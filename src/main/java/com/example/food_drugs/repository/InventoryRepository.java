@@ -1,0 +1,223 @@
+package com.example.food_drugs.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
+
+import com.example.examplequerydslspringdatajpamaven.entity.DriverSelect;
+import com.example.food_drugs.entity.Inventory;
+
+public interface InventoryRepository extends JpaRepository<Inventory, Long>, QueryDslPredicateExecutor<Inventory>{
+
+	@Query(value = " SELECT tc_inventories.id FROM tc_inventories " + 
+			" where tc_inventories.userId IN (:userId) and tc_inventories.delete_date is null "
+			+ " and tc_inventories.name=:name and tc_inventories.inventoryNumber=:inventoryNumber " ,nativeQuery = true )
+	public Long getInventoryIdByName(@Param("userId") Long userId,@Param("name") String name,@Param("inventoryNumber") String inventoryNumber);
+	
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
+			" LIMIT :offset,10 ", nativeQuery = true)
+	public List<Inventory> getInventories(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
+	public List<Inventory> getInventoriesExport(@Param("userIds")List<Long> userIds,@Param("search") String search);
+	
+	
+	@Query(value = "SELECT count(*) FROM tc_inventories " + 
+			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null " , nativeQuery = true)
+	public Integer getInventoriesSize(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
+			" LIMIT :offset,10 ", nativeQuery = true)
+	public List<Inventory> getInventoriesByIds(@Param("inventoryIds")List<Long> inventoryIds,@Param("offset") int offset,@Param("search") String search);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
+	public List<Inventory> getInventoriesByIdsExport(@Param("inventoryIds")List<Long> inventoryIds,@Param("search") String search);
+	
+	
+	@Query(value = "SELECT count(*) FROM tc_inventories " + 
+			"  WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is null " , nativeQuery = true)
+	public Integer getInventoriesSizeByIds(@Param("inventoryIds")List<Long> inventoryIds);
+
+	@Query(value = "select * from tc_inventories "
+			+ " where (tc_inventories.name=:name or tc_inventories.inventoryNumber=:inventoryNumber ) and tc_inventories.userId=:userId and tc_inventories.delete_date IS NULL", nativeQuery = true)
+	public List<Inventory> checkDublicateAdd(@Param("userId") Long id,
+			 @Param("name") String email
+			,@Param("inventoryNumber") String name);
+	
+	
+	@Query(value ="select * from tc_inventories "
+			+ " where (tc_inventories.name=:name or tc_inventories.inventoryNumber=:inventoryNumber ) "
+			+ " and tc_inventories.userId=:userId and tc_inventories.delete_date IS NULL and tc_inventories.id !=:id ", nativeQuery = true)
+	public List<Inventory> checkDublicateEdit(@Param("id") Long id,@Param("userId") Long userId,
+			@Param("name") String email
+			,@Param("inventoryNumber") String name);
+	
+	@Query(value = "SELECT tc_inventories.id FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null", nativeQuery = true)
+	public List<Long> getAllInventoriesIds(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.protocolType =:type", nativeQuery = true)
+	public List<Inventory> getAllInventoriesTypeProtocolCSV(@Param("userIds") Long userIds,@Param("type") String type);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.protocolType =:type limit 0,1", nativeQuery = true)
+	public List<Inventory> getAllInventoriesTypeProtocolEasyClould(@Param("userIds") Long userIds,@Param("type") String type);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.delete_date is null and tc_inventories.protocolType =:type", nativeQuery = true)
+	public List<Inventory> getInventoriesTypeProtocol(@Param("type") String type);
+	
+	@Query(value = "select * from tc_inventories "
+			+ " where tc_inventories.referenceKey IS NOT NULL and tc_inventories.delete_date IS NULL", nativeQuery = true)
+	public List<Inventory> getConnectedInventories();
+	
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null", nativeQuery = true)
+	public List<Inventory> getAllInventoriesSelect(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is null", nativeQuery = true)
+	public List<Inventory> getAllInventoriesSelectByIds(@Param("inventoryIds")List<Long> inventoryIds);
+	
+	@Query(value = "SELECT tc_inventories.id FROM tc_inventories"
+			+ " WHERE tc_inventories.warehouseId IN(:warehouseIds) and tc_inventories.delete_date is null", nativeQuery = true)
+	public List<Long> getAllInventoriesOfWarehouse(@Param("warehouseIds")List<Long> warehouseIds);
+	
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.warehouseId IN(:warehouseId) and tc_inventories.delete_date is null", nativeQuery = true)
+	public List<Inventory> getAllInventoriesOfWarehouseList(@Param("warehouseId")Long warehouseId);
+	
+	
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) "
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
+			" LIMIT :offset,10 ", nativeQuery = true)
+	public List<Inventory> getInventoriesAll(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) "
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
+	public List<Inventory> getInventoriesAllExport(@Param("userIds")List<Long> userIds,@Param("search") String search);
+	
+	
+	@Query(value = "SELECT count(*) FROM tc_inventories " + 
+			"  WHERE tc_inventories.userId IN(:userIds)  " , nativeQuery = true)
+	public Integer getInventoriesSizeAll(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) "
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
+			" LIMIT :offset,10 ", nativeQuery = true)
+	public List<Inventory> getInventoriesByIdsAll(@Param("inventoryIds")List<Long> inventoryIds,@Param("offset") int offset,@Param("search") String search);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) "
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
+	public List<Inventory> getInventoriesByIdsAllExport(@Param("inventoryIds")List<Long> inventoryIds,@Param("search") String search);
+	
+	
+	@Query(value = "SELECT count(*) FROM tc_inventories " + 
+			"  WHERE tc_inventories.id IN(:inventoryIds)" , nativeQuery = true)
+	public Integer getInventoriesSizeByIdsAll(@Param("inventoryIds")List<Long> inventoryIds);
+
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is not null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
+			" LIMIT :offset,10 ", nativeQuery = true)
+	public List<Inventory> getInventoriesDeactive(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is not null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
+	public List<Inventory> getInventoriesDeactiveExport(@Param("userIds")List<Long> userIds,@Param("search") String search);
+	
+	@Query(value = "SELECT count(*) FROM tc_inventories " + 
+			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is not null " , nativeQuery = true)
+	public Integer getInventoriesSizeDeactive(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is not null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
+			" LIMIT :offset,10 ", nativeQuery = true)
+	public List<Inventory> getInventoriesByIdsDeactive(@Param("inventoryIds")List<Long> inventoryIds,@Param("offset") int offset,@Param("search") String search);
+	
+	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
+			+ " WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is not null"
+			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
+	public List<Inventory> getInventoriesByIdsDeactiveExport(@Param("inventoryIds")List<Long> inventoryIds,@Param("search") String search);
+	
+	
+	@Query(value = "SELECT count(*) FROM tc_inventories " + 
+			"  WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is not null " , nativeQuery = true)
+	public Integer getInventoriesSizeByIdsDeactive(@Param("inventoryIds")List<Long> inventoryIds);
+
+	@Query(value = "SELECT tc_inventories.id,tc_inventories.name FROM tc_inventories " 
+			+ " WHERE tc_inventories.userId IN(:loggedUserId) and tc_inventories.delete_date is null "
+			+ " and tc_inventories.id Not IN(Select tc_user_client_inventory.inventoryid from tc_user_client_inventory where tc_user_client_inventory.userid !=:userId ) ",nativeQuery = true)
+	public List<DriverSelect> getInventoryUnSelectOfClient(@Param("loggedUserId") Long loggedUserId,@Param("userId") Long userId);
+	
+	@Query(value = "SELECT tc_inventories.lastDataId FROM tc_inventories "
+			+ "where tc_inventories.lastUpdate>date_sub(now(), interval 0 minute)=false  AND tc_inventories.lastUpdate<date_sub(now(), interval 3 minute)=false "
+			+ " AND tc_inventories.userId IN (:userIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is not null ", nativeQuery = true)
+	public List<String> getNumberOfOnlineInventoryList(@Param("userIds")List<Long> userIds);
+	                    
+	@Query(value = "SELECT tc_inventories.lastDataId FROM tc_inventories "
+			+ " where tc_inventories.lastUpdate>date_sub(now(), interval 0 minute)=false  AND tc_inventories.lastUpdate<date_sub(now(), interval 3 minute)=false "
+			+ " AND tc_inventories.id IN (:inventoryIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is not null", nativeQuery = true)
+	public List<String> getNumberOfOnlineInventoryListByIds(@Param("inventoryIds")List<Long> inventoryIds);
+	
+	@Query(value = "SELECT tc_inventories.lastDataId FROM tc_inventories "
+			+ "where tc_inventories.lastUpdate>date_sub(now(), interval 3 minute)=false  AND tc_inventories.lastUpdate<date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_inventories.userId IN (:userIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is not null", nativeQuery = true)
+	public List<String> getNumberOfOutOfNetworkInventoryList(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.lastDataId FROM tc_inventories "
+			+ "where tc_inventories.lastUpdate>date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_inventories.userId IN (:userIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is not null", nativeQuery = true)
+	public List<String> getNumberOfOfflineInventoryList(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT tc_inventories.lastDataId FROM tc_inventories "
+			+ " where  tc_inventories.lastUpdate>date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_inventories.id IN (:inventoryIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is not null", nativeQuery = true)
+	public List<String> getNumberOfOfflineInventoryListByIds(@Param("inventoryIds")List<Long> inventoryIds);
+	
+	@Query(value = "SELECT tc_inventories.lastDataId FROM tc_inventories "
+			+ "where tc_inventories.lastUpdate>date_sub(now(), interval 3 minute)=false  AND tc_inventories.lastUpdate<date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_inventories.id IN (:inventoryIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is not null", nativeQuery = true)
+	public List<String> getNumberOfOutOfNetworkInventoryListByIds(@Param("inventoryIds")List<Long> inventoryIds);
+	
+	@Query(value = "SELECT count(tc_inventories.id) FROM tc_inventories " + 
+			"where tc_inventories.userId IN (:userIds) and tc_inventories.delete_date is null ",nativeQuery = true )
+	public Integer getTotalNumberOfUserInventory(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT count(tc_inventories.id) FROM tc_inventories " + 
+			"where tc_inventories.id IN (:inventoryIds) and tc_inventories.delete_date is null ",nativeQuery = true )
+	public Integer getTotalNumberOfUserInventoryByIds(@Param("inventoryIds")List<Long> inventoryIds);
+
+	
+	@Query(value = "SELECT count(tc_inventories.id) FROM tc_inventories " + 
+			"where tc_inventories.userId IN (:userIds) and tc_inventories.delete_date is null and tc_inventories.lastUpdate is null ",nativeQuery = true )
+	public Integer getTotalNumberOfUserInventoryNoData(@Param("userIds")List<Long> userIds);
+	
+	@Query(value = "SELECT count(tc_inventories.id) FROM tc_inventories " + 
+			"where tc_inventories.id IN (:inventoryIds) and tc_inventories.delete_date is null and tc_inventories.lastUpdate is null ",nativeQuery = true )
+	public Integer getTotalNumberOfUserInventoryNoDataByIds(@Param("inventoryIds")List<Long> inventoryIds);
+
+}
