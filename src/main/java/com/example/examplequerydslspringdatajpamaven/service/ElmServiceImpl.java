@@ -4277,9 +4277,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 	@Override
 	public ResponseEntity<?> checkBySequenceNumber(String sequenceNumber) {
 		// TODO Auto-generated method stub
-		
-		
-		if(sequenceNumber.equals("")) {
+if(sequenceNumber.equals("")) {
 			
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "No Sequence Number Selected",null);
 			return  ResponseEntity.ok().body(getObjectResponse);
@@ -4302,6 +4300,22 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 	     deviceData.put("Name", device.getName());
 	     deviceData.put("Unique Id", device.getUniqueid());
 	     deviceData.put("Sequence Number", device.getSequence_number());
+	     
+	     if(device.getExpired() == 1) {
+		     deviceData.put("Expired", "Expired");
+
+	     }
+	     else {
+		     deviceData.put("Expired", "Not Expired");
+	     }
+	     
+	     if(device.getReference_key() != null) {
+		     deviceData.put("Reference Key", device.getReference_key());
+
+	     }
+	     else {
+		     deviceData.put("Reference Key", "No Reference Key");
+	     }
 	     
 	     List<Map> calibrationData=new ArrayList<Map>();
 	     deviceData.put("Calibration Data", calibrationData);
