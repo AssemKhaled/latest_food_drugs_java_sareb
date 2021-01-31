@@ -21,6 +21,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
                   columns={
                      @ColumnResult(name="id",type=int.class),
                      @ColumnResult(name="deviceName",type=String.class),
+                     @ColumnResult(name="simcardNumber",type=String.class),
                      @ColumnResult(name="uniqueId",type=String.class),
                      @ColumnResult(name="sequenceNumber",type=String.class),
                      @ColumnResult(name="lastUpdate",type=String.class),
@@ -44,7 +45,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 
 	@NamedNativeQuery(name="getDevicesListAll", 
 	     resultSetMapping="DevicesListSFDA", 
-	     query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+	     query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 	     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 	     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -55,14 +56,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 	     		+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 	     		+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
 	     		+ " where tc_user_device.userid IN(:userIds) "
-	     		+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+	     		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR  tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 	     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 	     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 	     		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesListAllExport", 
     resultSetMapping="DevicesListSFDA", 
-    query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+    query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -73,14 +74,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
     		+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
     		+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
     		+ " where tc_user_device.userid IN(:userIds) "
-    		+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+    		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR  tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
     		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesListByIdsAll", 
 	resultSetMapping="DevicesListSFDA", 
-	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -91,14 +92,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 			+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
 			+ " where tc_devices.id IN(:deviceIds) "
-			+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+			+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR   tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 			+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesListByIdsAllExport", 
 	resultSetMapping="DevicesListSFDA", 
-	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -109,14 +110,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 			+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
 			+ " where tc_devices.id IN(:deviceIds) "
-			+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+			+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR   tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 			+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id "),
 
 	@NamedNativeQuery(name="getDevicesListDeactive", 
 	     resultSetMapping="DevicesListSFDA", 
-	     query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+	     query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 	     		+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 	     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -127,14 +128,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 	     		+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 	     		+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
 	     		+ " where tc_user_device.userid IN(:userIds) and tc_devices.delete_date is not null"
-	     		+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+	     		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR   tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 	     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 	     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 	     		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesListDeactiveExport", 
     resultSetMapping="DevicesListSFDA", 
-    query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+    query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
     		+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -145,14 +146,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
     		+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
     		+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
     		+ " where tc_user_device.userid IN(:userIds) and tc_devices.delete_date is not null"
-    		+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+    		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR   tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
     		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesListByIdsDeactive", 
 	resultSetMapping="DevicesListSFDA", 
-	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.simcardNumber as simcardNumber,tc_devices.uniqueid as uniqueId,"
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -163,14 +164,14 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 			+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
 			+ " where tc_devices.id IN(:deviceIds) and tc_devices.delete_date is not null "
-			+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+			+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR  tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 			+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesListByIdsDeactiveExport", 
 	resultSetMapping="DevicesListSFDA", 
-	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
+	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
@@ -181,7 +182,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 			+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
 			+ " where tc_devices.id IN(:deviceIds) and tc_devices.delete_date is not null "
-			+ " AND ( tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
+			+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR  tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 			+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id ")

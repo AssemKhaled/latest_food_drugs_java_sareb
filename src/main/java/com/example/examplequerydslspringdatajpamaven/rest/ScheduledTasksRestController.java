@@ -29,6 +29,7 @@ import com.example.examplequerydslspringdatajpamaven.service.ScheduledServiceImp
  *
  */
 @Configuration
+@EnableScheduling
 public class ScheduledTasksRestController implements SchedulingConfigurer,DisposableBean{
 	private static final Log logger = LogFactory.getLog(DeviceServiceImpl.class);
 	public static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

@@ -127,6 +127,11 @@ public class UserRestControllerSFDA {
 		
 	}
 	
-
+	@GetMapping("/updateExpData")
+	public ResponseEntity<?> updateExpData() {
+		
+		return userServiceImpl.updateExpData();
+	
+	}
 
 }

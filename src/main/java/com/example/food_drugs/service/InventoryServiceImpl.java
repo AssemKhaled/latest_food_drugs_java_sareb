@@ -1818,8 +1818,17 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		Integer totalInventories = 0;
 		Integer inventoryNoData = 0;
 		
+		Integer totalWarehouses = 0;
+
 		if(user.getAccountType().equals(4)) {
 			 List<Long> inventoryIds = userClientInventoryRepository.getInventoryIds(userId);
+			 List<Long> warehouseIds = userClientWarehouseRepository.getWarehouseIds(userId);
+
+			 if(warehouseIds.size()>0) {
+				 totalWarehouses = warehousesRepository.getTotalNumberOfUserWarehouseByIds(warehouseIds);
+
+			 }
+			 
 			 if(inventoryIds.size()>0) {
 				 List<String> onlineInventoryIds = inventoryRepository.getNumberOfOnlineInventoryListByIds(inventoryIds);
 				 inventoryON = onlineInventoryIds.size();
@@ -1856,6 +1865,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 
 			 totalInventories = inventoryRepository.getTotalNumberOfUserInventory(usersIds);
 			 inventoryNoData = inventoryRepository.getTotalNumberOfUserInventoryNoData(usersIds);
+			 
+			 totalWarehouses = warehousesRepository.getTotalNumberOfUserWarehouse(usersIds);
+
 		 
 		}
 
@@ -1867,7 +1879,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		invStatus.put("inventoryOutOfNetwork", inventoryOutOfNetwork);
 		invStatus.put("totalInventories", totalInventories);
 		invStatus.put("inventoryNoData", inventoryNoData);
-
+		invStatus.put("warehouses", totalWarehouses);
 
 		List<Map> data = new ArrayList<>();
 		data.add(invStatus);

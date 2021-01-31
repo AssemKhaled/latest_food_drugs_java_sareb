@@ -16,7 +16,16 @@ public class CustomDeviceListSFDA extends CustomDeviceList{
 	private Long companyId;
 	private Boolean expired;
 	private String companyName;
-
+	private String simcardNumber;
+	
+	
+	
+	public String getSimcardNumber() {
+		return simcardNumber;
+	}
+	public void setSimcardNumber(String simcardNumber) {
+		this.simcardNumber = simcardNumber;
+	}
 	public int getId() {
 		return id;
 	}
@@ -111,6 +120,26 @@ public class CustomDeviceListSFDA extends CustomDeviceList{
 		
 		
 	}
+	public CustomDeviceListSFDA(int id ,String deviceName,String simcardNumber,String uniqueId ,String sequenceNumber
+			,String lastUpdate, String referenceKey , Boolean expired , String driverName ,
+			String companyName, Long companyId,String geofenceName,String delete_date) {
+		super();
+		this.id = id;
+		this.deviceName = deviceName;
+		this.uniqueId = uniqueId;
+		this.sequenceNumber = sequenceNumber;
+		this.lastUpdate = lastUpdate;
+		this.referenceKey = referenceKey;
+		this.driverName = driverName;
+		this.geofenceName = geofenceName;
+		this.delete_date = delete_date;
+		this.companyId = companyId;
+		this.expired = expired;
+		this.companyName = companyName;
+		this.simcardNumber = simcardNumber;
+	}
+	
+	
 
 	
 	

@@ -155,7 +155,7 @@ public class ElmConnectionsRestController {
 	}
 	
 	@GetMapping(path ="/getExpiredVehicles")
-//	@Scheduled(fixedRate = 30000)
+//	@Scheduled(cron = "0 59 23 ? * *")
 	public ResponseEntity<?> getExpiredVehicles(){
 		
 		return elmServiceImpl.getExpiredVehicles();

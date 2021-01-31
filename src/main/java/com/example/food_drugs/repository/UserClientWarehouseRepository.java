@@ -21,6 +21,9 @@ import com.example.food_drugs.entity.userClientWarehouse;;
 @Component
 public interface UserClientWarehouseRepository extends JpaRepository<userClientWarehouse, Long>, QueryDslPredicateExecutor<userClientWarehouse>{
 
+	@Query(value = "select tc_user_client_warehouse.warehouseid from tc_user_client_warehouse where tc_user_client_warehouse.userid=:userId", nativeQuery = true)
+	public List<Long> getWarehouseIds(@Param("userId") Long userId);
+
 	@Query(value = "select tc_user_client_warehouse.warehouseid from tc_user_client_warehouse "
 			+ " where tc_user_client_warehouse.userid=:userId and tc_user_client_warehouse.warehouseid=:warehouseId  ", nativeQuery = true)
 	public List<Long> getWarehouse(@Param("userId") Long userId,@Param("warehouseId") Long warehouseId);

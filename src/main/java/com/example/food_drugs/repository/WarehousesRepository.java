@@ -12,7 +12,15 @@ import com.example.food_drugs.entity.Warehouse;;
 
 public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, QueryDslPredicateExecutor<Warehouse>{
 
+	@Query(value = "SELECT count(tc_warehouses.id) FROM tc_warehouses " + 
+			"where tc_warehouses.userId IN (:userIds) and tc_warehouses.delete_date is null ",nativeQuery = true )
+	public Integer getTotalNumberOfUserWarehouse(@Param("userIds")List<Long> userIds);
 	
+	
+	@Query(value = "SELECT count(tc_warehouses.id) FROM tc_warehouses " + 
+			"where tc_warehouses.id IN (:warehouseIds) and tc_warehouses.delete_date is null ",nativeQuery = true )
+	public Integer getTotalNumberOfUserWarehouseByIds(@Param("warehouseIds")List<Long> warehouseIds);
+
 	@Query(value = "SELECT tc_warehouses.* FROM tc_warehouses"
 			+ " WHERE tc_warehouses.userId IN(:userIds) and tc_warehouses.delete_date is null"
 			+ " and ( (tc_warehouses.name Like %:search%) or (tc_warehouses.city Like %:search%) or (tc_warehouses.email Like %:search%) or (tc_warehouses.phone Like %:search%)) " + 
