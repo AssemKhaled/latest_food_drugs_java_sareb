@@ -1,3 +1,3 @@
-[submodule "sareb_back_java"]
-	path = sareb_back_java
+[submodule "/src/main/java/com/example"]
+	path =  /src/main/java/com/example
 	url = https://ahmed_fox@bitbucket.org/fuincowebapps/sareb_back_java.git
