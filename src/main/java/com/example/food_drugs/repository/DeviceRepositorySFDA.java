@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
-
 import com.example.examplequerydslspringdatajpamaven.entity.CustomDeviceList;
 import com.example.food_drugs.entity.DeviceSFDA;
 
@@ -26,10 +25,10 @@ public interface DeviceRepositorySFDA extends  JpaRepository<DeviceSFDA, Long>, 
 	List<CustomDeviceList> getDevicesListDeactiveExport(@Param("userIds")List<Long> userIds,@Param("search") String search);
 
 	@Query(nativeQuery = true, name = "getDevicesListByIdsDeactive")
-	List<CustomDeviceList> getDevicesListByIdsDeactive(@Param("deviceIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
+	List<CustomDeviceList> getDevicesListByIdsDeactive(@Param("deviceIds")List<Long> deviceIds,@Param("offset") int offset,@Param("search") String search);
 
 	@Query(nativeQuery = true, name = "getDevicesListByIdsDeactiveExport")
-	List<CustomDeviceList> getDevicesListByIdsDeactiveExport(@Param("deviceIds")List<Long> userIds,@Param("search") String search);
+	List<CustomDeviceList> getDevicesListByIdsDeactiveExport(@Param("deviceIds")List<Long> deviceIds,@Param("search") String search);
 
 	@Query(value = " SELECT count(*) From ( "
 			+ "SELECT count(*) X "
@@ -70,10 +69,10 @@ public interface DeviceRepositorySFDA extends  JpaRepository<DeviceSFDA, Long>, 
 
 	
 	@Query(nativeQuery = true, name = "getDevicesListByIdsAll")
-	List<CustomDeviceList> getDevicesListByIdsAll(@Param("deviceIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
+	List<CustomDeviceList> getDevicesListByIdsAll(@Param("deviceIds")List<Long> deviceIds,@Param("offset") int offset,@Param("search") String search);
 
 	@Query(nativeQuery = true, name = "getDevicesListByIdsAllExport")
-	List<CustomDeviceList> getDevicesListByIdsAllExport(@Param("deviceIds")List<Long> userIds,@Param("search") String search);
+	List<CustomDeviceList> getDevicesListByIdsAllExport(@Param("deviceIds")List<Long> deviceIds,@Param("search") String search);
 
 	
 	@Query(value = " SELECT count(*) From ( "

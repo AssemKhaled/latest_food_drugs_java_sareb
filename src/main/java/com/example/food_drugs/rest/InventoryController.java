@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.food_drugs.entity.Inventory;
+import com.example.food_drugs.entity.SensorsInventories;
 import com.example.food_drugs.service.InventoryServiceImpl;
 
 @RestController
@@ -150,12 +151,60 @@ public class InventoryController {
 		return inventoryServiceImpl.getEasyCloudData();
 	}
 	
-	@GetMapping(path ="/getDataProtocols")
-	public ResponseEntity<?> getDataProtocols(@RequestParam (value = "userId",defaultValue = "0") Long userId,
-			                                  @RequestBody ArrayList<Map<Object,Object>> data,
-			                                  @RequestParam (value = "type",defaultValue = "0") String type){
+	@PostMapping(path ="/getDataProtocols")
+	public ResponseEntity<?> getDataProtocols(@RequestBody Map<Object,Object> dataObject){
 		
-		return inventoryServiceImpl.getDataProtocols(data,type,userId);
+		String email = "";
+		String type = "";
+		ArrayList<Map<Object,Object>> data = new ArrayList<Map<Object,Object>>();
+		
+		if(dataObject.containsKey("email")) {
+			email = (String) dataObject.get("email");
+		}
+		if(dataObject.containsKey("type")) {
+			type = 	(String) dataObject.get("type");
+		}
+		if(dataObject.containsKey("data")) {
+			data = 	(ArrayList<Map<Object, Object>>) dataObject.get("data");
+
+		}
+		
+		return inventoryServiceImpl.getDataProtocols(data,type,email);
+	}
+	
+	//only for one client
+	@PostMapping(path ="/getDataProtocolsCSV")
+	public ResponseEntity<?> getDataProtocolsCSV(@RequestBody ArrayList<Map<Object,Object>> data){
+		String email = "hzetawi@alhaya-medical.com";
+		String type = "csv";
+		
+		return inventoryServiceImpl.getDataProtocols(data,type,email);
+	}
+	
+	@GetMapping("/getSensorsInventoriesList")
+	public ResponseEntity<?> getSensorsInventoriesList(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+				                           @RequestParam (value = "inventoryId",defaultValue = "0") Long inventoryId,
+				                           @RequestParam (value = "userId",defaultValue = "0") Long userId) {
+	 
+		return inventoryServiceImpl.getSensorsInventoriesList(TOKEN,inventoryId,userId);
+		
+	}
+	
+	@PostMapping(path ="/addSensor")
+	public ResponseEntity<?> addSensor(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                           @RequestParam (value = "userId",defaultValue = "0") Long userId,
+			                           @RequestParam (value = "inventoryId",defaultValue = "0") Long InventoryId,
+			                           @RequestBody(required = false) SensorsInventories sensorsInventories) {
+		
+		return inventoryServiceImpl.addSensor(TOKEN,sensorsInventories,InventoryId,userId);				
+	}
+	@GetMapping("/removeSensor")
+	public ResponseEntity<?> removeSensor(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                           @RequestParam (value = "userId",defaultValue = "0") Long userId,
+			                           @RequestParam (value = "inventoryId",defaultValue = "0") Long InventoryId,
+			                           @RequestParam (value = "sensorInventoryId",defaultValue = "0") Long sensorInventoryId) {
+		
+		return inventoryServiceImpl.removeSensor(TOKEN,sensorInventoryId,InventoryId,userId);				
 	}
 	
 }

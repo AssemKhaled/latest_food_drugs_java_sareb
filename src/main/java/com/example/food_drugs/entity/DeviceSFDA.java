@@ -32,6 +32,8 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
                      @ColumnResult(name="companyId",type=Long.class),
                      @ColumnResult(name="geofenceName",type=String.class),
                      @ColumnResult(name="delete_date",type=String.class),
+                     @ColumnResult(name="create_date",type=String.class),
+                     @ColumnResult(name="leftDays",type=Long.class)
 
                      }
            )
@@ -49,7 +51,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 	     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 	     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-	     		+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+	     		+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 	     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 	     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 	     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -67,7 +69,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-    		+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+    		+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -77,7 +79,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
     		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR  tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
-    		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
+    		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id "),
 	
 	@NamedNativeQuery(name="getDevicesListByIdsAll", 
 	resultSetMapping="DevicesListSFDA", 
@@ -85,7 +87,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-			+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -103,7 +105,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-			+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -121,7 +123,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 	     		+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 	     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-	     		+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+	     		+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 	     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 	     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 	     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -139,7 +141,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
     		+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-    		+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+    		+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -149,7 +151,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
     		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR   tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
-    		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id LIMIT :offset,10"),
+    		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id "),
 	
 	@NamedNativeQuery(name="getDevicesListByIdsDeactive", 
 	resultSetMapping="DevicesListSFDA", 
@@ -157,7 +159,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-			+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -175,6 +177,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.Device;
 			+ " tc_devices.sequence_number as sequenceNumber,tc_devices.delete_date as delete_date ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
+			+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  "
 			+ " FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 

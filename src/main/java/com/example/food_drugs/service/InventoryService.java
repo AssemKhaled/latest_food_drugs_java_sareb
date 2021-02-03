@@ -35,7 +35,7 @@ public interface InventoryService {
 	public ResponseEntity<?> getEasyCloudData();
 	public ResponseEntity<?> callApiEasyClould(Inventory inv);
 
-	public ResponseEntity<?> getDataProtocols(ArrayList<Map<Object,Object>> data,String type,Long userId);
+	public ResponseEntity<?> getDataProtocols(ArrayList<Map<Object,Object>> data,String type,String email);
 	public ResponseEntity<?> getCsvProtocols(Long userId,ArrayList<Map<Object,Object>> data);
 	public ResponseEntity<?> getEasyCloudProtocols(Inventory inv,ArrayList<Map<Object,Object>> data);
 	

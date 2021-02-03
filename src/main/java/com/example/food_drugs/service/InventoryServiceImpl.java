@@ -46,6 +46,7 @@ import com.example.food_drugs.entity.MonogoInventoryLastData;
 import com.example.food_drugs.entity.MonogoInventoryLastDataElmSend;
 import com.example.food_drugs.entity.NotificationAttributes;
 import com.example.food_drugs.entity.SensorsInventories;
+import com.example.food_drugs.entity.UserSFDA;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Driver;
 import com.example.examplequerydslspringdatajpamaven.entity.DriverSelect;
@@ -63,6 +64,7 @@ import com.example.food_drugs.repository.MongoInventoryNotificationRepository;
 import com.example.food_drugs.repository.SensorsInventoriesRepository;
 import com.example.food_drugs.repository.UserClientInventoryRepository;
 import com.example.food_drugs.repository.UserClientWarehouseRepository;
+import com.example.food_drugs.repository.UserRepositorySFDA;
 import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
 import com.example.food_drugs.repository.WarehousesRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -108,6 +110,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	
 	@Autowired
 	private WarehousesRepository warehousesRepository;
+	
+	@Autowired
+	private UserRepositorySFDA userRepositorySFDA;
 	
 	@Autowired
 	private UserClientInventoryRepository userClientInventoryRepository;
@@ -2022,14 +2027,15 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	
 	
 	@Override
-	public ResponseEntity<?> getDataProtocols(ArrayList<Map<Object,Object>> data,String type,Long userId) {
+	public ResponseEntity<?> getDataProtocols(ArrayList<Map<Object,Object>> data,String type,String email) {
 		// TODO Auto-generated method stub
 
-		if(userId != 0) {
-			User loggedUser = userServiceImpl.findById(userId);
-			if(loggedUser != null) {
-				 
-				if(type != null) {
+		
+		if(!email.equals("")) {
+			Long userId = userRepositorySFDA.getUserByEmail(email);
+
+			if(userId != null) {
+				if(!type.equals("")) {
 					if(type.equals("csv")) {
 						return getCsvProtocols(userId,data);
 					}
@@ -2054,13 +2060,13 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			Double humidity = 0.0;
 			Integer countTemp = 0;
 			Integer countHum = 0;
-			String Date = "";
+			String DateOfSensor = null;
 			List<SensorsInventories> sensorsInventories = sensorsInventoriesRepository.getAllSensorsOfInventory(inventory.getId());
 			for(SensorsInventories sensorsInventory:sensorsInventories) {
 				for(Map<Object, Object> obj:data) {
 					
 					if(obj.containsKey("Date")&&obj.containsKey("Time")) {
-						Date = obj.get("Date").toString()+" "+obj.get("Time").toString();
+						DateOfSensor = obj.get("Date").toString()+" "+obj.get("Time").toString();
 
 					}
 					
@@ -2090,13 +2096,23 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				
 			}
 
+		
 			
-			Double AvgHum = humidity/countHum;
-			Double AvgTemp = temperature/countTemp;
+			Double AvgTemp = (double) 0;
+        	Double AvgHum = (double) 0;
+        	
+        	if(countTemp != 0) {
+        		AvgTemp = temperature/countTemp;
+
+        	}
+        	if(countHum != 0) {
+        		AvgHum = humidity/countHum;
+
+        	}
 
 			Date dateTime = null;
 			String create_date = null;
-			if(Date.equals("")) {
+			if(DateOfSensor == null) {
 				Date now = new Date();
 				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				
@@ -2114,14 +2130,13 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					e.printStackTrace();
 				}
 			}
-			
 			else {
 				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS'Z'"); 
 				SimpleDateFormat input = new SimpleDateFormat("ddMMMyy hh:mm", Locale.ENGLISH); 
 
 				try {
 					try {
-						dateTime = input.parse(Date.toString());
+						dateTime = input.parse(DateOfSensor.toString());
 					} catch (java.text.ParseException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2145,8 +2160,10 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			Double oldTHum = null;
 			if(inventory.getLastDataId() != null) {
 				MonogoInventoryLastData check = mongoInventoryLastDataRepository.findById(inventory.getLastDataId());
-				oldTemp = check.getTemperature();
-				oldTHum = check.getHumidity();
+				if(check != null) {
+					oldTemp = check.getTemperature();
+					oldTHum = check.getHumidity();
+				}
 			}
 			
 			
@@ -2205,9 +2222,18 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			}
 		}
 
-		Double AvgHum = humidity/countHum;
-		Double AvgTemp = temperature/countTemp;
 
+		Double AvgTemp = (double) 0;
+    	Double AvgHum = (double) 0;
+    	
+    	if(countTemp != 0) {
+    		AvgTemp = temperature/countTemp;
+
+    	}
+    	if(countHum != 0) {
+    		AvgHum = humidity/countHum;
+
+    	}
 		
 		Date now = new Date();
 		SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -2232,8 +2258,10 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		Double oldHum = null;
 		if(inventory.getLastDataId() != null) {
 			MonogoInventoryLastData check = mongoInventoryLastDataRepository.findById(inventory.getLastDataId());
-			oldTemp = check.getTemperature();
-			oldHum = check.getHumidity();
+			if(check != null) {
+				oldTemp = check.getTemperature();
+				oldHum = check.getHumidity();
+			}
 		}
 		
 
