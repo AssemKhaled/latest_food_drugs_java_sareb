@@ -18,10 +18,24 @@ public class CustomDeviceListSFDA extends CustomDeviceList{
 	private String companyName;
 	private String simcardNumber;
 	private String create_date;
+	private String update_date_elm;
+	private String delete_date_elm;
 	private Long leftDays;
 	
 	
 	
+	public String getDelete_date_elm() {
+		return delete_date_elm;
+	}
+	public void setDelete_date_elm(String delete_date_elm) {
+		this.delete_date_elm = delete_date_elm;
+	}
+	public String getUpdate_date_elm() {
+		return update_date_elm;
+	}
+	public void setUpdate_date_elm(String update_date_elm) {
+		this.update_date_elm = update_date_elm;
+	}
 	public String getCreate_date() {
 		return create_date;
 	}
@@ -155,7 +169,8 @@ public class CustomDeviceListSFDA extends CustomDeviceList{
 	
 	public CustomDeviceListSFDA(int id ,String deviceName,String simcardNumber,String uniqueId ,String sequenceNumber
 			,String lastUpdate, String referenceKey , Boolean expired , String driverName ,
-			String companyName, Long companyId,String geofenceName,String delete_date,String create_date ,Long leftDays) {
+			String companyName, Long companyId,String geofenceName,String delete_date,
+			String create_date,String delete_date_elm,String update_date_elm ,Long leftDays) {
 		super();
 		this.id = id;
 		this.deviceName = deviceName;
@@ -171,6 +186,8 @@ public class CustomDeviceListSFDA extends CustomDeviceList{
 		this.companyName = companyName;
 		this.simcardNumber = simcardNumber;
 	    this.create_date = create_date;
+	    this.delete_date_elm = delete_date_elm;
+	    this.update_date_elm = update_date_elm;
 	    this.leftDays = leftDays;
 	}
 	

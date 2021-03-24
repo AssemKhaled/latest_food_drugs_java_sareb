@@ -148,17 +148,33 @@ public class ElmConnectionsRestController {
 	}
 	
 	@GetMapping(path ="/lastLocations")
-//	@Scheduled(fixedRate = 30000)
 	public ResponseEntity<?> lastLocations(){
 		
 		return elmServiceImpl.lastLocations();
 	}
 	
 	@GetMapping(path ="/getExpiredVehicles")
-//	@Scheduled(cron = "0 59 23 ? * *")
 	public ResponseEntity<?> getExpiredVehicles(){
 		
 		return elmServiceImpl.getExpiredVehicles();
+	}
+	
+	@GetMapping(path ="/getRemoveOldLogs")
+	public ResponseEntity<?> getRemoveOldLogs(){
+		
+		return elmServiceImpl.getRemoveOldLogs();
+	}
+	
+	@GetMapping(path ="/getRemoveOldPositions")
+	public ResponseEntity<?> getRemoveOldPositions(){
+		
+		return elmServiceImpl.getRemoveOldPositions();
+	}
+	
+	@GetMapping(path ="/getRemoveOldEvents")
+	public ResponseEntity<?> getRemoveOldEvents(){
+		
+		return elmServiceImpl.getRemoveOldEvents();
 	}
 	
 	@GetMapping(path ="/checkBySequenceNumber")
@@ -170,10 +186,16 @@ public class ElmConnectionsRestController {
 	
 	@PostMapping(path ="/deleteVehicleFromElm")
 	public ResponseEntity<?> deleteVehicleFromElm(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-			                                     @RequestBody Map<String, String> data,
-			                                     @RequestParam (value = "userId", defaultValue = "0") Long userId,
-			                                     @RequestParam (value = "deviceId", defaultValue = "0") Long deviceId){
+			                                      @RequestBody Map<String, String> data,
+			                                      @RequestParam (value = "userId", defaultValue = "0") Long userId,
+			                                      @RequestParam (value = "deviceId", defaultValue = "0") Long deviceId){
 		
 		return elmServiceImpl.deleteVehicleFromElm(TOKEN,deviceId,userId,data);
+	}
+	
+	@GetMapping(path ="/deleteOldExpiredData")
+	public ResponseEntity<?> deleteOldExpiredData(){
+		
+		return elmServiceImpl.deleteOldExpiredData();
 	}
 }

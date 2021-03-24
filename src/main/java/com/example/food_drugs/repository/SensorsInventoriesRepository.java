@@ -17,4 +17,9 @@ public interface SensorsInventoriesRepository extends JpaRepository<SensorsInven
 			+ " WHERE tc_sensors_inventories.inventoryId IN(:inventoryIds) and tc_sensors_inventories.name =:name", nativeQuery = true)
 	public List<SensorsInventories> getAllSensorsOfInventoryDublicate(@Param("inventoryIds")List<Long> inventoryIds,@Param("name")String name);
 
+	
+	@Query(value = "SELECT tc_sensors_inventories.inventoryId FROM tc_sensors_inventories"
+			+ " WHERE tc_sensors_inventories.name=:sensorId and tc_sensors_inventories.type=:type "
+			+ " limit 0,1 ", nativeQuery = true)
+	public Long getBySensorId(@Param("sensorId")String sensorId,@Param("type")String type);
 }

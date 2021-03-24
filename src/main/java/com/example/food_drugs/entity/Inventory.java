@@ -1,5 +1,7 @@
 package com.example.food_drugs.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -70,6 +72,15 @@ public class Inventory {
 	@Column(name = "APIToken")
 	private String APIToken;
 
+	@Column(name = "regestration_to_elm_date")
+	private Date regestration_to_elm_date;
+	
+	@Column(name = "delete_from_elm_date")
+	private Date delete_from_elm_date;
+	
+	@Column(name = "update_date_in_elm")
+	private Date update_date_in_elm;
+	
 	public Long getId() {
 		return id;
 	}
@@ -220,6 +231,30 @@ public class Inventory {
 
 	public void setAPIToken(String aPIToken) {
 		APIToken = aPIToken;
+	}
+
+	public Date getRegestration_to_elm_date() {
+		return regestration_to_elm_date;
+	}
+
+	public void setRegestration_to_elm_date(Date regestration_to_elm_date) {
+		this.regestration_to_elm_date = regestration_to_elm_date;
+	}
+
+	public Date getDelete_from_elm_date() {
+		return delete_from_elm_date;
+	}
+
+	public void setDelete_from_elm_date(Date delete_from_elm_date) {
+		this.delete_from_elm_date = delete_from_elm_date;
+	}
+
+	public Date getUpdate_date_in_elm() {
+		return update_date_in_elm;
+	}
+
+	public void setUpdate_date_in_elm(Date update_date_in_elm) {
+		this.update_date_in_elm = update_date_in_elm;
 	}
 	
 	

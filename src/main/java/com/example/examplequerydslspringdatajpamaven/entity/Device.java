@@ -78,6 +78,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
                      @ColumnResult(name="companyId",type=Long.class),
                      @ColumnResult(name="geofenceName",type=String.class),
                      @ColumnResult(name="create_date",type=String.class),
+                     @ColumnResult(name="delete_date_elm",type=String.class),
+                     @ColumnResult(name="update_date_elm",type=String.class),
                      @ColumnResult(name="leftDays",type=Long.class)
 
                      }
@@ -338,7 +340,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
 	     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-	     		+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+	     		+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
+	     		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 	     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 	     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 	     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -356,7 +359,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-    		+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+    		+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm  "
+    		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -374,7 +378,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-			+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
+			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -392,7 +397,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
-			+ " ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm  "
+			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -461,7 +467,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	query=" SELECT  tc_devices.id as id ,tc_devices.uniqueid as uniqueId ,tc_devices.name as deviceName ,"
 			+ " tc_devices.lastupdate as lastUpdate, tc_devices.expired as expired, " + 
 			"  tc_devices.positionid as positionId, " + 
-			" tc_devices.photo as photo ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices "
+			" tc_devices.photo as photo ,tc_devices.create_date as create_date , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays  FROM tc_devices "
 			+ " INNER JOIN  tc_user_device ON tc_devices.id=tc_user_device.deviceid " 
 			+ " where tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null "
 			+ "  AND (  (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"
@@ -472,7 +478,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	query=" SELECT  tc_devices.id as id ,tc_devices.uniqueid as uniqueId ,tc_devices.name as deviceName ,"
 			+ " tc_devices.lastupdate as lastUpdate , tc_devices.expired as expired , " + 
 			"  tc_devices.positionid as positionId, " + 
-			" tc_devices.photo as photo ,tc_devices.create_date as create_date  , DATEDIFF(DATE_ADD(tc_devices.create_date, INTERVAL 1 YEAR),CURDATE()) as leftDays  FROM tc_devices "
+			" tc_devices.photo as photo ,tc_devices.create_date as create_date  , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays  FROM tc_devices "
 			+ " where tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null "
 			+ "  AND ( (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"
 			+ " GROUP BY tc_devices.id LIMIT :offset,10"),
@@ -561,10 +567,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			" INNER JOIN tc_users ON tc_user_device.userid=tc_users.id " + 
 			" where tc_devices.delete_date IS NULL " + 
 			" AND tc_devices.create_date Is NOT NULL " + 
-			" AND TIMESTAMPDIFF(month ,tc_devices.create_date,:currentDate) >= 11 " + 
+			" AND TIMESTAMPDIFF(day ,tc_devices.create_date,:currentDate) >= 275 " + 
 			" AND tc_devices.reference_key IS NOT NULL " + 
 			" AND tc_devices.expired IS False " + 
-			" AND ( ( TIMESTAMPDIFF(month ,tc_devices.update_date_in_elm,:currentDate) >= 11) " + 
+			" AND ( ( TIMESTAMPDIFF(day ,tc_devices.update_date_in_elm,:currentDate) >= 275) " + 
 			" or (tc_devices.update_date_in_elm IS NULL) ) " + 
 			" ORDER BY tc_devices.create_date ASC LIMIT 1000 " ),
 	
@@ -747,6 +753,9 @@ public class Device extends Attributes{
 	
 	@Column(name = "simcardNumber")
 	private String simcardNumber;
+	
+	@Column(name = "user_id")
+	private Long user_id;
 		
 	
 	@JsonIgnore 
@@ -1434,6 +1443,17 @@ public class Device extends Attributes{
 
 	public void setSimcardNumber(String simcardNumber) {
 		this.simcardNumber = simcardNumber;
+	}
+
+
+	public Long getUser_id() {
+		return user_id;
+	}
+
+
+
+	public void setUser_id(Long user_id) {
+		this.user_id = user_id;
 	}
 
 	

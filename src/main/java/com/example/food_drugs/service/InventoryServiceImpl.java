@@ -38,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+
+import com.example.food_drugs.entity.BindData;
 import com.example.food_drugs.entity.Inventory;
 import com.example.food_drugs.entity.InventoryLastData;
 import com.example.food_drugs.entity.InventoryNotification;
@@ -67,6 +69,7 @@ import com.example.food_drugs.repository.UserClientWarehouseRepository;
 import com.example.food_drugs.repository.UserRepositorySFDA;
 import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
 import com.example.food_drugs.repository.WarehousesRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
@@ -273,9 +276,15 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					     InventoriesList.put("userId", inventory.getUserId());
 					     InventoriesList.put("delete_date", inventory.getDelete_date());
 						 InventoriesList.put("warehouseId", inventory.getWarehouseId());
-						 InventoriesList.put("referenceKey", inventory.getReferenceKey());
+						 InventoriesList.put("referenceKey", inventory.getReferenceKey());						 InventoriesList.put("referenceKey", inventory.getReferenceKey());
+						 InventoriesList.put("protocolType", inventory.getProtocolType());
 						 InventoriesList.put("userName", null);
 						 InventoriesList.put("warehouserName", null);
+						 
+						 InventoriesList.put("create_date", inventory.getCreate_date());
+						 InventoriesList.put("regestration_to_elm_date", inventory.getRegestration_to_elm_date());
+						 InventoriesList.put("delete_from_elm_date", inventory.getDelete_from_elm_date());
+						 InventoriesList.put("update_date_in_elm", inventory.getUpdate_date_in_elm());
 
 						 Warehouse war = new Warehouse();
 						 User us = new User();
@@ -395,18 +404,31 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						
 						List<Inventory> res = inventoryRepository.checkDublicateAdd(inventory.getUserId(), inventory.getName(), inventory.getInventoryNumber());
 					    List<Integer> duplictionList =new ArrayList<Integer>();
+						List<Inventory> res2 = inventoryRepository.checkDublicateAddByInv(inventory.getInventoryNumber());
 
-						if(!res.isEmpty()) {
+						if(!res.isEmpty() || !res2.isEmpty()) {
 							for(int i=0;i<res.size();i++) {
-								if(res.get(i).getName().equals(inventory.getName())) {
-									duplictionList.add(1);				
-				
-								}
-								if(res.get(i).getInventoryNumber().equals(inventory.getInventoryNumber())) {
-									duplictionList.add(2);				
-				
+								
+								if(res.get(i).getName() != null) {
+									if(res.get(i).getName().equals(inventory.getName())) {
+										duplictionList.add(1);				
+					
+									}
 								}
 								
+								
+								
+							}
+							for(int i=0;i<res2.size();i++) {
+								
+								if(res2.get(i).getInventoryNumber() != null) {
+
+									if(res2.get(i).getInventoryNumber().equals(inventory.getInventoryNumber())) {
+										duplictionList.add(2);				
+					
+									}
+									
+								}
 								
 							}
 							getObjectResponse = new GetObjectResponse( 201, "This inventorie was found before",duplictionList);
@@ -578,16 +600,28 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			
 			List<Inventory> res = inventoryRepository.checkDublicateEdit(inventory.getId(),inventory.getUserId(), inventory.getName(), inventory.getInventoryNumber());
 		    List<Integer> duplictionList =new ArrayList<Integer>();
+			List<Inventory> res2 = inventoryRepository.checkDublicateEditByInv(inventory.getId(), inventory.getInventoryNumber());
 
-			if(!res.isEmpty()) {
+			if(!res.isEmpty() || !res2.isEmpty()) {
 				for(int i=0;i<res.size();i++) {
-					if(res.get(i).getName().equals(inventory.getName())) {
-						duplictionList.add(1);				
-	
+					
+					if(res.get(i).getName() != null) {
+
+						if(res.get(i).getName().equals(inventory.getName())) {
+							duplictionList.add(1);				
+		
+						}
 					}
-					if(res.get(i).getInventoryNumber().equals(inventory.getInventoryNumber())) {
-						duplictionList.add(2);				
-	
+					
+					
+				}
+				for(int i=0;i<res2.size();i++) {
+					if(res2.get(i).getInventoryNumber() != null) {
+
+						if(res2.get(i).getInventoryNumber().equals(inventory.getInventoryNumber())) {
+							duplictionList.add(2);				
+		
+						}
 					}
 
 					
@@ -1122,7 +1156,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			return super.checkActive(TOKEN);
 		}
 		List<Long> allInventories = new ArrayList<Long>();
-		 List<Long>usersIds= new ArrayList<>();
+		List<Long>usersIds= new ArrayList<>();
 		if(userId != 0) {
 		
 			User user = userServiceImpl.findById(userId);
@@ -1135,17 +1169,6 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				 }
 				 else {
 					 usersIds.add(userId);
-
-					 List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
-					 if(childernUsers.isEmpty()) {
-						 usersIds.add(userId);
-					 }
-					 else {
-						 usersIds.add(userId);
-						 for(User object : childernUsers) {
-							 usersIds.add(object.getId());
-						 }
-					 }
 					 allInventories = inventoryRepository.getAllInventoriesIds(usersIds);
 
 				 }
@@ -1156,7 +1179,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					notifications = mongoInventoryNotificationRepo.getNotificationsToday(allInventories, offset);
 					Integer size=0;
 					if(notifications.size()>0) {
-						size= mongoInventoryNotificationRepo.getNotificationsTodaySize(allInventories);
+						//size= mongoInventoryNotificationRepo.getNotificationsTodaySize(allInventories);
 						for(int i=0;i<notifications.size();i++) {
 							
 							Inventory inventory = inventoryRepository.findOne(notifications.get(i).getInventory_id());
@@ -2131,7 +2154,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				}
 			}
 			else {
-				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS'Z'"); 
+				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
 				SimpleDateFormat input = new SimpleDateFormat("ddMMMyy hh:mm", Locale.ENGLISH); 
 
 				try {
@@ -2674,11 +2697,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCD1 -20°C to -10°C
 		if(inventory.getStoringCategory().equals("SCD1") && (AvgTemp < -20 || AvgTemp > -10) ) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < -20 || oldTemp > -10){
 					return null;
 				}
-			}
+			}*/
 			
 		    mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2687,11 +2710,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCD2 2°C to 8°C
 		else if(inventory.getStoringCategory().equals("SCD2") && (AvgTemp < 2 || AvgTemp > 8) ) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < 2 || oldTemp > 8){
 					return null;
 				}
-			}
+			}*/
 			
         	mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2701,11 +2724,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		else if(inventory.getStoringCategory().equals("SCD3") && (AvgTemp >= 25)) {
 
 
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp >= 25){
 					return null;
 				}
-			}
+			}*/
 			
         	mongoInventoryNotificationRepository.save(monogInventoryNotification);			
 			
@@ -2714,11 +2737,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCC1 Less than 25°C
 		else if(inventory.getStoringCategory().equals("SCC1") && (AvgTemp >= 25)) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp >= 25){
 					return null;
 				}
-			}
+			}*/
 			
         	mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2727,11 +2750,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCM1 -20°C to -10°C
 		else if(inventory.getStoringCategory().equals("SCM1") && (AvgTemp < -20 || AvgTemp > -10)) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < -20 || oldTemp > -10){
 					return null;
 				}
-			}
+			}*/
 			
 		    mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2740,11 +2763,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCM2 2°C to 8°C
 		else if(inventory.getStoringCategory().equals("SCM2") && (AvgTemp < 2 || AvgTemp > 8)) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < 2 || oldTemp > 8){
 					return null;
 				}
-			}
+			}*/
 		    
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 	
@@ -2753,11 +2776,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCM3 8°C to 15°C
 		else if(inventory.getStoringCategory().equals("SCM3") && (AvgTemp < 8 || AvgTemp > 15)) {
             
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < 8 || oldTemp > 15){
 					return null;
 				}
-			}
+			}*/
 			
 		    mongoInventoryNotificationRepository.save(monogInventoryNotification);
 		
@@ -2766,11 +2789,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCM4 15°C to 30°C
 		else if(inventory.getStoringCategory().equals("SCM4") && (AvgTemp < 15 || AvgTemp > 30)) {
             
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < 15 || oldTemp > 30){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2779,11 +2802,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCM5 Should not exceed 40°C
 		else if(inventory.getStoringCategory().equals("SCM5") && (AvgTemp > 40)) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp > 40){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 
@@ -2792,11 +2815,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF1 Should not exceed 25°C
 		else if(inventory.getStoringCategory().equals("SCF1") && (AvgTemp > 25)) {
             
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp > 25){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2806,11 +2829,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF2 -1.5°C to 10°C
 		else if(inventory.getStoringCategory().equals("SCF2") && (AvgTemp < -1.5 || AvgTemp > 10)) {
 
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < -1.5 || oldTemp > 10){
 					return null;
 				}
-			}
+			}*/
 			
             mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2819,11 +2842,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCF3 -1.5°C to 21°C 
 		else if(inventory.getStoringCategory().equals("SCF3") && (AvgTemp < -1.5 || AvgTemp > 21)) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp < -1.5 || oldTemp > 21){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 
@@ -2832,11 +2855,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF4 Should not exceed (-18)°C
 		else if(inventory.getStoringCategory().equals("SCF4") && (AvgTemp > -18)) {
             
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp > -18){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2845,11 +2868,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCA1 Should not exceed 30°C
 		else if(inventory.getStoringCategory().equals("SCA1") && (AvgTemp > 30)) {
            
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp > 30){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2858,11 +2881,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
         //SCP1 Should not exceed 35°C
 		else if(inventory.getStoringCategory().equals("SCP1") && (AvgTemp > 35)) {
 			
-			if(oldTemp != null) {
+			/*if(oldTemp != null) {
 				if(oldTemp > 35){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2893,11 +2916,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCD3 Less than 60%
 		if(inventory.getStoringCategory().equals("SCD3") && (AvgHum >= 60)) {
 			
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum >= 60){
 					return null;
 				}
-			}
+			}*/
 			
 		    mongoInventoryNotificationRepository.save(monogInventoryNotification);
 
@@ -2906,11 +2929,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCC1 Less than 60%
 		else if(inventory.getStoringCategory().equals("SCC1") && (AvgHum >= 60)) {
             	
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum >= 60){
 					return null;
 				}
-			}
+			}*/
 			
 		    mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2919,11 +2942,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCM3 Less than 60%
 		else if(inventory.getStoringCategory().equals("SCM3") && (AvgHum >= 60)) {
            
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum >= 60){
 					return null;
 				}
-			}
+			}*/
 			
 		    mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2932,11 +2955,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCM4 Less than 60%
 		else if(inventory.getStoringCategory().equals("SCM4") && (AvgHum >= 60)) {
            
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum >= 60){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2945,11 +2968,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF1 Less than 60%
 		else if(inventory.getStoringCategory().equals("SCF1") && (AvgHum >= 60)) {
             
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum >= 60){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2958,11 +2981,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF2 75% to 90%
 		else if(inventory.getStoringCategory().equals("SCF2") && (AvgHum < 75 || AvgHum > 90)) {
             
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum < 75 || oldHum > 90){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2971,11 +2994,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF3 85% to 95%
 		else if(inventory.getStoringCategory().equals("SCF3") && (AvgHum < 85 || AvgHum > 95)) {
             
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum < 85 || oldHum > 95){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2984,11 +3007,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCF4 75% to 99%
 		else if(inventory.getStoringCategory().equals("SCF4") && (AvgHum < 75 || AvgHum > 99)) {
             	
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum < 75 || oldHum > 99){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
@@ -2997,16 +3020,85 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		//SCA1 Should not exceed 60%
 		else if(inventory.getStoringCategory().equals("SCA1") && (AvgHum > 60)) {
            
-			if(oldHum != null) {
+			/*if(oldHum != null) {
 				if(oldHum > 60){
 					return null;
 				}
-			}
+			}*/
 			
 			mongoInventoryNotificationRepository.save(monogInventoryNotification);
 			
 		}
 		
 		return null;
+	}
+
+	@Override
+	public ResponseEntity<?> getDataProtocolsSkarpt(Map<Object, Object> data) {
+		// TODO Auto-generated method stub
+		
+		if(data.get("type").equals("skarpt")) {
+			getSkarptProtocols((List<BindData>) data.get("data"));
+		}
+		
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",null);
+		return  ResponseEntity.ok().body(getObjectResponse);
+	}
+	
+	public void getSkarptProtocols(List<BindData> data) {
+		ObjectMapper mapper = new ObjectMapper();
+
+		List<BindData> list = mapper.convertValue(
+				data, 
+			    new TypeReference<List<BindData>>(){}
+			);
+
+		for(BindData obj:list) {
+
+			Long inventoryId = inventoryRepository.getInventoryByNumber(obj.getInventoryNumber(), "skarpt");
+		
+			if(inventoryId  != null) {
+				Inventory inventory = inventoryRepository.findOne(inventoryId);
+				
+				Date dateTime = null;
+				String create_date = null;
+				
+				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); 
+				
+				try {
+					dateTime = input.parse(obj.getCreate_date().toString());
+				} catch (java.text.ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				create_date = output.format(dateTime);
+					
+
+				Double oldTemp = null;
+				Double oldTHum = null;
+				if(inventory.getLastDataId() != null) {
+					MonogoInventoryLastData check = mongoInventoryLastDataRepository.findById(inventory.getLastDataId());
+					if(check != null) {
+						oldTemp = check.getTemperature();
+						oldTHum = check.getHumidity();
+					}
+				}
+				
+				
+						
+				ObjectId lastDataId = saveLastDataHandler(inventory,dateTime,obj.getTemperature(),obj.getHumidity());
+
+				saveHumidityHandler(inventory, dateTime, obj.getHumidity(), oldTHum);
+				saveTemperatureHandler(inventory, dateTime, obj.getTemperature(), oldTemp);
+			
+				//save setLastUpdate setLastDataId after push data and notification data
+				inventory.setLastUpdate(create_date);
+				inventory.setLastDataId(lastDataId.toString());
+				inventoryRepository.save(inventory);
+			
+			}
+			
+		}
 	}
 }

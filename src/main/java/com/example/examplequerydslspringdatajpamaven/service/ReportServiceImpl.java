@@ -34,7 +34,6 @@ import com.example.examplequerydslspringdatajpamaven.entity.CustomPositions;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.DeviceWorkingHours;
 import com.example.examplequerydslspringdatajpamaven.entity.Driver;
-import com.example.examplequerydslspringdatajpamaven.entity.DriverSelect;
 import com.example.examplequerydslspringdatajpamaven.entity.DriverWorkingHours;
 import com.example.examplequerydslspringdatajpamaven.entity.EventReport;
 import com.example.examplequerydslspringdatajpamaven.entity.EventReportByCurl;
@@ -1172,9 +1171,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			}
 		}
 		
-		List<Long>allDevices= new ArrayList<>();
-		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
+		List<Long>allDevices= new ArrayList<Long>();
+		List<Long>allDrivers= new ArrayList<Long>();
 
 		if(groupIds.length != 0) {
 			for(Long groupId:groupIds) {
@@ -1246,11 +1244,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			}
 		}
 		if(driverIds.length !=0 ) {
+
 			for(Long driverId : driverIds) {
+
+
 				if(driverId !=0) {
-					
+
 					Driver driver =driverServiceImpl.getDriverById(driverId);
 					if(driver != null) {
+
 						boolean isParent = false;
 						if(loggedUser.getAccountType() == 4) {
 							Set<User>parentClients = loggedUser.getUsersOfUser();
@@ -1285,11 +1287,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 									isParent = true;
 							}
 						}
+
+
 						if(!driverServiceImpl.checkIfParent(driver , loggedUser) && ! isParent) {
 							getObjectResponse = new GetObjectResponse( HttpStatus.BAD_REQUEST.value(), "this user is not allwed to get data of this driver",driverHours);
 							 logger.info("************************ getDriverWorkingHours ENDED ***************************");
 							return ResponseEntity.badRequest().body(getObjectResponse);
 						}
+
+
 						allDrivers.add(driverId);
 						
 						
@@ -1300,11 +1306,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			}
 		}
 		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
+
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
 		}
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
-		}
+
 		
 		Date dateFrom;
 		Date dateTo;
@@ -1489,18 +1499,18 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					
 
 						if(search.equals("")) {
-							notifications = mongoEventsRepo.getNotificationsToday(deviceIds, offset);
-							if(notifications.size()>0) {
-								size= mongoEventsRepo.getNotificationsTodaySize(deviceIds);
-									
-							}
+							notifications = mongoEventsRepo.getNotificationsTodayByDeviceId(deviceIds, offset);
+//							if(notifications.size()>0) {
+//								size= mongoEventsRepo.getNotificationsTodaySize(deviceIds);
+//									
+//							}
 						}
 						else {
-							notifications = mongoEventsRepo.getNotificationsTodaySearch(deviceIds,search, offset);
-							if(notifications.size()>0) {
-								size= mongoEventsRepo.getNotificationsTodaySizeSearch(deviceIds,search);
-									
-							}
+							notifications = mongoEventsRepo.getNotificationsTodaySearchByDeviceId(deviceIds,search, offset);
+//							if(notifications.size()>0) {
+//								size= mongoEventsRepo.getNotificationsTodaySizeSearch(deviceIds,search);
+//									
+//							}
 						}
 						
 
@@ -1527,21 +1537,21 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					List<Long> allDevices = deviceRepository.getDevicesUsers(usersIds);
 
 					if(search.equals("")) {
-
-						notifications = mongoEventsRepo.getNotificationsToday(allDevices, offset);
-						if(notifications.size()>0) {
-							size= mongoEventsRepo.getNotificationsTodaySize(allDevices);
-								
-						}
+						//notifications = mongoEventsRepo.getNotificationsTodayByDeviceId(allDevices, offset);
+						notifications = mongoEventsRepo.getNotificationsTodayByUserId(usersIds, offset);
+//						if(notifications.size()>0) {
+//							size= mongoEventsRepo.getNotificationsTodaySize(allDevices);
+//								
+//						}
 
 					}
 					else {
-					
-						notifications = mongoEventsRepo.getNotificationsTodaySearch(allDevices,search, offset);
-						if(notifications.size()>0) {
-							size= mongoEventsRepo.getNotificationsTodaySizeSearch(allDevices,search);
-								
-						}
+						//notifications = mongoEventsRepo.getNotificationsTodaySearchByDeviceId(allDevices,search, offset);
+						notifications = mongoEventsRepo.getNotificationsTodaySearchByUserId(usersIds,search, offset);
+//						if(notifications.size()>0) {
+//							size= mongoEventsRepo.getNotificationsTodaySizeSearch(allDevices,search);
+//								
+//						}
 					}
 					
 				    
@@ -1923,6 +1933,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 							e.printStackTrace();
 						}
 						
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
+						
 						stopReportOne.setStartTime(outputFormat.format(dateTime));
 
 				  }
@@ -1938,6 +1953,10 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
 						
 						stopReportOne.setEndTime(outputFormat.format(dateTime));
 
@@ -2333,6 +2352,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 							e.printStackTrace();
 						}
 						
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
+						
 						tripReportOne.setStartTime(outputFormat.format(dateTime));
 
 				  }
@@ -2348,6 +2372,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
 						
 						tripReportOne.setEndTime(outputFormat.format(dateTime));
 
@@ -2377,7 +2406,6 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 
 
 		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",tripReport);
 				logger.info("************************ getDriveMoreThanReport ENDED ***************************");
@@ -2548,11 +2576,13 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			}
 		}
 		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
-		}
-		
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
+
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
 		}
 		
 		if(deviceIds.length != 0 ) {
@@ -2822,6 +2852,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 								e.printStackTrace();
 							}
 							
+							Calendar calendarTime = Calendar.getInstance();
+							calendarTime.setTime(dateTime);
+							calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+							dateTime = calendarTime.getTime();
+							
 							tripReportOne.setStartTime(outputFormat.format(dateTime));
 
 					  }
@@ -2837,6 +2872,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
+							
+							Calendar calendarTime = Calendar.getInstance();
+							calendarTime.setTime(dateTime);
+							calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+							dateTime = calendarTime.getTime();
 							
 							tripReportOne.setEndTime(outputFormat.format(dateTime));
 
@@ -3182,6 +3222,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
 						
 						eventReportOne.setServerTime(outputFormat.format(dateTime));
 				  }
@@ -3888,8 +3933,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		 logger.info("************************ returnFromTraccar STARTED ***************************");
 
 		 
-		 SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-         outputFormat.setLenient(false);
+		SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        outputFormat.setLenient(false);
 
 		Date dateFrom;	
 		Date dateTo;	
@@ -3899,7 +3944,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			
 			Calendar calendarFrom = Calendar.getInstance();
 			calendarFrom.setTime(dateFrom);
-			calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+			calendarFrom.add(Calendar.HOUR_OF_DAY, -3);
 			dateFrom = calendarFrom.getTime();
 			
 			from = outputFormat.format(dateFrom);
@@ -3914,7 +3959,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			
 			Calendar calendarFrom = Calendar.getInstance();
 			calendarFrom.setTime(dateTo);
-			calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+			calendarFrom.add(Calendar.HOUR_OF_DAY, -3);
 			dateTo = calendarFrom.getTime();
 			
 			to = outputFormat.format(dateTo);
@@ -3923,9 +3968,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		} catch (ParseException e2) {
 			
 		}
-		 
-		 
-		
+
 		String plainCreds = "admin@fuinco.com:admin";
 		byte[] plainCredsBytes = plainCreds.getBytes();
 		
@@ -4010,7 +4053,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		List<StopReport> stopReport = new ArrayList<>();
 
 		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
+
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",stopReport);
 			 logger.info("************************ getNumStopsReport ENDED ***************************");
@@ -4180,12 +4223,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				}
 			}
 		}
-		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
-		}
 		
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
+		if(allDrivers.size()>0) {
+
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
 		}
 		
 		if(deviceIds.length != 0 ) {
@@ -4360,28 +4406,29 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 
 				  int count=0;
 				  Map devicesStatus = new HashMap();
+
+				  devicesStatus.put("deviceName", null);
+				  devicesStatus.put("deviceId" ,null);
+				  devicesStatus.put("driverName", null);
+				  devicesStatus.put("driverUniqueId",null);
+				  
+				  devicesStatus.put("stops" ,count);
+				  
+				  Device device= deviceServiceImpl.findById(dev);
+				  
+			      devicesStatus.put("deviceName", device.getName());
+				  devicesStatus.put("deviceId" ,device.getId());
+				  Set<Driver>  drivers = device.getDriver();
+
+				  for(Driver driver : drivers ) {
+
+					  devicesStatus.put("driverName", driver.getName());
+					  devicesStatus.put("driverUniqueId", driver.getUniqueid());
+					  
+				  }
+				  
 				  for(StopReport stop: stopReport) {
 
-
-					  devicesStatus.put("deviceName", null);
-					  devicesStatus.put("deviceId" ,null);
-					  devicesStatus.put("driverName", null);
-					  devicesStatus.put("driverUniqueId",null);
-					  devicesStatus.put("stops" ,count);
-					  
-					  Device device= deviceServiceImpl.findById(dev);
-					  
-				      devicesStatus.put("deviceName", device.getName());
-					  devicesStatus.put("deviceId" ,device.getId());
-					  Set<Driver>  drivers = device.getDriver();
-
-					  for(Driver driver : drivers ) {
-
-						  devicesStatus.put("driverName", driver.getName());
-						  devicesStatus.put("driverUniqueId", driver.getUniqueid());
-						  
-					  }
-					  
 
 					  if((long) stop.getDeviceId() == (long) dev) {
 
@@ -4413,7 +4460,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		List<StopReport> stopReport = new ArrayList<>();
 
 		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
+
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",stopReport);
 			 logger.info("************************ getTotalStopsReport ENDED ***************************");
@@ -4582,12 +4629,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				}
 			}
 		}
-		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
-		}
 		
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
+		if(allDrivers.size()>0) {
+
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
 		}
 		
 		if(deviceIds.length != 0 ) {
@@ -4772,37 +4822,36 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					  duplicateAddressList.clear();
 
 					  Map devicesStatus = new HashMap();
+					  
+					  devicesStatus.put("deviceName", null);
+					  devicesStatus.put("deviceId" ,null);
+					  devicesStatus.put("driverName", null);
+					  devicesStatus.put("driverUniqueId",null);
+					  
+					  devicesStatus.put("totalDuration", totalDuration);
+				      devicesStatus.put("totalEngineHours", totalEngineHours);
+				      devicesStatus.put("totalSpentFuel", roundOffFuel);
+					  devicesStatus.put("totalVisitedPlace" ,0);
+					  
+					  Device device= deviceServiceImpl.findById(dev);
+					  
+				      devicesStatus.put("deviceName", device.getName());
+					  devicesStatus.put("deviceId" ,device.getId());
+					  Set<Driver>  drivers = device.getDriver();
+
+					  for(Driver driver : drivers ) {
+
+						  devicesStatus.put("driverName", driver.getName());
+						  devicesStatus.put("driverUniqueId", driver.getUniqueid());
+						  
+					  }
+					  
 					  for(StopReport stopReportOne: stopReport) {
 						 
 						  
 						  if((long) stopReportOne.getDeviceId() == (long) dev) {
-							  
-							  
-							  devicesStatus.put("deviceName", null);
-							  devicesStatus.put("deviceId" ,null);
-							  devicesStatus.put("driverName", null);
-							  devicesStatus.put("driverUniqueId",null);
-							  
-							  devicesStatus.put("totalDuration", totalDuration);
-						      devicesStatus.put("totalEngineHours", totalEngineHours);
-						      devicesStatus.put("totalSpentFuel", roundOffFuel);
-							  devicesStatus.put("totalVisitedPlace" ,0);
 
-							  
-							  Device device= deviceServiceImpl.findById(dev);
-							  
-						      devicesStatus.put("deviceName", device.getName());
-							  devicesStatus.put("deviceId" ,device.getId());
-							  Set<Driver>  drivers = device.getDriver();
 
-							  for(Driver driver : drivers ) {
-
-								  devicesStatus.put("driverName", driver.getName());
-								  devicesStatus.put("driverUniqueId", driver.getUniqueid());
-								  
-							  }
-							  
-							  
 							  if(stopReportOne.getAddress() != null && stopReportOne.getAddress() != "") {
 								  duplicateAddressList.add(stopReportOne.getAddress());
 							  
@@ -4870,7 +4919,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					  }
 					  Map<String, Long> couterMap = duplicateAddressList.stream().collect(Collectors.groupingBy(e -> e.toString(),Collectors.counting()));
 					  devicesStatus.put("totalVisitedPlace" ,couterMap.size());
-					  data.add(devicesStatus);
+					  
+					  
+					  if(devicesStatus.size() > 0) {
+						  data.add(devicesStatus);
+					  }
 
 				  }
 				  
@@ -4894,7 +4947,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		List<TripReport> tripReport = new ArrayList<>();
 
 		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
+
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",tripReport);
 			 logger.info("************************ geTotalTripsReport ENDED ***************************");
@@ -5063,12 +5116,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				}
 			}
 		}
-		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
-		}
 		
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
+		if(allDrivers.size()>0) {
+
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
 		}
 		
 		if(deviceIds.length != 0 ) {
@@ -5249,27 +5305,30 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				  String totalDuration = "00:00:00";
 
 				  Map devicesStatus = new HashMap();
+				  
+				  devicesStatus.put("deviceName", null);
+				  devicesStatus.put("deviceId" ,null);
+				  devicesStatus.put("driverName", null);
+				  devicesStatus.put("driverUniqueId",null);
+				  
+				  devicesStatus.put("totalDrivingHours",totalDuration);
+			      devicesStatus.put("totalDistance", roundOffDistance);
+			      devicesStatus.put("totalSpentFuel", roundOffFuel);
+			      
+			      Device device= deviceServiceImpl.findById(dev);
+				  
+			      devicesStatus.put("deviceName", device.getName());
+				  devicesStatus.put("deviceId" ,device.getId());
+				  Set<Driver>  drivers = device.getDriver();
+
+				  for(Driver driver : drivers ) {
+
+					  devicesStatus.put("driverName", driver.getName());
+					  devicesStatus.put("driverUniqueId", driver.getUniqueid());
+					  
+				  }
+				  
 				  for(TripReport tripReportOne: tripReport) {
-					  devicesStatus.put("deviceName", null);
-					  devicesStatus.put("deviceId" ,null);
-					  devicesStatus.put("driverName", null);
-					  devicesStatus.put("driverUniqueId",null);
-					  devicesStatus.put("totalDrivingHours",totalDuration);
-				      devicesStatus.put("totalDistance", roundOffDistance);
-				      devicesStatus.put("totalSpentFuel", roundOffFuel);
-					  
-					  Device device= deviceServiceImpl.findById(dev);
-					  
-				      devicesStatus.put("deviceName", device.getName());
-					  devicesStatus.put("deviceId" ,device.getId());
-					  Set<Driver>  drivers = device.getDriver();
-
-					  for(Driver driver : drivers ) {
-
-						  devicesStatus.put("driverName", driver.getName());
-						  devicesStatus.put("driverUniqueId", driver.getUniqueid());
-						  
-					  }
 					  
 					  if((long) tripReportOne.getDeviceId() == (long) dev) {
 						  if(tripReportOne.getDistance() != null && tripReportOne.getDistance() != "") {
@@ -5326,7 +5385,9 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				      
 					  
 				  }
-				  data.add(devicesStatus);
+				  if(devicesStatus.size() > 0) {
+					  data.add(devicesStatus);
+				  }
 
 			  }
 			  
@@ -5351,7 +5412,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		List<TripReport> tripReport = new ArrayList<>();
 
 		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
+
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",tripReport);
 			 logger.info("************************ getNumTripsReport ENDED ***************************");
@@ -5518,12 +5579,15 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				}
 			}
 		}
-		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
-		}
 		
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
+		if(allDrivers.size()>0) {
+
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
 		}
 		
 		if(deviceIds.length != 0 ) {
@@ -5698,36 +5762,37 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 
 				  int count=0;
 				  Map devicesStatus = new HashMap();
-				  for(TripReport trip: tripReport) {
+				  
+				  devicesStatus.put("deviceName", null);
+				  devicesStatus.put("deviceId" ,null);
+				  devicesStatus.put("driverName", null);
+				  devicesStatus.put("driverUniqueId",null);
+				  
+				  devicesStatus.put("trips" ,count);
+				  
+				  Device device= deviceServiceImpl.findById(dev);
+				  
+			      devicesStatus.put("deviceName", device.getName());
+				  devicesStatus.put("deviceId" ,device.getId());
+				  Set<Driver>  drivers = device.getDriver();
 
+				  for(Driver driver : drivers ) {
 
-					  devicesStatus.put("deviceName", null);
-					  devicesStatus.put("deviceId" ,null);
-					  devicesStatus.put("driverName", null);
-					  devicesStatus.put("driverUniqueId",null);
-					  devicesStatus.put("trips" ,count);
+					  devicesStatus.put("driverName", driver.getName());
+					  devicesStatus.put("driverUniqueId", driver.getUniqueid());
 					  
-					  Device device= deviceServiceImpl.findById(dev);
-					  
-				      devicesStatus.put("deviceName", device.getName());
-					  devicesStatus.put("deviceId" ,device.getId());
-					  Set<Driver>  drivers = device.getDriver();
-
-					  for(Driver driver : drivers ) {
-
-						  devicesStatus.put("driverName", driver.getName());
-						  devicesStatus.put("driverUniqueId", driver.getUniqueid());
-						  
-					  }
-					  
-					  
+				  }
+				  
+				  for(TripReport trip: tripReport) {  
 					  if((long) trip.getDeviceId() == (long) dev) {
 						  
 						  count= count+1;
 						  devicesStatus.put("trips" ,count);
 					  }
 				  }
-				  data.add(devicesStatus);
+				  if(devicesStatus.size() > 0) {
+					  data.add(devicesStatus);
+				  }
 
 			  }
 			  
@@ -5892,7 +5957,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		
 		List<Long>allDevices= new ArrayList<>();
 		List<Long>allDrivers= new ArrayList<>();
-		List<DriverSelect>allDevicesList= new ArrayList<DriverSelect>();
+
 
 		if(groupIds.length != 0) {
 			for(Long groupId:groupIds) {
@@ -6018,12 +6083,14 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			}
 		}
 		if(allDrivers.size()>0) {
-			allDevicesList.addAll(driverRepository.devicesOfDrivers(allDrivers));
-		}
-		for(DriverSelect object : allDevicesList) {
-			allDevices.add(object.getId());
-		}
 
+			List<Long> dri = new ArrayList<Long>();
+			for(Object obj : allDrivers.toArray()) {
+				dri.add(Long.valueOf(obj.toString()));
+			}
+			allDevices.addAll(driverRepository.devicesOfDrivers(dri));
+
+		}
 
 		Date dateFrom;
 		Date dateTo;
@@ -6177,7 +6244,9 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 						      devicesStatus.put("totalHours", totalHours);
 						  }
 					  }
-					  dataAll.add(devicesStatus);
+					  if(devicesStatus.size() > 0) {
+						  dataAll.add(devicesStatus);
+					  }
 
 				  }
 				 
@@ -6188,7 +6257,6 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",dataAll,dataAll.size());
 			logger.info("************************ getNumberDriverWorkingHours ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
-			
 			
 			
 	}

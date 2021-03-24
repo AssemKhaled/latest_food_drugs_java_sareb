@@ -211,7 +211,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	public ResponseEntity<?> createDevice(String TOKEN,Device device,Long userId) {
 		// TODO Auto-generated method stub
 		logger.info("************************ createDevice STARTED ***************************");
-		
+		device.setUser_id(userId);
 		Date now = new Date();
 		SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String nowTime = isoFormat.format(now);
@@ -380,8 +380,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	@Override
 	public ResponseEntity<?> editDevice(String TOKEN,Device device, Long userId) {
 		logger.info("************************ editDevice STARTED ***************************");
+
     	String newPhoto= device.getPhoto();
-		
     	device.setPhoto("not_available.png");
     	
     	
@@ -762,6 +762,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	         Set<Notification> notificationDevice=new HashSet<>();
 	         device.setNotificationDevice(notificationDevice);
 	         
+	         String uniqueId = device.getUniqueid();
+	         device.setUniqueid(uniqueId+"/D");
 			 deviceRepository.save(device);
 		     
 		     List<Device> devices = null;
@@ -1795,44 +1797,117 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 		                    	Double Hum = (double) 0;
 		                    	
 		                    	if(obj.has("temp1")) {
-		                    		Temp = Temp + obj.getDouble("temp1");
-		                    		countTemp = countTemp + 1;
+		                    		if(obj.getDouble("temp1") != 0) {
+			                    		Temp = Temp + obj.getDouble("temp1");
+			                    		countTemp = countTemp + 1;
+		                    		}
 								}
 		                    	if(obj.has("temp2")) {
-		                    		Temp = Temp + obj.getDouble("temp2");
-		                    		countTemp = countTemp + 1;
-		
+		                    		if(obj.getDouble("temp2") != 0) {
+			                    		Temp = Temp + obj.getDouble("temp2");
+			                    		countTemp = countTemp + 1;
+		                    		}
 								}
 		                    	if(obj.has("temp3")) {
-		                    		Temp = Temp + obj.getDouble("temp3");
-		                    		countTemp = countTemp + 1;
-		
+		                    		if(obj.getDouble("temp3") != 0) {
+			                    		Temp = Temp + obj.getDouble("temp3");
+			                    		countTemp = countTemp + 1;
+		                    		}
 								}
 		                    	if(obj.has("temp4")) {
-		                    		Temp = Temp + obj.getDouble("temp4");
-		                    		countTemp = countTemp + 1;
-		
+		                    		if(obj.getDouble("temp4") != 0) {
+		                    			Temp = Temp + obj.getDouble("temp4");
+			                    		countTemp = countTemp + 1;
+		                    		}
 								}
 		                    	
 		                    	if(obj.has("hum1")) {
-		                    		Hum = Hum + obj.getDouble("hum1");
-		                    		countHum = countHum + 1;
+		                    		if(obj.getDouble("hum1") != 0) {
+			                    		Hum = Hum + obj.getDouble("hum1");
+			                    		countHum = countHum + 1;
+		                    		}
+
 								}
 		                    	if(obj.has("hum2")) {
-		                    		Hum = Hum + obj.getDouble("hum2");
-		                    		countHum = countHum + 1;
+		                    		if(obj.getDouble("hum2") != 0) {
+			                    		Hum = Hum + obj.getDouble("hum2");
+			                    		countHum = countHum + 1;
+		                    		}
 		
 								}
 		                    	if(obj.has("hum3")) {
-		                    		Hum = Hum + obj.getDouble("hum3");
-		                    		countHum = countHum + 1;
+		                    		if(obj.getDouble("hum3") != 0) {
+			                    		Hum = Hum + obj.getDouble("hum3");
+			                    		countHum = countHum + 1;
+		                    		}
 		
 								}
 		                    	if(obj.has("hum4")) {
-		                    		Hum = Hum + obj.getDouble("hum4");
-		                    		countHum = countHum + 1;
+		                    		if(obj.getDouble("hum4") != 0) {
+			                    		Hum = Hum + obj.getDouble("hum4");
+			                    		countHum = countHum + 1;
+		                    		}
 		
 								}
+		                    	
+		                    	if(obj.has("wiretemp1")) {
+		                    		if(obj.getDouble("wiretemp1") != 0) {
+			                    		Temp = Temp + obj.getDouble("wiretemp1");
+			                    		countTemp = countTemp + 1;
+		                    		}
+								}
+		                    	if(obj.has("wiretemp2")) {
+		                    		if(obj.getDouble("wiretemp2") != 0) {
+			                    		Temp = Temp + obj.getDouble("wiretemp2");
+			                    		countTemp = countTemp + 1;
+		                    		}
+		
+								}
+		                    	if(obj.has("wiretemp3")) {
+		                    		if(obj.getDouble("wiretemp3") != 0) {
+			                    		Temp = Temp + obj.getDouble("wiretemp3");
+			                    		countTemp = countTemp + 1;
+		                    		}
+		
+								}
+		                    	if(obj.has("wiretemp4")) {
+		                    		if(obj.getDouble("wiretemp4") != 0) {
+			                    		Temp = Temp + obj.getDouble("wiretemp4");
+			                    		countTemp = countTemp + 1;
+		                    		}
+		
+								}
+		                    	
+		                    	if(obj.has("wirehum1")) {
+		                    		if(obj.getDouble("wirehum1") != 0) {
+			                    		Hum = Hum + obj.getDouble("wirehum1");
+			                    		countHum = countHum + 1;
+		                    		}
+								}
+		                    	if(obj.has("wirehum2")) {
+		                    		if(obj.getDouble("wirehum2") != 0) {
+			                    		Hum = Hum + obj.getDouble("wirehum2");
+			                    		countHum = countHum + 1;
+		                    		}
+		
+								}
+		                    	if(obj.has("wirehum3")) {
+		                    		if(obj.getDouble("wirehum3") != 0) {
+			                    		Hum = Hum + obj.getDouble("wirehum3");
+			                    		countHum = countHum + 1;
+		                    		}
+		
+								}
+		                    	if(obj.has("wirehum4")) {
+		                    		if(obj.getDouble("wirehum4") != 0) {
+			                    		Hum = Hum + obj.getDouble("wirehum4");
+			                    		countHum = countHum + 1;
+		                    		}
+		
+								}
+		                    	
+		                    	
+		                    	
 		                    	Double avgTemp = (double) 0;
 		                    	Double avgHum = (double) 0;
 		                    	if(countTemp != 0) {
@@ -1843,7 +1918,9 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 		                    		avgHum = Hum / countHum;
 
 		                    	}
-		                    	
+		                    	avgHum = Math.round(avgHum * 100.0) / 100.0;
+		                    	avgTemp = Math.round(avgTemp * 100.0) / 100.0;
+
 		                    	allDevicesLiveData.get(i).setTemperature(avgTemp);
 		                    	allDevicesLiveData.get(i).setHumidity(avgHum);
 		                    	
@@ -1997,44 +2074,116 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	                    	Double Hum = (double) 0;
 	                    	
 	                    	if(obj.has("temp1")) {
-	                    		Temp = Temp + obj.getDouble("temp1");
-	                    		countTemp = countTemp + 1;
+	                    		if(obj.getDouble("temp1") != 0) {
+		                    		Temp = Temp + obj.getDouble("temp1");
+		                    		countTemp = countTemp + 1;
+	                    		}
 							}
 	                    	if(obj.has("temp2")) {
-	                    		Temp = Temp + obj.getDouble("temp2");
-	                    		countTemp = countTemp + 1;
-	
+	                    		if(obj.getDouble("temp2") != 0) {
+		                    		Temp = Temp + obj.getDouble("temp2");
+		                    		countTemp = countTemp + 1;
+	                    		}
 							}
 	                    	if(obj.has("temp3")) {
-	                    		Temp = Temp + obj.getDouble("temp3");
-	                    		countTemp = countTemp + 1;
-	
+	                    		if(obj.getDouble("temp3") != 0) {
+		                    		Temp = Temp + obj.getDouble("temp3");
+		                    		countTemp = countTemp + 1;
+	                    		}
 							}
 	                    	if(obj.has("temp4")) {
-	                    		Temp = Temp + obj.getDouble("temp4");
-	                    		countTemp = countTemp + 1;
-	
+	                    		if(obj.getDouble("temp4") != 0) {
+	                    			Temp = Temp + obj.getDouble("temp4");
+		                    		countTemp = countTemp + 1;
+	                    		}
 							}
 	                    	
 	                    	if(obj.has("hum1")) {
-	                    		Hum = Hum + obj.getDouble("hum1");
-	                    		countHum = countHum + 1;
+	                    		if(obj.getDouble("hum1") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum1");
+		                    		countHum = countHum + 1;
+	                    		}
+
 							}
 	                    	if(obj.has("hum2")) {
-	                    		Hum = Hum + obj.getDouble("hum2");
-	                    		countHum = countHum + 1;
+	                    		if(obj.getDouble("hum2") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum2");
+		                    		countHum = countHum + 1;
+	                    		}
 	
 							}
 	                    	if(obj.has("hum3")) {
-	                    		Hum = Hum + obj.getDouble("hum3");
-	                    		countHum = countHum + 1;
+	                    		if(obj.getDouble("hum3") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum3");
+		                    		countHum = countHum + 1;
+	                    		}
 	
 							}
 	                    	if(obj.has("hum4")) {
-	                    		Hum = Hum + obj.getDouble("hum4");
-	                    		countHum = countHum + 1;
+	                    		if(obj.getDouble("hum4") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum4");
+		                    		countHum = countHum + 1;
+	                    		}
 	
 							}
+	                    	
+	                    	if(obj.has("wiretemp1")) {
+	                    		if(obj.getDouble("wiretemp1") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp1");
+		                    		countTemp = countTemp + 1;
+	                    		}
+							}
+	                    	if(obj.has("wiretemp2")) {
+	                    		if(obj.getDouble("wiretemp2") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp2");
+		                    		countTemp = countTemp + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wiretemp3")) {
+	                    		if(obj.getDouble("wiretemp3") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp3");
+		                    		countTemp = countTemp + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wiretemp4")) {
+	                    		if(obj.getDouble("wiretemp4") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp4");
+		                    		countTemp = countTemp + 1;
+	                    		}
+	
+							}
+	                    	
+	                    	if(obj.has("wirehum1")) {
+	                    		if(obj.getDouble("wirehum1") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum1");
+		                    		countHum = countHum + 1;
+	                    		}
+							}
+	                    	if(obj.has("wirehum2")) {
+	                    		if(obj.getDouble("wirehum2") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum2");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wirehum3")) {
+	                    		if(obj.getDouble("wirehum3") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum3");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wirehum4")) {
+	                    		if(obj.getDouble("wirehum4") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum4");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	
+	                    	
 	                    	Double avgTemp = (double) 0;
 	                    	Double avgHum = (double) 0;
 	                    	if(countTemp != 0) {
@@ -2045,6 +2194,9 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	                    		avgHum = Hum / countHum;
 
 	                    	}
+	                    	
+	                    	avgHum = Math.round(avgHum * 100.0) / 100.0;
+	                    	avgTemp = Math.round(avgTemp * 100.0) / 100.0;
 	                    	
 	                    	allDevicesLiveData.get(i).setTemperature(avgTemp);
 	                    	allDevicesLiveData.get(i).setHumidity(avgHum);
@@ -2343,6 +2495,18 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			                    vehicleInfo.get(0).setAddress(mongoPosition.getAddress());
 			                    vehicleInfo.get(0).setAttributes(mongoPosition.getAttributes());
 			                    
+			                    if(mongoPosition.getServertime() != null) {
+			                    	
+									vehicleInfo.get(0).setServertime(mongoPosition.getServertime().toString());
+
+			                    }
+			                    if(mongoPosition.getDevicetime() != null) {
+			                    	
+
+									vehicleInfo.get(0).setDevicetime(mongoPosition.getDevicetime().toString());
+									
+			                    }
+
 			                    
 							}
 							
@@ -2500,42 +2664,23 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					
 					return ResponseEntity.status(404).body(getObjectResponse);
 				}else {
+
 					if(checkIfParent( device ,  loggedUser)) {
 					     User toUser = userService.findById(toUserId);
 					     if(toUser == null) {
-					    	 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "user you want to assign to  is not found",null);
-								
-								return ResponseEntity.status(404).body(getObjectResponse);
+					    	getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "user you want to assign to  is not found",null);
+							return ResponseEntity.status(404).body(getObjectResponse);
 					     }else {
 					    	  if(toUser.getAccountType().equals(4)) {
 					    		  getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign device to this user type 4 assign to his parents",null);
-									
-									return ResponseEntity.status(404).body(getObjectResponse);
+								  return ResponseEntity.status(404).body(getObjectResponse);
 					    	  }
-					    	  else if(loggedUser.getAccountType().equals(toUser.getAccountType())) {
-					    		  if(loggedUser.getId().equals(toUser.getId())) {
-					    			  Set<User> deviceOldUser = device.getUser();
-						    			 Set<User> temp = deviceOldUser;
-						    			 deviceOldUser.removeAll(temp);
-						    			 device.setUser(deviceOldUser);
-						    		     deviceOldUser.add(toUser);
-						    		     device.setUser(deviceOldUser);
-						    		     deviceRepository.save(device);
-						    		     getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "device assigned successfully",null);
-											
-										return ResponseEntity.ok().body(getObjectResponse);
-					    		  }else {
-					    			  getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign device to this user",null);
-										
-										return ResponseEntity.status(404).body(getObjectResponse);
-					    		  }
-					    	  }
+					    	  
+					    	  
 					    	 List<User>toUserParents = userService.getAllParentsOfuser(toUser, toUser.getAccountType());
 					    	 if(toUserParents.isEmpty()) {
-					    		 
 					    		 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign device to this user",null);
-									
-									return ResponseEntity.status(404).body(getObjectResponse);
+								 return ResponseEntity.status(404).body(getObjectResponse);
 					    	 }else {
 					    		
 					    		 boolean isParent = false;
@@ -2553,15 +2698,15 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					    			 deviceOldUser.removeAll(temp);
 					    			 device.setUser(deviceOldUser);
 					    		     deviceOldUser.add(toUser);
+					    		     device.setUser_id(toUser.getId());
 					    		     device.setUser(deviceOldUser);
 					    		     deviceRepository.save(device);
-					    		     getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "device assigned successfully",null);
-										
-									return ResponseEntity.ok().body(getObjectResponse);
+					    		     
+					    		     getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "device assigned successfully",null);	
+									 return ResponseEntity.ok().body(getObjectResponse);
 					    		     
 					    		 }else {
 					    			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign device to this user",null);
-										
 									 return ResponseEntity.status(404).body(getObjectResponse);
 					    		 }
 					    	 }
@@ -3746,6 +3891,22 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 							objectData.put("attributes", commandData);
 
 						}
+						else if(command.equals("custom")) {
+							Map<String, Object> commandData = new HashMap<String, Object>();
+							
+							if(!data.containsKey("custom")) {
+								getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "custom data shouldn't be null",null);
+								return  ResponseEntity.badRequest().body(getObjectResponse);
+							}
+							if(data.get("custom") == null) {
+								getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "custom data shouldn't be null",null);
+								return  ResponseEntity.badRequest().body(getObjectResponse);
+							}
+							
+							commandData.put("data",data.get("custom"));
+							objectData.put("attributes", commandData);
+
+						}
 						else {
 							getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "select command please.",null);
 							return  ResponseEntity.badRequest().body(getObjectResponse);
@@ -3826,9 +3987,13 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 
 		  ResponseEntity<String> response = restTemplate.postForEntity(sendCommand, request, String.class);
 
-		if (response.getStatusCode() == HttpStatus.ACCEPTED) {
+		if(response.getStatusCode() == HttpStatus.ACCEPTED) {
 		    return "success";
-		} else {
+		} 
+		else if(response.getStatusCode() == HttpStatus.OK) {
+		    return "success";
+		} 
+		else {
 		    return "faild";
 		}
 

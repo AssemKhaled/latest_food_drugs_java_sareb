@@ -53,16 +53,25 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	@Query(value = "select * from tc_inventories "
 			+ " where (tc_inventories.name=:name or tc_inventories.inventoryNumber=:inventoryNumber ) and tc_inventories.userId=:userId and tc_inventories.delete_date IS NULL", nativeQuery = true)
 	public List<Inventory> checkDublicateAdd(@Param("userId") Long id,
-			 @Param("name") String email
-			,@Param("inventoryNumber") String name);
+			 @Param("name") String name
+			,@Param("inventoryNumber") String inventoryNumber);
+	
+	@Query(value = "select * from tc_inventories "
+			+ " where tc_inventories.inventoryNumber=:inventoryNumber and tc_inventories.delete_date IS NULL", nativeQuery = true)
+	public List<Inventory> checkDublicateAddByInv(@Param("inventoryNumber") String inventoryNumber);
 	
 	
 	@Query(value ="select * from tc_inventories "
 			+ " where (tc_inventories.name=:name or tc_inventories.inventoryNumber=:inventoryNumber ) "
 			+ " and tc_inventories.userId=:userId and tc_inventories.delete_date IS NULL and tc_inventories.id !=:id ", nativeQuery = true)
 	public List<Inventory> checkDublicateEdit(@Param("id") Long id,@Param("userId") Long userId,
-			@Param("name") String email
-			,@Param("inventoryNumber") String name);
+			@Param("name") String name
+			,@Param("inventoryNumber") String inventoryNumber);
+	
+	@Query(value ="select * from tc_inventories "
+			+ " where tc_inventories.inventoryNumber=:inventoryNumber "
+			+ " and tc_inventories.delete_date IS NULL and tc_inventories.id !=:id ", nativeQuery = true)
+	public List<Inventory> checkDublicateEditByInv(@Param("id") Long id,@Param("inventoryNumber") String inventoryNumber);
 	
 	@Query(value = "SELECT tc_inventories.id FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null", nativeQuery = true)
@@ -220,4 +229,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 			"where tc_inventories.id IN (:inventoryIds) and tc_inventories.delete_date is null and tc_inventories.lastUpdate is null ",nativeQuery = true )
 	public Integer getTotalNumberOfUserInventoryNoDataByIds(@Param("inventoryIds")List<Long> inventoryIds);
 
+	@Query(value = "SELECT tc_inventories.id FROM tc_inventories"
+			+ " WHERE tc_inventories.inventoryNumber=:inventoryNumber "
+			+ " and tc_inventories.protocolType=:protocolType "
+			+ " and tc_inventories.delete_date is null"
+			+ " limit 0,1 ", nativeQuery = true)
+	public Long getInventoryByNumber(@Param("inventoryNumber")String inventoryNumber,@Param("protocolType")String protocolType);
 }

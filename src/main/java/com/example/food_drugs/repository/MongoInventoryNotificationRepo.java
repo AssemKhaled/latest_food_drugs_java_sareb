@@ -5,6 +5,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.grou
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.limit;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregationOptions;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.replaceRoot;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.skip;
@@ -78,7 +79,7 @@ public class MongoInventoryNotificationRepo {
 		            sort(Sort.Direction.DESC, "create_date"),
 	                count().as("size")
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 
 	        AggregationResults<BasicDBObject> groupResults
@@ -141,7 +142,7 @@ public class MongoInventoryNotificationRepo {
 	            skip(offset),
 	            limit(10)
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 
 	        AggregationResults<BasicDBObject> groupResults
@@ -244,7 +245,7 @@ public class MongoInventoryNotificationRepo {
 	            skip(offset),
 	            limit(10)
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 
 	        AggregationResults<BasicDBObject> groupResults
@@ -344,7 +345,7 @@ public class MongoInventoryNotificationRepo {
 	            project("type","attributes","inventory_id").and("create_date").dateAsFormattedString("%Y-%m-%d %H:%M:%S.%LZ").as("create_date"),
 	            sort(Sort.Direction.DESC, "create_date")
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 
 	        AggregationResults<BasicDBObject> groupResults
@@ -448,7 +449,7 @@ public class MongoInventoryNotificationRepo {
 	            replaceRoot("test"),
 	            count().as("size")
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 
 	        AggregationResults<BasicDBObject> groupResults

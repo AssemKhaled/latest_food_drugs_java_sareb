@@ -38,7 +38,8 @@ public interface InventoryService {
 	public ResponseEntity<?> getDataProtocols(ArrayList<Map<Object,Object>> data,String type,String email);
 	public ResponseEntity<?> getCsvProtocols(Long userId,ArrayList<Map<Object,Object>> data);
 	public ResponseEntity<?> getEasyCloudProtocols(Inventory inv,ArrayList<Map<Object,Object>> data);
-	
+	public ResponseEntity<?> getDataProtocolsSkarpt(Map<Object,Object> data);
+
 	public ObjectId saveLastDataHandler(Inventory inventory,Date dateTime,Double AvgTemp,Double AvgHum);
 	public ResponseEntity<?> saveTemperatureHandler(Inventory inventory,Date dateTime,Double AvgTemp,Double oldTemp);
 	public ResponseEntity<?> saveHumidityHandler(Inventory inventory,Date dateTime,Double AvgHum,Double oldTHum);

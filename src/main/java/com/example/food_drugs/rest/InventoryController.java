@@ -27,7 +27,7 @@ import com.example.food_drugs.service.InventoryServiceImpl;
 public class InventoryController {
 	
 	@Autowired
-	InventoryServiceImpl inventoryServiceImpl;
+	private InventoryServiceImpl inventoryServiceImpl;
 
 	@GetMapping("/getInventoriesList")
 	public ResponseEntity<?> getInventoriesList(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
@@ -205,6 +205,12 @@ public class InventoryController {
 			                           @RequestParam (value = "sensorInventoryId",defaultValue = "0") Long sensorInventoryId) {
 		
 		return inventoryServiceImpl.removeSensor(TOKEN,sensorInventoryId,InventoryId,userId);				
+	}
+	
+	@PostMapping(path ="/getDataProtocolsSkarpt")
+	public ResponseEntity<?> getDataProtocolsSkarpt(@RequestBody Map<Object,Object> data){
+		
+		return inventoryServiceImpl.getDataProtocolsSkarpt(data);
 	}
 	
 }

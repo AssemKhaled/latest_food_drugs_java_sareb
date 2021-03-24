@@ -4,6 +4,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.coun
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.limit;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregationOptions;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.skip;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
@@ -55,7 +56,7 @@ public class MongoPositionRepoSFDA {
 	            project("deviceid","attributes","speed","deviceName","weight").and("devicetime").dateAsFormattedString("%Y-%m-%dT%H:%M:%S.%LZ").as("devicetime"),
 	            sort(Sort.Direction.DESC, "devicetime")
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 	    
 	        AggregationResults<BasicDBObject> groupResults
@@ -80,45 +81,117 @@ public class MongoPositionRepoSFDA {
 	                   	Double Temp = (double) 0;
 	                   	Double Hum = (double) 0;
 	                   	
-	                   	if(obj.has("temp1")) {
-	                   		Temp = Temp + obj.getDouble("temp1");
-	                   		countTemp = countTemp + 1;
-							}
-	                   	if(obj.has("temp2")) {
-	                   		Temp = Temp + obj.getDouble("temp2");
-	                   		countTemp = countTemp + 1;
-	
-							}
-	                   	if(obj.has("temp3")) {
-	                   		Temp = Temp + obj.getDouble("temp3");
-	                   		countTemp = countTemp + 1;
-	
-							}
-	                   	if(obj.has("temp4")) {
-	                   		Temp = Temp + obj.getDouble("temp4");
-	                   		countTemp = countTemp + 1;
-	
-							}
-	                   	
-	                   	if(obj.has("hum1")) {
-	                   		Hum = Hum + obj.getDouble("hum1");
-	                   		countHum = countHum + 1;
-							}
-	                   	if(obj.has("hum2")) {
-	                   		Hum = Hum + obj.getDouble("hum2");
-	                   		countHum = countHum + 1;
-	
-							}
-	                   	if(obj.has("hum3")) {
-	                   		Hum = Hum + obj.getDouble("hum3");
-	                   		countHum = countHum + 1;
-	
-							}
-	                   	if(obj.has("hum4")) {
-	                   		Hum = Hum + obj.getDouble("hum4");
-	                   		countHum = countHum + 1;
-	
-							}
+
+                    	if(obj.has("temp1")) {
+                    		if(obj.getDouble("temp1") != 0) {
+	                    		Temp = Temp + obj.getDouble("temp1");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("temp2")) {
+                    		if(obj.getDouble("temp2") != 0) {
+	                    		Temp = Temp + obj.getDouble("temp2");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("temp3")) {
+                    		if(obj.getDouble("temp3") != 0) {
+	                    		Temp = Temp + obj.getDouble("temp3");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("temp4")) {
+                    		if(obj.getDouble("temp4") != 0) {
+                    			Temp = Temp + obj.getDouble("temp4");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	
+                    	if(obj.has("hum1")) {
+                    		if(obj.getDouble("hum1") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum1");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("hum2")) {
+                    		if(obj.getDouble("hum2") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum2");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("hum3")) {
+                    		if(obj.getDouble("hum3") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum3");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("hum4")) {
+                    		if(obj.getDouble("hum4") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum4");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	
+                    	if(obj.has("wiretemp1")) {
+                    		if(obj.getDouble("wiretemp1") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp1");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("wiretemp2")) {
+                    		if(obj.getDouble("wiretemp2") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp2");
+	                    		countTemp = countTemp + 1;
+                    		}
+
+						}
+                    	if(obj.has("wiretemp3")) {
+                    		if(obj.getDouble("wiretemp3") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp3");
+	                    		countTemp = countTemp + 1;
+                    		}
+
+						}
+                    	if(obj.has("wiretemp4")) {
+                    		if(obj.getDouble("wiretemp4") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp4");
+	                    		countTemp = countTemp + 1;
+                    		}
+
+						}
+                    	
+                    	if(obj.has("wirehum1")) {
+                    		if(obj.getDouble("wirehum1") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum1");
+	                    		countHum = countHum + 1;
+                    		}
+						}
+                    	if(obj.has("wirehum2")) {
+                    		if(obj.getDouble("wirehum2") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum2");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("wirehum3")) {
+                    		if(obj.getDouble("wirehum3") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum3");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("wirehum4")) {
+                    		if(obj.getDouble("wirehum4") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum4");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	
 	                   	Double avgTemp = (double) 0;
 	                   	Double avgHum = (double) 0;
 	                   	if(countTemp != 0) {
@@ -209,7 +282,7 @@ public class MongoPositionRepoSFDA {
 	            skip(offset),
 	            limit(10)
 	            
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 	    
 	        AggregationResults<BasicDBObject> groupResults
@@ -235,46 +308,117 @@ public class MongoPositionRepoSFDA {
 		                   	
 		                   	Double Temp = (double) 0;
 		                   	Double Hum = (double) 0;
-		                   	
-		                   	if(obj.has("temp1")) {
-		                   		Temp = Temp + obj.getDouble("temp1");
-		                   		countTemp = countTemp + 1;
-								}
-		                   	if(obj.has("temp2")) {
-		                   		Temp = Temp + obj.getDouble("temp2");
-		                   		countTemp = countTemp + 1;
-		
-								}
-		                   	if(obj.has("temp3")) {
-		                   		Temp = Temp + obj.getDouble("temp3");
-		                   		countTemp = countTemp + 1;
-		
-								}
-		                   	if(obj.has("temp4")) {
-		                   		Temp = Temp + obj.getDouble("temp4");
-		                   		countTemp = countTemp + 1;
-		
-								}
-		                   	
-		                   	if(obj.has("hum1")) {
-		                   		Hum = Hum + obj.getDouble("hum1");
-		                   		countHum = countHum + 1;
-								}
-		                   	if(obj.has("hum2")) {
-		                   		Hum = Hum + obj.getDouble("hum2");
-		                   		countHum = countHum + 1;
-		
-								}
-		                   	if(obj.has("hum3")) {
-		                   		Hum = Hum + obj.getDouble("hum3");
-		                   		countHum = countHum + 1;
-		
-								}
-		                   	if(obj.has("hum4")) {
-		                   		Hum = Hum + obj.getDouble("hum4");
-		                   		countHum = countHum + 1;
-		
-								}
+
+	                    	if(obj.has("temp1")) {
+	                    		if(obj.getDouble("temp1") != 0) {
+		                    		Temp = Temp + obj.getDouble("temp1");
+		                    		countTemp = countTemp + 1;
+	                    		}
+							}
+	                    	if(obj.has("temp2")) {
+	                    		if(obj.getDouble("temp2") != 0) {
+		                    		Temp = Temp + obj.getDouble("temp2");
+		                    		countTemp = countTemp + 1;
+	                    		}
+							}
+	                    	if(obj.has("temp3")) {
+	                    		if(obj.getDouble("temp3") != 0) {
+		                    		Temp = Temp + obj.getDouble("temp3");
+		                    		countTemp = countTemp + 1;
+	                    		}
+							}
+	                    	if(obj.has("temp4")) {
+	                    		if(obj.getDouble("temp4") != 0) {
+	                    			Temp = Temp + obj.getDouble("temp4");
+		                    		countTemp = countTemp + 1;
+	                    		}
+							}
+	                    	
+	                    	if(obj.has("hum1")) {
+	                    		if(obj.getDouble("hum1") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum1");
+		                    		countHum = countHum + 1;
+	                    		}
+
+							}
+	                    	if(obj.has("hum2")) {
+	                    		if(obj.getDouble("hum2") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum2");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("hum3")) {
+	                    		if(obj.getDouble("hum3") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum3");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("hum4")) {
+	                    		if(obj.getDouble("hum4") != 0) {
+		                    		Hum = Hum + obj.getDouble("hum4");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	
+	                    	if(obj.has("wiretemp1")) {
+	                    		if(obj.getDouble("wiretemp1") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp1");
+		                    		countTemp = countTemp + 1;
+	                    		}
+							}
+	                    	if(obj.has("wiretemp2")) {
+	                    		if(obj.getDouble("wiretemp2") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp2");
+		                    		countTemp = countTemp + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wiretemp3")) {
+	                    		if(obj.getDouble("wiretemp3") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp3");
+		                    		countTemp = countTemp + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wiretemp4")) {
+	                    		if(obj.getDouble("wiretemp4") != 0) {
+		                    		Temp = Temp + obj.getDouble("wiretemp4");
+		                    		countTemp = countTemp + 1;
+	                    		}
+	
+							}
+	                    	
+	                    	if(obj.has("wirehum1")) {
+	                    		if(obj.getDouble("wirehum1") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum1");
+		                    		countHum = countHum + 1;
+	                    		}
+							}
+	                    	if(obj.has("wirehum2")) {
+	                    		if(obj.getDouble("wirehum2") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum2");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wirehum3")) {
+	                    		if(obj.getDouble("wirehum3") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum3");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	if(obj.has("wirehum4")) {
+	                    		if(obj.getDouble("wirehum4") != 0) {
+		                    		Hum = Hum + obj.getDouble("wirehum4");
+		                    		countHum = countHum + 1;
+	                    		}
+	
+							}
+	                    	
 		                   	Double avgTemp = (double) 0;
 		                   	Double avgHum = (double) 0;
 		                   	if(countTemp != 0) {
@@ -361,7 +505,7 @@ public class MongoPositionRepoSFDA {
 	            project("deviceid","attributes","speed","deviceName","weight").and("devicetime").dateAsFormattedString("%Y-%m-%dT%H:%M:%S.%LZ").as("devicetime"),
 	            sort(Sort.Direction.DESC, "devicetime"),
 	            count().as("size")
-	        );
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
 
 
 	        AggregationResults<BasicDBObject> groupResults

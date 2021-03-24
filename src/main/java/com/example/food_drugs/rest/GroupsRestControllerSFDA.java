@@ -140,11 +140,10 @@ public class GroupsRestControllerSFDA {
 	@RequestMapping(value = "/getGroupSelect", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getGroupSelect(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 												          @RequestParam (value = "loggedUserId", defaultValue = "0") Long loggedUserId,
-			                                              @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+			                                              @RequestParam (value = "userId", defaultValue = "0") Long userId,
+			                                              @RequestParam (value = "type", defaultValue = "") List<String> type) {
 		
-	
-    	return  groupsServiceImpl.getGroupSelect(TOKEN,loggedUserId,userId);
-
+    	return  groupsServiceImpl.getGroupSelect(TOKEN,loggedUserId,userId,type);
 		
 	}
 	

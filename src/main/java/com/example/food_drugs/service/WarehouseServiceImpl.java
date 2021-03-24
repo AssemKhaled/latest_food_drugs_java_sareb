@@ -204,6 +204,13 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 						 WarehousesList.put("delete_date", warehouse.getDelete_date());
 						 WarehousesList.put("userId", warehouse.getUserId());
 						 WarehousesList.put("referenceKey", warehouse.getReferenceKey());
+
+						 WarehousesList.put("create_date", warehouse.getCreate_date());
+						 WarehousesList.put("regestration_to_elm_date", warehouse.getRegestration_to_elm_date());
+						 WarehousesList.put("delete_from_elm_date", warehouse.getDelete_from_elm_date());
+						 WarehousesList.put("update_date_in_elm", warehouse.getUpdate_date_in_elm());
+
+						 
 						 WarehousesList.put("userName", null);
 						
 						 User us = userRepository.findOne(warehouse.getUserId());
@@ -322,22 +329,33 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 
 						if(!res.isEmpty()) {
 							for(int i=0;i<res.size();i++) {
-								if(res.get(i).getName().equals(warehouse.getName())) {
-									duplictionList.add(1);				
-				
+								if(res.get(i).getName() != null) {
+									if(res.get(i).getName().equals(warehouse.getName())) {
+										duplictionList.add(1);				
+					
+									}
 								}
-								if(res.get(i).getPhone().equals(warehouse.getPhone())) {
-									duplictionList.add(2);				
-				
+								if(res.get(i).getPhone() != null) {
+									if(res.get(i).getPhone().equals(warehouse.getPhone())) {
+										duplictionList.add(2);				
+					
+									}
 								}
-								if(res.get(i).getLicenseNumber().equals(warehouse.getLicenseNumber())) {
-									duplictionList.add(3);				
-				
+								
+								if(res.get(i).getLicenseNumber() != null) {
+									if(res.get(i).getLicenseNumber().equals(warehouse.getLicenseNumber())) {
+										duplictionList.add(3);				
+					
+									}
 								}
-								if(res.get(i).getEmail().equals(warehouse.getEmail())) {
-									duplictionList.add(4);				
-				
+								
+								if(res.get(i).getEmail() != null) {
+									if(res.get(i).getEmail().equals(warehouse.getEmail())) {
+										duplictionList.add(4);				
+					
+									}
 								}
+								
 								
 								
 							}
@@ -534,22 +552,34 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 
 			if(!res.isEmpty()) {
 				for(int i=0;i<res.size();i++) {
-					if(res.get(i).getName().equals(warehouse.getName())) {
-						duplictionList.add(1);				
-	
+					if(res.get(i).getName() != null) {
+						if(res.get(i).getName().equals(warehouse.getName())) {
+							duplictionList.add(1);				
+		
+						}
 					}
-					if(res.get(i).getPhone().equals(warehouse.getPhone())) {
-						duplictionList.add(2);				
-	
+					
+					if(res.get(i).getPhone() != null) {
+						if(res.get(i).getPhone().equals(warehouse.getPhone())) {
+							duplictionList.add(2);				
+		
+						}
 					}
-					if(res.get(i).getLicenseNumber().equals(warehouse.getLicenseNumber())) {
-						duplictionList.add(3);				
-	
+					
+					if(res.get(i).getLicenseNumber() != null) {
+						if(res.get(i).getLicenseNumber().equals(warehouse.getLicenseNumber())) {
+							duplictionList.add(3);				
+		
+						}
 					}
-					if(res.get(i).getEmail().equals(warehouse.getEmail())) {
-						duplictionList.add(4);				
-	
+					
+					if(res.get(i).getEmail() != null) {
+						if(res.get(i).getEmail().equals(warehouse.getEmail())) {
+							duplictionList.add(4);				
+		
+						}
 					}
+					
 					
 					
 				}

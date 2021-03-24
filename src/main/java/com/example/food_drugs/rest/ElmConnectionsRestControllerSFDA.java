@@ -232,6 +232,12 @@ public class ElmConnectionsRestControllerSFDA {
 		return elmServiceImpl.getExpiredVehicles();
 	}
 	
+	@GetMapping(path ="/getRemoveOldLogs")
+	public ResponseEntity<?> getRemoveOldLogs(){
+		
+		return elmServiceImpl.getRemoveOldLogs();
+	}
+	
 	@GetMapping(path ="/checkBySequenceNumber")
 	public ResponseEntity<?> checkBySequenceNumber(
 			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){

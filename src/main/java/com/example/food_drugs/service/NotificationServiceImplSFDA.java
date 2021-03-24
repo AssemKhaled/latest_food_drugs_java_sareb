@@ -205,19 +205,10 @@ public class NotificationServiceImplSFDA extends RestServiceController implement
 						return  ResponseEntity.ok().body(getObjectResponse);
 						 
 					 }
-				     List<User>childernUsers = userService.getActiveAndInactiveChildern(id);
 					 List<Long>usersIds= new ArrayList<>();
-					 if(childernUsers.isEmpty()) {
-						 usersIds.add(id);
-					 }
-					 else {
-						 usersIds.add(id);
-						 for(User object : childernUsers) {
-							 usersIds.add(object.getId());
-						 }
-					 }
+					 usersIds.add(id);
 
-					Integer size = 0;
+					 Integer size = 0;
 					
 					 if(active == 0) {
 						 if(exportData.equals("exportData")) {
