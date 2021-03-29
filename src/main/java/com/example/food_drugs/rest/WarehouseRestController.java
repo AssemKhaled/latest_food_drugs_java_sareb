@@ -136,5 +136,13 @@ public class WarehouseRestController {
 											@RequestParam (value = "userId", defaultValue = "0") Long userId) {
 		return warehouseServiceImpl.getClientWarehouses(TOKEN,loggedUserId,userId);
 	}
+	
+	@GetMapping(value = "/assignWarehouseToUser")
+	public ResponseEntity<?> assignWarehouseToUser(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                     @RequestParam (value = "userId", defaultValue = "0") Long userId,
+												 @RequestParam (value = "warehouseId", defaultValue = "0") Long warehouseId,
+												 @RequestParam (value = "toUserId", defaultValue = "0") Long toUserId){
+		return warehouseServiceImpl.assignWarehouseToUser(TOKEN,userId,warehouseId,toUserId);
+	}
 
 }

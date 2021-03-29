@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.DriverSelect;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.food_drugs.entity.Inventory;
@@ -1568,6 +1570,106 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 		inventories = inventoryRepository.getAllInventoriesOfWarehouseList(WarehouseId);
 		getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",inventories);
 		return  ResponseEntity.ok().body(getObjectResponse);
+	}
+
+	@Override
+	public ResponseEntity<?> assignWarehouseToUser(String TOKEN, Long userId, Long warehouseId, Long toUserId) {
+		// TODO Auto-generated method stub
+		if(TOKEN.equals("")) {
+			 List<Device> devices = null;
+			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",devices);
+			 return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+		
+		if(super.checkActive(TOKEN)!= null)
+		{
+			return super.checkActive(TOKEN);
+		}
+		if(userId == 0 || warehouseId == 0 || toUserId == 0 ) {
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "userId , warehouseId and toUserId  are required",null);
+			 return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+		else {
+			User loggedUser = userServiceImpl.findById(userId);
+			
+			if(loggedUser == null) {
+				getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "loggedUser is not found",null);
+				
+				return ResponseEntity.status(404).body(getObjectResponse);
+			}else {
+				if(!loggedUser.getAccountType().equals(1)) {
+					if(!userRoleService.checkUserHasPermission(userId, "WAREHOUSE", "assignToUser")) {
+						 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "this user doesnot has permission to assignToWarehouse",null);
+						 logger.info("************************ assignToUser ENDED ***************************");
+						return  ResponseEntity.badRequest().body(getObjectResponse);
+					}
+				}
+				if(loggedUser.getAccountType().equals(3) || loggedUser.getAccountType().equals(4)) {
+					getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign warehouse to any user",null);
+					
+					return ResponseEntity.status(404).body(getObjectResponse);
+				}
+				
+				User toUser = userServiceImpl.findById(toUserId);
+			    if(toUser == null) {
+			    	getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "user you want to assign to  is not found",null);
+					return ResponseEntity.status(404).body(getObjectResponse);
+			    }
+			    else {
+			    	
+			    	 if(toUser.getAccountType().equals(4)) {
+			    		  getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign warehouse to this user type 4 assign to his parents",null);
+						  return ResponseEntity.status(404).body(getObjectResponse);
+			    	 }
+			    	  
+			    	  
+			    	 List<User>toUserParents = userServiceImpl.getAllParentsOfuser(toUser, toUser.getAccountType());
+			    	 if(toUserParents.isEmpty()) {
+			    		 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign warehouse to this user",null);
+						 return ResponseEntity.status(404).body(getObjectResponse);
+			    	 }else {
+			    		
+			    		 boolean isParent = false;
+			    		 for(User object : toUserParents) {
+			    			 if(loggedUser.getId().equals(object.getId())) {
+			    				 isParent = true;
+			    				 break;
+			    			 }
+			    		 }
+			    		 if(isParent) {
+			    			 if(warehouseId == 0) {
+			 					getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "No WarehouseId  to delete",null);
+			 					 return  ResponseEntity.badRequest().body(getObjectResponse);
+			 				}
+			 				Warehouse warehouse= warehousesRepository.findOne(warehouseId);
+			 				if(warehouse == null) {
+			 					getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this WarehouseId not found",null);
+			 					 return  ResponseEntity.status(404).body(getObjectResponse);
+			 				}
+
+			 				if(warehouse.getDelete_date() != null) {
+			 					getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this Warehouse not found or deleted",null);
+			 					 return  ResponseEntity.status(404).body(getObjectResponse);
+			 				}
+			 				warehouse.setUserId(toUserId);
+			 			     
+			 			    warehousesRepository.save(warehouse);
+			 			    
+			 			    
+			 				getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",null);
+			 				return  ResponseEntity.ok().body(getObjectResponse);
+			    		 }
+			    		 else {
+			    			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign warehouse to this user",null);
+							 return ResponseEntity.status(404).body(getObjectResponse);
+			    		 }
+			    	 }
+				
+			    }
+			    
+			}
+		}
+
 	}
 
 	

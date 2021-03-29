@@ -45,6 +45,12 @@ public class Warehouse {
 	@Column(name = "licenseExpiryDate")
 	private String licenseExpiryDate;
 	
+	@Column(name = "licenseIssueDateType",columnDefinition = "int default 0")
+	private Integer licenseIssueDateType;
+	
+	@Column(name = "licenseExpiryDateType",columnDefinition = "int default 0")
+	private Integer licenseExpiryDateType;
+	
 	@Column(name = "phone")
 	private String phone;
 	
@@ -278,6 +284,22 @@ public class Warehouse {
 
 	public void setUpdate_date_in_elm(Date update_date_in_elm) {
 		this.update_date_in_elm = update_date_in_elm;
+	}
+
+	public Integer getLicenseIssueDateType() {
+		return licenseIssueDateType;
+	}
+
+	public void setLicenseIssueDateType(Integer licenseIssueDateType) {
+		this.licenseIssueDateType = licenseIssueDateType;
+	}
+
+	public Integer getLicenseExpiryDateType() {
+		return licenseExpiryDateType;
+	}
+
+	public void setLicenseExpiryDateType(Integer licenseExpiryDateType) {
+		this.licenseExpiryDateType = licenseExpiryDateType;
 	}
 
 	

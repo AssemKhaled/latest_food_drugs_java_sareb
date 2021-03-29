@@ -3101,4 +3101,107 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			
 		}
 	}
+
+	@Override
+	public ResponseEntity<?> assignInventoryToUser(String TOKEN, Long userId, Long inventoryId, Long toUserId) {
+		// TODO Auto-generated method stub
+		
+
+		if(TOKEN.equals("")) {
+			 List<Device> devices = null;
+			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",devices);
+			 return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+		
+		if(super.checkActive(TOKEN)!= null)
+		{
+			return super.checkActive(TOKEN);
+		}
+		if(userId == 0 || inventoryId == 0 || toUserId == 0 ) {
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "userId , inventoryId and toUserId  are required",null);
+			 return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+		else {
+			User loggedUser = userServiceImpl.findById(userId);
+			
+			if(loggedUser == null) {
+				getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "loggedUser is not found",null);
+				
+				return ResponseEntity.status(404).body(getObjectResponse);
+			}else {
+				if(!loggedUser.getAccountType().equals(1)) {
+					if(!userRoleService.checkUserHasPermission(userId, "INVENTORY", "assignToUser")) {
+						 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "this user doesnot has permission to assignToInventory",null);
+						 logger.info("************************ assignToUser ENDED ***************************");
+						return  ResponseEntity.badRequest().body(getObjectResponse);
+					}
+				}
+				if(loggedUser.getAccountType().equals(3) || loggedUser.getAccountType().equals(4)) {
+					getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign inventory to any user",null);
+					
+					return ResponseEntity.status(404).body(getObjectResponse);
+				}
+				
+				User toUser = userServiceImpl.findById(toUserId);
+			    if(toUser == null) {
+			    	getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "user you want to assign to  is not found",null);
+					return ResponseEntity.status(404).body(getObjectResponse);
+			    }
+			    else {
+			    	
+			    	 if(toUser.getAccountType().equals(4)) {
+			    		  getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign inventory to this user type 4 assign to his parents",null);
+						  return ResponseEntity.status(404).body(getObjectResponse);
+			    	 }
+			    	  
+			    	  
+			    	 List<User>toUserParents = userServiceImpl.getAllParentsOfuser(toUser, toUser.getAccountType());
+			    	 if(toUserParents.isEmpty()) {
+			    		 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign inventory to this user",null);
+						 return ResponseEntity.status(404).body(getObjectResponse);
+			    	 }else {
+			    		
+			    		 boolean isParent = false;
+			    		 for(User object : toUserParents) {
+			    			 if(loggedUser.getId().equals(object.getId())) {
+			    				 isParent = true;
+			    				 break;
+			    			 }
+			    		 }
+			    		 if(isParent) {
+			    			 if(inventoryId == 0) {
+			 					getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "No inventoryId  to delete",null);
+			 					 return  ResponseEntity.badRequest().body(getObjectResponse);
+			 				}
+			 				Inventory inventory= inventoryRepository.findOne(inventoryId);
+			 				if(inventory == null) {
+			 					getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this inventoryId not found",null);
+			 					 return  ResponseEntity.status(404).body(getObjectResponse);
+			 				}
+
+			 				if(inventory.getDelete_date() != null) {
+			 					getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this inventory not found or deleted",null);
+			 					 return  ResponseEntity.status(404).body(getObjectResponse);
+			 				}
+			 				inventory.setUserId(toUserId);
+			 			     
+			 				inventoryRepository.save(inventory);
+			 			    
+			 			    
+			 				getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",null);
+			 				return  ResponseEntity.ok().body(getObjectResponse);
+			    		 }
+			    		 else {
+			    			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "you are not allowed to assign inventory to this user",null);
+							 return ResponseEntity.status(404).body(getObjectResponse);
+			    		 }
+			    	 }
+				
+			    }
+			    
+			}
+		}
+
+		
+	}
 }

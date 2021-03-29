@@ -397,11 +397,11 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 			  return  ResponseEntity.ok().body(getObjectResponse);
 		  }
 		  else if(resp.containsKey("resultCode")) {
-			  if(resp.get("resultCode").toString() == "success") {
-				  JSONObject res = new JSONObject(resp.get("result").toString());	
+			  if(resp.get("resultCode").toString().equals("success")) {
+				  Map res = (Map) resp.get("result");	
 				  
 				  warehouse.setReject_reason(null);
-				  warehouse.setReferenceKey(res.getString("referenceKey"));
+				  warehouse.setReferenceKey(res.get("referenceKey").toString());
 				  warehouse.setRegestration_to_elm_date(dateReg);
 				  warehouse.setUpdate_date_in_elm(dateReg);
 				  warehouse.setDelete_from_elm_date(null);
@@ -414,11 +414,11 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 				  return  ResponseEntity.ok().body(getObjectResponse);
 				
 			  }
-			  else if(resp.get("resultCode").toString() == "duplicate") {
-					JSONObject res = new JSONObject(resp.get("result").toString() );	
+			  else if(resp.get("resultCode").toString().equals("duplicate")) {
+				  Map res = (Map) resp.get("result");	
 					
 					  warehouse.setReject_reason(null);
-					  warehouse.setReferenceKey(res.getString("referenceKey"));
+					  warehouse.setReferenceKey(res.get("referenceKey").toString());
 					  warehouse.setRegestration_to_elm_date(dateReg);
 					  warehouse.setUpdate_date_in_elm(dateReg);
 					  warehouse.setDelete_from_elm_date(null);
@@ -1015,8 +1015,7 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 			  return  ResponseEntity.ok().body(getObjectResponse);
 		  }
 		  else if(resp.containsKey("resultCode")) {
-			  if(resp.get("resultCode").toString() == "success") {
-				  JSONObject res = new JSONObject(resp.get("result").toString());	
+			  if(resp.get("resultCode").toString().equals("success")) {
 				  
 				  warehouse.setReject_reason(null);
 				  warehouse.setDelete_from_elm_date(dateReg);
@@ -1292,56 +1291,59 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 			  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),resp.get("errorMsg").toString(),data);
 			  logger.info("************************ deviceRegistrtaion ENDED ***************************");
 			  return  ResponseEntity.ok().body(getObjectResponse);
-		  }
-		  else if(resp.containsKey("resultCode")) {
-			  if(resp.get("resultCode").toString() == "success") {
-				  JSONObject res = new JSONObject(resp.get("result").toString());	
-				  
-					inventory.setReject_reason(null);
-					inventory.setReferenceKey(res.getString("referenceKey"));
-					inventory.setRegestration_to_elm_date(dateReg);
-					inventory.setUpdate_date_in_elm(dateReg);
-					inventory.setDelete_from_elm_date(null);
-					
-				  inventoryRepository.save(inventory);
-				  
-				  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"success",data);
-				  logger.info("************************ deviceRegistrtaion ENDED ***************************");
-				  return  ResponseEntity.ok().body(getObjectResponse);
+	  }
+	  else if(resp.containsKey("resultCode")) {
+		  if(resp.get("resultCode").toString().equals("success")) {
+			  Map res = (Map) resp.get("result");	
+			  
+				inventory.setReject_reason(null);
+				inventory.setReferenceKey(res.get("referenceKey").toString());
+				inventory.setRegestration_to_elm_date(dateReg);
+				inventory.setUpdate_date_in_elm(dateReg);
+				inventory.setDelete_from_elm_date(null);
 				
-			  }
-			  else if(resp.get("resultCode").toString() == "duplicate") {
-					JSONObject res = new JSONObject(resp.get("result").toString() );	
-					
-					inventory.setReject_reason(null);
-					inventory.setReferenceKey(res.getString("referenceKey"));
-					inventory.setRegestration_to_elm_date(dateReg);
-					inventory.setUpdate_date_in_elm(dateReg);
-					inventory.setDelete_from_elm_date(null);
-					
-					inventoryRepository.save(inventory);
+			  inventoryRepository.save(inventory);
+			  
+			  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"success",data);
+			  logger.info("************************ deviceRegistrtaion ENDED ***************************");
+			  return  ResponseEntity.ok().body(getObjectResponse);
+			
+		  }
+		  else if(resp.get("resultCode").toString().equals("inventory_already_registered")) {
+			  Map res = (Map) resp.get("result");	
+				
+				inventory.setReject_reason(null);
+				
+				if(res.containsKey("referenceKey")) {
+					inventory.setReferenceKey(res.get("referenceKey").toString());
+				}
+				inventory.setRegestration_to_elm_date(dateReg);
+				inventory.setUpdate_date_in_elm(dateReg);
+				inventory.setDelete_from_elm_date(null);
+				
+				inventoryRepository.save(inventory);
 
 
-					  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"duplicate",data);
-					  logger.info("************************ deviceRegistrtaion ENDED ***************************");
-					  return  ResponseEntity.ok().body(getObjectResponse);
-			  }
-			  else {
-
-				  inventory.setReject_reason(resp.get("resultCode").toString());
-				  inventoryRepository.save(inventory);
-				  
-				  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),resp.get("resultCode").toString(),data);
+				  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"duplicate",data);
 				  logger.info("************************ deviceRegistrtaion ENDED ***************************");
 				  return  ResponseEntity.ok().body(getObjectResponse);
-			  }
-			 
 		  }
 		  else {
-			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"cann't request to elm",data);
-			logger.info("************************ deviceRegistrtaion ENDED ***************************");
-			return  ResponseEntity.ok().body(getObjectResponse);	
+
+			  inventory.setReject_reason(resp.get("resultCode").toString());
+			  inventoryRepository.save(inventory);
+			  
+			  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),resp.get("resultCode").toString(),data);
+			  logger.info("************************ deviceRegistrtaion ENDED ***************************");
+			  return  ResponseEntity.ok().body(getObjectResponse);
 		  }
+		 
+	  }
+	  else {
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"cann't request to elm",data);
+		logger.info("************************ deviceRegistrtaion ENDED ***************************");
+		return  ResponseEntity.ok().body(getObjectResponse);	
+	  }
 
 	}
 
@@ -1850,8 +1852,7 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 			  return  ResponseEntity.ok().body(getObjectResponse);
 		  }
 		  else if(resp.containsKey("resultCode")) {
-			  if(resp.get("resultCode").toString() == "success") {
-				  JSONObject res = new JSONObject(resp.get("result").toString());	
+			  if(resp.get("resultCode").toString().equals("success")) {
 				  
 				  inventory.setReject_reason(null);
 				  inventory.setDelete_from_elm_date(dateReg);

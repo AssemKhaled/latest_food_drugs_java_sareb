@@ -558,7 +558,44 @@ end;
 PREPARE stmt FROM @stmt;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+----------------------------------------------------------------
+set @col_exists = 0;
+SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME='tc_warehouses'
+AND column_name='licenseIssueDateType'
+and table_schema = database()
+into @col_exists;
 
+set @stmt = case @col_exists
+when 0 then CONCAT(
+'alter table tc_warehouses'
+, ' ADD COLUMN  `licenseIssueDateType` INT(11) NULL DEFAULT 0 '
+,';')
+else 'select ''column already exists, no op'''
+end;
+
+PREPARE stmt FROM @stmt;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+----------------------------------------------------------------
+set @col_exists = 0;
+SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME='tc_warehouses'
+AND column_name='licenseExpiryDateType'
+and table_schema = database()
+into @col_exists;
+
+set @stmt = case @col_exists
+when 0 then CONCAT(
+'alter table tc_warehouses'
+, ' ADD COLUMN  `licenseExpiryDateType` INT(11) NULL DEFAULT 0 '
+,';')
+else 'select ''column already exists, no op'''
+end;
+
+PREPARE stmt FROM @stmt;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 ----------------------------------------------------------------
 set @col_exists = 0;
 SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS

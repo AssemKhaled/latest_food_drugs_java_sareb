@@ -17,4 +17,7 @@ public interface WarehouseService {
 	public ResponseEntity<?> getWarehouseUnSelectOfClient(String TOKEN,Long loggedUserId,Long userId);
 	public ResponseEntity<?> assignClientWarehouses(String TOKEN,Long loggedUserId,Long userId,Long [] warehouseIds);
 	public ResponseEntity<?> getClientWarehouses(String TOKEN,Long loggedUserId,Long userId);
+	
+	public ResponseEntity<?> assignWarehouseToUser(String TOKEN,Long userId,Long warehouseId , Long toUserId);
+
 }

@@ -48,4 +48,8 @@ public interface InventoryService {
 	public ResponseEntity<?> getSensorsInventoriesList(String TOKEN,Long InventoryId,Long userId);
 	public ResponseEntity<?> addSensor(String TOKEN,SensorsInventories sensorsInventories,Long InventoryId,Long userId);
 	public ResponseEntity<?> removeSensor(String TOKEN,Long sensorInventoryId,Long InventoryId,Long userId);
+	
+	public ResponseEntity<?> assignInventoryToUser(String TOKEN,Long userId,Long inventoryId , Long toUserId);
+
+	
 }

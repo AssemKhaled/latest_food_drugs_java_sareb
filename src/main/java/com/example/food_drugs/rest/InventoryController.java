@@ -213,4 +213,12 @@ public class InventoryController {
 		return inventoryServiceImpl.getDataProtocolsSkarpt(data);
 	}
 	
+	@GetMapping(value = "/assignInventoryToUser")
+	public ResponseEntity<?> assignInventoryToUser(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                     @RequestParam (value = "userId", defaultValue = "0") Long userId,
+												 @RequestParam (value = "inventoryId", defaultValue = "0") Long inventoryId,
+												 @RequestParam (value = "toUserId", defaultValue = "0") Long toUserId){
+		return inventoryServiceImpl.assignInventoryToUser(TOKEN,userId,inventoryId,toUserId);
+	}
+	
 }

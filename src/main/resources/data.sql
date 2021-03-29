@@ -25,14 +25,14 @@ WHERE NOT EXISTS (
 );
 
 INSERT INTO tc_permissions(name,functionality)
-SELECT * FROM (SELECT 'WAREHOUSE', '{"list":true,"create":true,"edit":true,"delete":true,"connectToElm":true,"updateInElm":true,"deleteFromElm":true}') AS tmp
+SELECT * FROM (SELECT 'WAREHOUSE', '{"list":true,"create":true,"edit":true,"delete":true,"connectToElm":true,"updateInElm":true,"deleteFromElm":true,"assignToUser":true}') AS tmp
 WHERE NOT EXISTS (
     SELECT name FROM tc_permissions WHERE name = 'WAREHOUSE'
 );
 
 INSERT INTO tc_permissions(name,functionality)
 SELECT * FROM (SELECT 'INVENTORY', '{"list":true,"create":true,"edit":true,"delete":true,"assignWarehouse":true,"connectToElm":true,"updateInElm":true,"deleteFromElm":true,
-"statsToElm":true}') AS tmp
+"statsToElm":true,"assignToUser":true}') AS tmp
 WHERE NOT EXISTS (
     SELECT name FROM tc_permissions WHERE name = 'INVENTORY'
 );
