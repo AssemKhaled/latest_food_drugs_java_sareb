@@ -276,7 +276,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					     InventoriesList.put("userId", inventory.getUserId());
 					     InventoriesList.put("delete_date", inventory.getDelete_date());
 						 InventoriesList.put("warehouseId", inventory.getWarehouseId());
-						 InventoriesList.put("referenceKey", inventory.getReferenceKey());						 InventoriesList.put("referenceKey", inventory.getReferenceKey());
+						 InventoriesList.put("referenceKey", inventory.getReferenceKey());	
 						 InventoriesList.put("protocolType", inventory.getProtocolType());
 						 InventoriesList.put("userName", null);
 						 InventoriesList.put("warehouserName", null);
@@ -2263,6 +2263,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		
 		Date dateTime = null;
 		String create_date = null;
+		
+		
+		
 		try {
 			create_date = input.format(now);
 			try {
@@ -2276,6 +2279,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		Calendar calendarTo = Calendar.getInstance();
+		calendarTo.setTime(dateTime);
+		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+		dateTime = calendarTo.getTime();
 
 		Double oldTemp = null;
 		Double oldHum = null;

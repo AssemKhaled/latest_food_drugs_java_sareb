@@ -202,7 +202,8 @@ public class MongoPositionRepoSFDA {
 	                   		avgHum = Hum / countHum;
 	
 	                   	}
-	                   	
+	                   	avgHum = Math.round(avgHum * 100.0) / 100.0;
+                    	        avgTemp = Math.round(avgTemp * 100.0) / 100.0;
 	                   	device.setTemperature(avgTemp);
 	                   	device.setHumidity(avgHum);
 	            	}
@@ -430,6 +431,8 @@ public class MongoPositionRepoSFDA {
 		
 		                   	}
 		                   	
+	                   	        avgHum = Math.round(avgHum * 100.0) / 100.0;
+                    	                avgTemp = Math.round(avgTemp * 100.0) / 100.0;
 		                   	device.setTemperature(avgTemp);
 		                   	device.setHumidity(avgHum);
 	            	}

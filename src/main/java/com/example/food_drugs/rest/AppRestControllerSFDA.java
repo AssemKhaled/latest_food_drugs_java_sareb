@@ -1,7 +1,6 @@
 package com.example.food_drugs.rest;
 
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Driver;
 import com.example.examplequerydslspringdatajpamaven.entity.Geofence;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.service.AppServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
-import com.example.food_drugs.entity.DeviceSFDA;;
+import com.example.food_drugs.entity.DeviceSFDA;
+import com.example.food_drugs.entity.Inventory;
+import com.example.food_drugs.entity.Warehouse;
+import com.example.food_drugs.service.AppServiceImplSFDA;
 
 /**
  * Services related to app
@@ -39,9 +39,10 @@ public class AppRestControllerSFDA {
 	private AppServiceImpl appService;
 	
 	@Autowired
-	private DeviceServiceImpl deviceServiceImpl;
+	private AppServiceImplSFDA appServiceSFDA;
 	
-	private GetObjectResponse getObjectResponse;
+	@Autowired
+	private DeviceServiceImpl deviceServiceImpl;
  
 	@GetMapping(path = "/loginApp")
 	public 	ResponseEntity<?> loginApp(@RequestHeader(value = "Authorization", defaultValue = "")String authtorization ){
@@ -84,7 +85,7 @@ public class AppRestControllerSFDA {
 	@PostMapping(path ="/createDeviceApp")
 	public ResponseEntity<?> createDeviceApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                              @RequestParam (value = "userId",defaultValue = "0") Long userId,
-			                              @RequestBody(required = false) Device device) {
+			                              @RequestBody(required = false) DeviceSFDA device) {
 
 	    return deviceServiceImpl.createDevice(TOKEN,device,userId);					
 	}
@@ -92,7 +93,7 @@ public class AppRestControllerSFDA {
 	@PostMapping(path ="/editDeviceApp")
 	public ResponseEntity<?> editDeviceApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                            @RequestParam (value = "userId",defaultValue = "0") Long userId,
-			                            @RequestBody(required = false) Device device) {
+			                            @RequestBody(required = false) DeviceSFDA device) {
 		
 
 		return deviceServiceImpl.editDevice(TOKEN,device,userId);
@@ -160,14 +161,26 @@ public class AppRestControllerSFDA {
 
 	}
 	
-	
 	@RequestMapping(value = "/getDriversListApp", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<?> getAllDriversApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-			                                          @RequestParam (value = "userId", defaultValue = "0") Long id,
+	public @ResponseBody ResponseEntity<?> getDrivers(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+											          @RequestParam (value = "exportData", defaultValue = "") String exportData,                                                                     
+													  @RequestParam (value = "userId", defaultValue = "0") Long id,
 													  @RequestParam (value = "offset", defaultValue = "0") int offset,
-													  @RequestParam (value = "search", defaultValue = "") String search) {
+													  @RequestParam (value = "search", defaultValue = "") String search,
+													  @RequestParam (value = "active", defaultValue = "1") int active) {
 		
-    	return  appService.getAllDriversApp(TOKEN,id,offset,search);
+    	return  appServiceSFDA.getAllDriversAppSFDA(TOKEN,id,offset,search,active,exportData);
+
+	}
+	
+	@RequestMapping(value = "/activeDriverApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> activeDriverApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "driverId", defaultValue = "0") Long driverId,
+			                                            @RequestParam(value = "userId",defaultValue = "0") Long userId) {
+		
+		
+		
+		return appServiceSFDA.activeDriverApp(TOKEN,driverId,userId);
 
 	}
 	
@@ -487,15 +500,30 @@ public class AppRestControllerSFDA {
 
 	}
 	
+	
 	@RequestMapping(value = "/getGeoListApp", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getGeoListApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-			                                            @RequestParam (value = "userId", defaultValue = "0") Long id,
+												        @RequestParam (value = "exportData", defaultValue = "") String exportData,                                                                                                                
+														@RequestParam (value = "userId", defaultValue = "0") Long id,
 														@RequestParam (value = "offset", defaultValue = "0") int offset,
-														@RequestParam (value = "search", defaultValue = "") String search) {
+														@RequestParam (value = "search", defaultValue = "") String search,
+														@RequestParam (value = "active", defaultValue = "1") int active) {
 		
-    	return  appService.getGeoListApp(TOKEN,id,offset,search);
+    	return  appServiceSFDA.getAllGeofencesAppSFDA(TOKEN,id,offset,search,active,exportData);
 
 	}
+	
+	
+	@RequestMapping(value = "/activeGeofenceApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> activeGeofenceApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "geofenceId", defaultValue = "0") Long geofenceId,
+			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+
+    	return  appServiceSFDA.activeGeofenceApp(TOKEN,geofenceId,userId);
+
+
+	}
+	
 	
 	@RequestMapping(value = "/getGeofenceByIdApp", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getGeofenceByIdApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
@@ -630,5 +658,270 @@ public class AppRestControllerSFDA {
     	return  appService.getNumberDriverWorkingHoursApp(TOKEN,driverId,groupId, offset,start, end,search,userId);
 
 	}
+	
+	@GetMapping(path ="/activeDeviceApp")
+	public ResponseEntity<?> activeDeviceSFDAApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                              @RequestParam  (value = "userId",defaultValue = "0") Long userId,
+			                              @RequestParam (value = "deviceId",defaultValue = "0") Long deviceId ) {
+			
+		return appServiceSFDA.activeDeviceAppSFDA(TOKEN,userId,deviceId);			
+	}
+	
+	@GetMapping("/getInventoriesListApp")
+	public ResponseEntity<?> getInventoriesListApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+		                                       @RequestParam (value = "exportData", defaultValue = "") String exportData,                                                                     
+					                           @RequestParam (value = "userId",defaultValue = "0") Long userId,
+											   @RequestParam(value = "offset", defaultValue = "0") int offset,
+									           @RequestParam(value = "search", defaultValue = "") String search,
+									           @RequestParam(value = "active", defaultValue = "1") int active) {
+	 
+		return appServiceSFDA.getInventoriesListApp(TOKEN,userId,offset,search,active,exportData);
+		
+	}
+	
+	@PostMapping(path ="/createInventoriesApp")
+	public ResponseEntity<?> createInventoriesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                              @RequestParam (value = "userId",defaultValue = "0") Long userId,
+			                              @RequestBody(required = false) Inventory inventory) {
+		
+			 return appServiceSFDA.createInventoriesApp(TOKEN,inventory,userId);				
+	}
+	
+	@RequestMapping(value = "/editInventoriesApp", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> editInventoriesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                          @RequestBody(required = false) Inventory inventory,
+			                                          @RequestParam (value = "userId", defaultValue = "0") Long id) {
+		
+		
+		return appServiceSFDA.editInventoriesApp(TOKEN,inventory,id);
+
+	}
+	
+	@RequestMapping(value = "/getInventoryByIdApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getInventoryByIdApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                               @RequestParam (value = "inventoryId", defaultValue = "0") Long inventoryId,
+			                                               @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+		
+    	return  appServiceSFDA.getInventoryByIdApp(TOKEN,inventoryId,userId);
+
+	}
+	
+	@RequestMapping(value = "/deleteInventoryApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> deleteInventoryApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "inventoryId", defaultValue = "0") Long inventoryId,
+			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+
+    	return  appServiceSFDA.deleteInventoryApp(TOKEN,inventoryId,userId);
+
+	}
+	
+	@RequestMapping(value = "/activeInventoryApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> activeInventoryApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "inventoryId", defaultValue = "0") Long inventoryId,
+			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+
+    	return  appServiceSFDA.activeInventoryApp(TOKEN,inventoryId,userId);
+
+	}
+	
+	@GetMapping("/assignWarehouseToInventoryApp")
+	public ResponseEntity<?>assignWarehouseToInventoryApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+											@RequestParam (value = "userId",defaultValue = "0") Long userId,
+											@RequestParam (value = "inventoryId",defaultValue = "0") Long inventoryId,
+											@RequestParam (value = "warehouseId",defaultValue = "0") Long warehouseId){
+	
+		if(warehouseId == 0) {
+			return appServiceSFDA.removeWarehouseFromInventoryApp(TOKEN,userId,inventoryId,warehouseId);
+		}else {
+			return appServiceSFDA.assignWarehouseToInventoryApp(TOKEN,userId,inventoryId,warehouseId);
+		}
+		
+	}
+	
+	@GetMapping("/getSelectedAndListWarehouseApp")
+	public ResponseEntity<?>getSelectedAndListWarehouseApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+											@RequestParam (value = "userId",defaultValue = "0") Long userId,
+											@RequestParam (value = "inventoryId",defaultValue = "0") Long inventoryId,
+											@RequestParam (value = "loggedUserId",defaultValue = "0") Long loggedUserId){
+	
+		return appServiceSFDA.getSelectedAndListWarehouseApp(TOKEN,loggedUserId,userId,inventoryId);
+		
+		
+	}
+	
+	@GetMapping("/getSelectListInventoriesApp")
+	public ResponseEntity<?> getSelectListInventoriesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+				                           @RequestParam (value = "userId",defaultValue = "0") Long userId) {
+	 
+		return appServiceSFDA.getSelectListInventoriesApp(TOKEN,userId);
+		
+	}
+	
+	@GetMapping("/getWarehousesListApp")
+	public ResponseEntity<?> getWarehousesListApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+								               @RequestParam (value = "exportData", defaultValue = "") String exportData,                                                                     
+				                               @RequestParam (value = "userId",defaultValue = "0") Long userId,
+											   @RequestParam(value = "offset", defaultValue = "0") int offset,
+									           @RequestParam(value = "search", defaultValue = "") String search,
+									           @RequestParam(value = "active", defaultValue = "1") int active) {
+	 
+		return appServiceSFDA.getWarehousesListApp(TOKEN,userId,offset,search,active,exportData);
+		
+	}
+	
+	@PostMapping(path ="/createWarehousesApp")
+	public ResponseEntity<?> createWarehousesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                              @RequestParam (value = "userId",defaultValue = "0") Long userId,
+			                              @RequestBody(required = false) Warehouse warehouse) {
+		
+		return appServiceSFDA.createWarehousesApp(TOKEN,warehouse,userId);				
+	}
+	@RequestMapping(value = "/editWarehousesApp", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> editWarehousesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                          @RequestBody(required = false) Warehouse warehouse,
+			                                          @RequestParam (value = "userId", defaultValue = "0") Long id) {
+		
+		
+		return appServiceSFDA.editWarehousesApp(TOKEN,warehouse,id);
+
+	}
+	
+	@RequestMapping(value = "/getWarehouseByIdApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getWarehouseByIdApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                               @RequestParam (value = "warehouseId", defaultValue = "0") Long warehouseId,
+			                                               @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+		
+    	return  appServiceSFDA.getWarehouseByIdApp(TOKEN,warehouseId,userId);
+
+	}
+	
+	@RequestMapping(value = "/deleteWarehouseApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> deleteWarehouseApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "warehouseId", defaultValue = "0") Long warehouseId,
+			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+
+    	return  appServiceSFDA.deleteWarehouseApp(TOKEN,warehouseId,userId);
+
+
+	}
+	
+	@RequestMapping(value = "/activeWarehouseApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> activeWarehouseApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "warehouseId", defaultValue = "0") Long warehouseId,
+			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {
+
+    	return  appServiceSFDA.activeWarehouseApp(TOKEN,warehouseId,userId);
+
+
+	}
+	
+	
+	@RequestMapping(value = "/getListSelectWarehouseApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getListSelectWarehouseApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                            @RequestParam (value = "userId", defaultValue = "0") Long  userId) {
+
+    	return appServiceSFDA.getListSelectWarehouseApp(TOKEN,userId);
+
+	}
+	
+	@RequestMapping(value = "/getListWarehouseMapApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getListWarehouseMapApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                                      @RequestParam (value = "userId", defaultValue = "0") Long  userId) {
+
+    	return appServiceSFDA.getListWarehouseMapApp(TOKEN,userId);
+
+	}
+	
+	@RequestMapping(value = "/getInventoryListOfWarehouseMapApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getInventoryListOfWarehouseMapApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                                   @RequestParam (value = "userId", defaultValue = "0") Long  userId,
+			                                                   @RequestParam (value = "warehouseId", defaultValue = "0") Long  warehouseId) {
+
+    	return appServiceSFDA.getInventoryListOfWarehouseMapApp(TOKEN,userId,warehouseId);
+
+	}
+	
+	@RequestMapping(value = "/getInventoriesNotificationsApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getInventoriesNotificationsApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+															@RequestParam (value = "userId", defaultValue = "0") Long userId,
+															@RequestParam (value = "offset", defaultValue = "0") int offset,
+															@RequestParam (value = "search", defaultValue = "") String search) {
+		
+    	return  appServiceSFDA.getInventoriesNotificationsApp(TOKEN,userId, offset,search);
+
+	}
+	
+	@GetMapping(path = "/getAllInventoriesLastInfoApp")
+	public ResponseEntity<?> getAllInventoriesLastInfoApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                       @RequestParam (value = "userId", defaultValue = "0") Long userId,
+												   @RequestParam (value = "offset", defaultValue = "0")int offset,
+												   @RequestParam (value = "search", defaultValue = "") String search ){
+		return appServiceSFDA.getAllInventoriesLastInfoApp(TOKEN,userId, offset, search);
+
+	}
+	
+	@GetMapping(path ="/getInventoryStatusApp")
+	public ResponseEntity<?> getInventoryStatusApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+			                                             @RequestParam (value = "userId", defaultValue = "0") Long userId){
+		
+		return appServiceSFDA.getInventoryStatusApp(TOKEN,userId);
+	}
+	
+
+	@RequestMapping(value = "/getInventoriesReportApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getInventoriesReportApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																@RequestParam (value = "inventoryId", defaultValue = "0") Long [] inventoryId,
+																@RequestParam (value = "exportData", defaultValue = "") String exportData,
+																@RequestParam (value = "offset", defaultValue = "0") int offset,
+																@RequestParam (value = "start", defaultValue = "0") String start,
+																@RequestParam (value = "end", defaultValue = "0") String end,
+																@RequestParam (value = "search", defaultValue = "") String search,
+																@RequestParam (value = "userId",defaultValue = "0")Long userId) {	
+    	return  appServiceSFDA.getInventoriesReportApp(TOKEN, inventoryId, offset, start, end, search, userId,exportData);
+
+	}
+	
+	@RequestMapping(value = "/getWarehousesReportApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getWarehousesReportApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+															   @RequestParam (value = "warehouseId", defaultValue = "0") Long [] warehouseId,
+																@RequestParam (value = "exportData", defaultValue = "") String exportData,
+																 @RequestParam (value = "offset", defaultValue = "0") int offset,
+																 @RequestParam (value = "start", defaultValue = "0") String start,
+																 @RequestParam (value = "end", defaultValue = "0") String end,
+																 @RequestParam (value = "search", defaultValue = "") String search,
+																 @RequestParam (value = "userId",defaultValue = "0")Long userId) {	
+    	return  appServiceSFDA.getWarehousesReportApp(TOKEN, warehouseId, offset, start, end, search, userId,exportData);
+
+	}
+	
+	@RequestMapping(value = "/getNotificationReportApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getNotificationReportApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																 @RequestParam (value = "inventoryId", defaultValue = "0") Long [] inventoryId,													 
+																 @RequestParam (value = "warehouseId", defaultValue = "0") Long [] warehouseId,
+																 @RequestParam (value = "exportData", defaultValue = "") String exportData,
+																 @RequestParam (value = "offset", defaultValue = "0") int offset,
+																 @RequestParam (value = "start", defaultValue = "0") String start,
+																 @RequestParam (value = "end", defaultValue = "0") String end,
+																 @RequestParam (value = "search", defaultValue = "") String search,
+																 @RequestParam (value = "userId",defaultValue = "0")Long userId) {	
+    	return  appServiceSFDA.getNotificationReportApp(TOKEN,inventoryId, warehouseId, offset, start, end, search, userId,exportData);
+
+	}
+	
+	@RequestMapping(value = "/getVehicleTempHumApp", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getVehicleTempHumApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+													  @RequestParam (value = "deviceId", defaultValue = "0") Long [] deviceId,
+													  @RequestParam (value = "groupId", defaultValue = "0") Long [] groupId,
+													  @RequestParam (value = "exportData", defaultValue = "") String exportData,
+													  @RequestParam (value = "offset", defaultValue = "0") int offset,
+													  @RequestParam (value = "start", defaultValue = "0") String start,
+													  @RequestParam (value = "end", defaultValue = "0") String end,
+													  @RequestParam (value = "search", defaultValue = "") String search,
+													  @RequestParam (value = "userId",defaultValue = "0")Long userId) {
+	
+    	return  appServiceSFDA.getVehicleTempHumApp(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
+
+	}
+
 	
 }

@@ -5,17 +5,6 @@ CREATE TABLE IF NOT EXISTS `tc_users_tokens` (
   PRIMARY KEY  (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `tc_sensors_inventories` (
-
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(512) NOT NULL,
-  `type` varchar(512) NOT NULL,
-  `inventoryId` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `inventoryId` (`inventoryId`),
-  CONSTRAINT `tc_sensors_inventories_ibfk_1` FOREIGN KEY (`inventoryId`) REFERENCES `tc_inventories` (`id`)
-
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 DEFAULT COLLATE utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `tc_warehouses` (
 
@@ -74,6 +63,21 @@ CREATE TABLE IF NOT EXISTS `tc_inventories` (
   CONSTRAINT `tc_inventories_ibfk_2` FOREIGN KEY (`warehouseId`) REFERENCES `tc_warehouses` (`id`)
 
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 DEFAULT COLLATE utf8_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS `tc_sensors_inventories` (
+
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(512) NOT NULL,
+  `type` varchar(512) NOT NULL,
+  `inventoryId` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `inventoryId` (`inventoryId`),
+  CONSTRAINT `tc_sensors_inventories_ibfk_1` FOREIGN KEY (`inventoryId`) REFERENCES `tc_inventories` (`id`)
+
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 DEFAULT COLLATE utf8_unicode_ci;
+
+
 CREATE TABLE IF NOT EXISTS `tc_user_client_device` (
   `id` int(11) NOT NULL auto_increment, 
   `userid` int(11) NOT NULL,
@@ -1222,6 +1226,46 @@ set @stmt = case @col_exists
 when 0 then CONCAT(
 'alter table tc_warehouses'
 , ' ADD COLUMN `update_date_in_elm` date NULL DEFAULT NULL'
+,';')
+else 'select ''column already exists, no op'''
+end;
+
+PREPARE stmt FROM @stmt;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+----------------------------------------------------------------
+set @col_exists = 0;
+SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME='tc_devices'
+AND column_name='lastTemp'
+and table_schema = database()
+into @col_exists;
+
+set @stmt = case @col_exists
+when 0 then CONCAT(
+'alter table tc_devices'
+, ' ADD COLUMN `lastTemp` double DEFAULT 0'
+,';')
+else 'select ''column already exists, no op'''
+end;
+
+PREPARE stmt FROM @stmt;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+----------------------------------------------------------------
+set @col_exists = 0;
+SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME='tc_devices'
+AND column_name='lastHum'
+and table_schema = database()
+into @col_exists;
+
+set @stmt = case @col_exists
+when 0 then CONCAT(
+'alter table tc_devices'
+, ' ADD COLUMN `lastHum` double DEFAULT 0'
 ,';')
 else 'select ''column already exists, no op'''
 end;

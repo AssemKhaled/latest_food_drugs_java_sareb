@@ -74,16 +74,6 @@ public class MongoInventoryLastDataRepo {
 		return size;
 	}
 	public Integer getInventoriesReportSize(List<Long> allInventories,Date start,Date end){
-
-		Calendar calendarFrom = Calendar.getInstance();
-		calendarFrom.setTime(start);
-		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
-		start = calendarFrom.getTime();
-	    
-		Calendar calendarTo = Calendar.getInstance();
-		calendarTo.setTime(end);
-		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
-		end = calendarTo.getTime();
 		
 		Integer size = 0;
 
@@ -174,11 +164,6 @@ public class MongoInventoryLastDataRepo {
 							e.printStackTrace();
 						}
 						
-
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
 						
 						inventory.setCreate_date(outputFormat.format(dateTime));
 						
@@ -197,17 +182,7 @@ public class MongoInventoryLastDataRepo {
 	}
 
    public List<InventoryLastData> getInventoriesReport(List<Long> allInventories,int offset,Date start,Date end){
-		
-		
-		Calendar calendarFrom = Calendar.getInstance();
-		calendarFrom.setTime(start);
-		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
-		start = calendarFrom.getTime();
-	    
-		Calendar calendarTo = Calendar.getInstance();
-		calendarTo.setTime(end);
-		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
-		end = calendarTo.getTime();
+
 		
 		List<InventoryLastData> inventories = new ArrayList<InventoryLastData>();
 		
@@ -262,11 +237,6 @@ public class MongoInventoryLastDataRepo {
 						}
 						
 
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
-						
 						inventory.setCreate_date(outputFormat.format(dateTime));
 	                }
 					if(object.containsField("_id") && object.get("_id") !=null) {
@@ -283,16 +253,7 @@ public class MongoInventoryLastDataRepo {
 	}
    public List<InventoryLastData> getInventoriesReportSchedule(List<Long> allInventories,Date start,Date end){
 		
-		
-		Calendar calendarFrom = Calendar.getInstance();
-		calendarFrom.setTime(start);
-		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
-		start = calendarFrom.getTime();
-	    
-		Calendar calendarTo = Calendar.getInstance();
-		calendarTo.setTime(end);
-		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
-		end = calendarTo.getTime();
+
 		
 		List<InventoryLastData> inventories = new ArrayList<InventoryLastData>();
 		
@@ -346,11 +307,6 @@ public class MongoInventoryLastDataRepo {
 						}
 						
 
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
-						
 						inventory.setCreate_date(outputFormat.format(dateTime));
 	                }
 					if(object.containsField("_id") && object.get("_id") !=null) {
@@ -420,11 +376,6 @@ public class MongoInventoryLastDataRepo {
 							e.printStackTrace();
 						}
 						
-
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
 						
 						inventory.setCreate_date(outputFormat.format(dateTime));    		
 	                }
