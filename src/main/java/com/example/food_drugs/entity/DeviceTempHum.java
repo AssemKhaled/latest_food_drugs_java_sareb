@@ -6,15 +6,42 @@ public class DeviceTempHum {
 	private Long deviceId;
 	private String deviceName;
 	private String driverName;
+	private Long driverId;
 	private String servertime;
+	private String fixTime;
+	private String deviceTime;
 	private Object attributes;
 	private Double speed;
 	private Double weight;
 	private Double temperature;
 	private Double humidity;
+	private Double latitude;
+	private Double longitude;
+	private String address;
+
 	
 	
-	
+	public DeviceTempHum(String id, Long deviceId, String deviceName, String driverName, Long driverId,
+			String servertime, String fixTime, String deviceTime, Object attributes, Double speed, Double weight,
+			Double temperature, Double humidity, Double latitude, Double longitude, String address) {
+		super();
+		this.id = id;
+		this.deviceId = deviceId;
+		this.deviceName = deviceName;
+		this.driverName = driverName;
+		this.driverId = driverId;
+		this.servertime = servertime;
+		this.fixTime = fixTime;
+		this.deviceTime = deviceTime;
+		this.attributes = attributes;
+		this.speed = speed;
+		this.weight = weight;
+		this.temperature = temperature;
+		this.humidity = humidity;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.address = address;
+	}
 	public DeviceTempHum() {
 		super();
 	}
@@ -93,6 +120,43 @@ public class DeviceTempHum {
 	public void setHumidity(Double humidity) {
 		this.humidity = humidity;
 	}
+	public Long getDriverId() {
+		return driverId;
+	}
+	public void setDriverId(Long driverId) {
+		this.driverId = driverId;
+	}
+	public String getFixTime() {
+		return fixTime;
+	}
+	public void setFixTime(String fixTime) {
+		this.fixTime = fixTime;
+	}
+	public String getDeviceTime() {
+		return deviceTime;
+	}
+	public void setDeviceTime(String deviceTime) {
+		this.deviceTime = deviceTime;
+	}
+	public Double getLatitude() {
+		return latitude;
+	}
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+	public Double getLongitude() {
+		return longitude;
+	}
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
 	
 	
 }

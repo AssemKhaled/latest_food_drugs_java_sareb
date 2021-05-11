@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Group;
+import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.GroupRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
@@ -1212,6 +1213,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				
 				positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 				
+
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,size);
+				logger.info("************************ getSensorsReport ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+				
 			}
 			if(!TOKEN.equals("Schedule")) {
 				search = "%"+search+"%";
@@ -1230,6 +1236,135 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,size);
 			logger.info("************************ getSensorsReport ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
+	}
+
+	@Override
+	public ResponseEntity<?> getviewTripDetails(String TOKEN, Long deviceId, String from, String to,String exportData,int offset) {
+		// TODO Auto-generated method stub
+		
+
+		logger.info("************************ getviewTrip STARTED ***************************");
+
+		List<DeviceTempHum> positions = new ArrayList<DeviceTempHum>();
+		if(TOKEN.equals("")) {
+			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",positions);
+				logger.info("************************ getviewTrip ENDED ***************************");
+			 return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+		
+		if(super.checkActive(TOKEN)!= null)
+		{
+			return super.checkActive(TOKEN);
+		}
+		
+
+		Date dateFrom;
+		Date dateTo;
+
+		SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS SSSS");
+		SimpleDateFormat inputFormat1 = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+		inputFormat1.setLenient(false);
+		inputFormat.setLenient(false);
+		outputFormat.setLenient(false);
+
+		
+		try {
+			dateFrom = inputFormat2.parse(from);
+			from = outputFormat.format(dateFrom);
+			
+
+		} catch (ParseException e2) {
+			try {
+				dateFrom = inputFormat.parse(from);
+				from = outputFormat.format(dateFrom);
+				
+
+			} catch (ParseException e3) {
+				// TODO Auto-generated catch block
+				try {
+					dateFrom = inputFormat1.parse(from);
+					from = outputFormat.format(dateFrom);
+
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					
+					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z' or yyyy-MM-dd'T'HH:mm:ss.SSS SSSS",null);
+					logger.info("************************ getEventsReport ENDED ***************************");		
+					return  ResponseEntity.badRequest().body(getObjectResponse);
+				}
+				
+			}
+			
+		}
+		
+		
+		try {
+			dateTo = inputFormat2.parse(to);
+			to = outputFormat.format(dateTo);
+			
+
+		} catch (ParseException e2) {
+			try {
+				dateTo = inputFormat.parse(to);
+				to = outputFormat.format(dateTo);
+				
+
+			} catch (ParseException e3) {
+				// TODO Auto-generated catch block
+				try {
+					dateTo = inputFormat1.parse(to);
+					to = outputFormat.format(dateTo);
+
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",null);
+					logger.info("************************ getEventsReport ENDED ***************************");		
+					return  ResponseEntity.badRequest().body(getObjectResponse);
+				}
+				
+			}
+			
+		}
+		
+		Device device = deviceServiceImpl.findById(deviceId);
+		
+		Integer size = 0;
+		
+		if(device != null) {
+			
+			
+			if(exportData.equals("exportData")) {
+				
+				
+				positions = mongoPositionRepoSFDA.getTripPositionsDetailsExport(deviceId, dateFrom, dateTo);
+
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positions);
+				logger.info("************************ getviewTrip ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+			}
+			
+			positions = mongoPositionRepoSFDA.getTripPositionsDetails(deviceId, dateFrom, dateTo,offset);
+
+			if(positions.size() > 0) {
+				size = mongoPositionRepoSFDA.getTripPositionsDetailsSize(deviceId, dateFrom, dateTo);
+
+			}
+			
+			
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positions,size);
+			logger.info("************************ getviewTrip ENDED ***************************");
+			return  ResponseEntity.ok().body(getObjectResponse);
+
+		}
+		else {
+			getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "Device ID is not found",positions);
+			logger.info("************************ getviewTrip ENDED ***************************");
+			return  ResponseEntity.status(404).body(getObjectResponse);
+
+		}
+		
 	}
 	
 	

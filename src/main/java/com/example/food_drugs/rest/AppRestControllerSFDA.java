@@ -305,11 +305,12 @@ public class AppRestControllerSFDA {
 													 @RequestParam (value = "groupId", defaultValue = "0") Long [] groupId,
 													 @RequestParam (value = "offset", defaultValue = "0") int offset,
 													 @RequestParam (value = "from", defaultValue = "0") String start,
+													 @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													 @RequestParam (value = "to", defaultValue = "0") String end,
 													 @RequestParam (value = "type", defaultValue = "") String type,
 													 @RequestParam (value = "search", defaultValue = "") String search,
 													 @RequestParam (value = "userId",defaultValue = "0")Long userId) {	
-    	return  appService.getEventsReportApp(TOKEN, deviceId,groupId, offset, start, end, type, search, userId);
+    	return  appService.getEventsReportApp(TOKEN, deviceId,groupId, offset, start, end, type, search, userId,exportData);
 
 	}
 	
@@ -317,6 +318,7 @@ public class AppRestControllerSFDA {
 	public @ResponseBody ResponseEntity<?> getDeviceWorkingHoursApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 													 @RequestParam (value = "deviceId", defaultValue = "0") Long [] deviceId,
 													 @RequestParam (value = "groupId", defaultValue = "0") Long [] groupId,
+													 @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													 @RequestParam (value = "offset", defaultValue = "0") int offset,
 													 @RequestParam (value = "from", defaultValue = "0") String start,
 													 @RequestParam (value = "to", defaultValue = "0") String end,
@@ -325,7 +327,7 @@ public class AppRestControllerSFDA {
 		
 		
 		
-    	return  appService.getDeviceWorkingHoursApp(TOKEN,deviceId,groupId, offset, start, end,search,userId);
+    	return  appService.getDeviceWorkingHoursApp(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
 
 	}
 	@RequestMapping(value = "/getCustomReportApp", method = RequestMethod.GET)
@@ -334,6 +336,7 @@ public class AppRestControllerSFDA {
 													 @RequestParam (value = "groupId", defaultValue = "0") Long [] groupId,
 													 @RequestParam (value = "offset", defaultValue = "0") int offset,
 													 @RequestParam (value = "from", defaultValue = "0") String start,
+													 @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													 @RequestParam (value = "to", defaultValue = "0") String end,
 													 @RequestParam (value = "search", defaultValue = "") String search,
 													 @RequestParam (value = "userId",defaultValue = "0")Long userId,
@@ -342,7 +345,7 @@ public class AppRestControllerSFDA {
 		
 		
 		
-    	return  appService.getCustomReportApp(TOKEN,deviceId,groupId, offset, start, end,search,userId,custom,value);
+    	return  appService.getCustomReportApp(TOKEN,deviceId,groupId, offset, start, end,search,userId,custom,value,exportData);
 
 	}
 	
@@ -353,12 +356,13 @@ public class AppRestControllerSFDA {
 													 @RequestParam (value = "offset", defaultValue = "0") int offset,
 													 @RequestParam (value = "from", defaultValue = "0") String start,
 													 @RequestParam (value = "to", defaultValue = "0") String end,
+													 @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													 @RequestParam (value = "search", defaultValue = "") String search,
 													 @RequestParam (value = "userId",defaultValue = "0")Long userId) {
 		
 		
 		
-    	return  appService.getDriverWorkingHoursApp(TOKEN,driverId,groupId, offset,start, end,search,userId);
+    	return  appService.getDriverWorkingHoursApp(TOKEN,driverId,groupId, offset,start, end,search,userId,exportData);
 
 	}
 	@RequestMapping(value = "/getDriveMoreThanReportApp", method = RequestMethod.GET)
@@ -404,12 +408,13 @@ public class AppRestControllerSFDA {
 													 @RequestParam (value = "offset", defaultValue = "0") int offset,
 													 @RequestParam (value = "from", defaultValue = "0") String start,
 													 @RequestParam (value = "to", defaultValue = "0") String end,
+													 @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													 @RequestParam (value = "search", defaultValue = "") String search,
 													 @RequestParam (value = "userId",defaultValue = "0")Long userId) {
 		
 		
 		
-    	return  appService.getSensorsReportApp(TOKEN,deviceId,groupId, offset, start, end,search,userId);
+    	return  appService.getSensorsReportApp(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
 
 	}
 	
@@ -650,12 +655,13 @@ public class AppRestControllerSFDA {
 													 @RequestParam (value = "offset", defaultValue = "0") int offset,
 													 @RequestParam (value = "from", defaultValue = "0") String start,
 													 @RequestParam (value = "to", defaultValue = "0") String end,
+													 @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													 @RequestParam (value = "search", defaultValue = "") String search,
 													 @RequestParam (value = "userId",defaultValue = "0")Long userId) {
 		
 		
 		
-    	return  appService.getNumberDriverWorkingHoursApp(TOKEN,driverId,groupId, offset,start, end,search,userId);
+    	return  appService.getNumberDriverWorkingHoursApp(TOKEN,driverId,groupId, offset,start, end,search,userId,exportData);
 
 	}
 	

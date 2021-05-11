@@ -12,4 +12,6 @@ public interface ReportServiceSFDA {
 	public ResponseEntity<?> getNotificationReport(String TOKEN,Long [] inventoryId,Long [] warehouseId,int offset,String start,String end,String search,Long userId,String exportData);
 	public ResponseEntity<?> getVehicleTempHum(String TOKEN,Long [] deviceId,Long [] groupId,int offset,String start,String end,String search,Long userId,String exportData);
 
+	public ResponseEntity<?> getviewTripDetails(String TOKEN,Long deviceId,String startTime,String endTime,String exportData,int offset);
+
 }

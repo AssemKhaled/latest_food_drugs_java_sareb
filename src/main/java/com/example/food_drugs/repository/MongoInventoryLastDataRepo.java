@@ -143,11 +143,20 @@ public class MongoInventoryLastDataRepo {
 	            	}
                     if(object.containsField("temperature") && object.get("temperature") !=null) {
                     	
-                    	inventory.setTemperature(object.getDouble("temperature"));
+						Double roundTemp = 0.0;
+						roundTemp = Math.round(object.getDouble("temperature") * 100.0) / 100.0;
+
+                    	inventory.setTemperature(roundTemp);
+                    	
+                    	
 
 	            	}
 	            	if(object.containsField("humidity") && object.get("humidity") !=null) {
-	            		inventory.setHumidity(object.getDouble("humidity"));
+	            		
+						Double roundHum = 0.0;
+						roundHum = Math.round(object.getDouble("humidity") * 100.0) / 100.0;
+	            		
+	            		inventory.setHumidity(roundHum);
 	
 	            	}
 					if(object.containsField("create_date") && object.get("create_date") !=null) {
@@ -215,11 +224,18 @@ public class MongoInventoryLastDataRepo {
 	            	}
                     if(object.containsField("temperature") && object.get("temperature") !=null) {
                     	
-                    	inventory.setTemperature(object.getDouble("temperature"));
+						Double roundTemp = 0.0;
+						roundTemp = Math.round(object.getDouble("temperature") * 100.0) / 100.0;
+
+                    	inventory.setTemperature(roundTemp);
 
 	            	}
 	            	if(object.containsField("humidity") && object.get("humidity") !=null) {
-	            		inventory.setHumidity(object.getDouble("humidity"));
+	            		
+						Double roundHum = 0.0;
+						roundHum = Math.round(object.getDouble("humidity") * 100.0) / 100.0;
+	            		
+	            		inventory.setHumidity(roundHum);
 	
 	            	}
 
@@ -280,16 +296,22 @@ public class MongoInventoryLastDataRepo {
 	            	InventoryLastData inventory = new InventoryLastData();
                    if(object.containsField("inventory_id") && object.get("inventory_id") !=null) {
                    	
-                   	inventory.setInventory_id(object.getLong("inventory_id"));
-	            	}
+                    	inventory.setInventory_id(object.getLong("inventory_id"));
+	               }
                    if(object.containsField("temperature") && object.get("temperature") !=null) {
                    	
-                   	inventory.setTemperature(object.getDouble("temperature"));
+						Double roundTemp = 0.0;
+						roundTemp = Math.round(object.getDouble("temperature") * 100.0) / 100.0;
+
+                   	    inventory.setTemperature(roundTemp);
 
 	            	}
 	            	if(object.containsField("humidity") && object.get("humidity") !=null) {
-	            		inventory.setHumidity(object.getDouble("humidity"));
-	
+
+						Double roundHum = 0.0;
+						roundHum = Math.round(object.getDouble("humidity") * 100.0) / 100.0;
+	            		
+	            		inventory.setHumidity(roundHum);	
 	            	}
 
 					if(object.containsField("create_date") && object.get("create_date") !=null) {
@@ -355,12 +377,18 @@ public class MongoInventoryLastDataRepo {
 	            	}
                     if(object.containsField("temperature") && object.get("temperature") !=null) {
                     	
-                    	inventory.setTemperature(object.getDouble("temperature"));
+						Double roundTemp = 0.0;
+						roundTemp = Math.round(object.getDouble("temperature") * 100.0) / 100.0;
+
+                   	    inventory.setTemperature(roundTemp);
 
 	            	}
 	            	if(object.containsField("humidity") && object.get("humidity") !=null) {
-	            		inventory.setHumidity(object.getDouble("humidity"));
-	
+
+						Double roundHum = 0.0;
+						roundHum = Math.round(object.getDouble("humidity") * 100.0) / 100.0;
+	            		
+	            		inventory.setHumidity(roundHum);	
 	            	}
 					if(object.containsField("create_date") && object.get("create_date") !=null) {
 						

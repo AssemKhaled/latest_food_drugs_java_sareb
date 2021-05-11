@@ -4620,12 +4620,16 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 				
 				positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 				
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList);
+				logger.info("************************ getSensorsReport ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+				
 			}
 			if(!TOKEN.equals("Schedule")) {
 				search = "%"+search+"%";
 				positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
 				if(positionsList.size()>0) {
-					    size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
+					size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
 				
 				}
 				

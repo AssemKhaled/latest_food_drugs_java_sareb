@@ -376,5 +376,17 @@ public class ReportRestControllerSFDA {
     	return  reportServiceImplSFDA.getVehicleTempHum(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
 
 	}
+	
+	
+	@RequestMapping(value = "/viewTripDetails", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> viewTripDetails(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+													       @RequestParam (value = "deviceId", defaultValue = "0") Long deviceId,
+													       @RequestParam (value = "exportData", defaultValue = "") String exportData,
+													       @RequestParam (value = "offset", defaultValue = "0") int offset,
+													       @RequestParam (value = "startTime", defaultValue = "0") String startTime,
+													       @RequestParam (value = "endTime", defaultValue = "0") String endTime) {	
+    	return  reportServiceImplSFDA.getviewTripDetails(TOKEN, deviceId,startTime, endTime,exportData,offset);
+
+	}
 
 }

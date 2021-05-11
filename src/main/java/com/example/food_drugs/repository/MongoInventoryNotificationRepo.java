@@ -196,13 +196,21 @@ public class MongoInventoryNotificationRepo {
 
 						if(notification.getType().equals("temperature alarm")) {
 							if(attr.has("value")) {
-								notification.setTemperature(attr.getDouble("value"));
+								
+								Double roundTemp = 0.0;
+								roundTemp = Math.round(attr.getDouble("value") * 100.0) / 100.0;
 
+								notification.setTemperature(roundTemp);
+								
 							}
 						}
                         if(notification.getType().equals("humidity alarm")) {
 							if(attr.has("value")) {
-								notification.setHumidity(attr.getDouble("value"));
+								
+								Double roundHum = 0.0;
+								roundHum = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+			            		
+								notification.setHumidity(roundHum);
 
 							}
 						}
@@ -299,14 +307,22 @@ public class MongoInventoryNotificationRepo {
 
 	                	if(notification.getType().equals("temperature alarm")) {
 							if(attr.has("value")) {
-								notification.setTemperature(attr.getDouble("value"));
+								
+								Double roundTemp = 0.0;
+								roundTemp = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+
+								notification.setTemperature(roundTemp);
+
 
 							}
 						}
                         if(notification.getType().equals("humidity alarm")) {
 							if(attr.has("value")) {
-								notification.setHumidity(attr.getDouble("value"));
 
+								Double roundHum = 0.0;
+								roundHum = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+			            		
+								notification.setHumidity(roundHum);
 							}
 						}
 	                		                	
@@ -399,14 +415,20 @@ public class MongoInventoryNotificationRepo {
 
 	                	if(notification.getType().equals("temperature alarm")) {
 							if(attr.has("value")) {
-								notification.setTemperature(attr.getDouble("value"));
 
+								Double roundTemp = 0.0;
+								roundTemp = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+
+								notification.setTemperature(roundTemp);
 							}
 						}
                         if(notification.getType().equals("humidity alarm")) {
 							if(attr.has("value")) {
-								notification.setHumidity(attr.getDouble("value"));
 
+								Double roundHum = 0.0;
+								roundHum = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+			            		
+								notification.setHumidity(roundHum);
 							}
 						}
 	                		                	
@@ -445,8 +467,6 @@ public class MongoInventoryNotificationRepo {
 	            match(Criteria.where("inventory_id").in(allInventories).and("create_date").gte(start).lte(end)),
 	            project("type","attributes","inventory_id").and("create_date").dateAsFormattedString("%Y-%m-%d %H:%M:%S.%LZ").as("create_date"),
 	            sort(Sort.Direction.ASC, "create_date"),
-	            group("inventory_id").last("$$ROOT").as("test"),
-	            replaceRoot("test"),
 	            count().as("size")
 	            
 	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
