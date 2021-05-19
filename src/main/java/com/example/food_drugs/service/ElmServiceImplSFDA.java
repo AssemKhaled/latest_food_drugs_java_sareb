@@ -2343,15 +2343,19 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 
 			  JSONObject obj = new JSONObject();
 			  if(user.getAttributes() != null) {
-	          	  obj = new JSONObject(user.getAttributes().toString());
-	          	  if(obj.has("sfdaCompanyActivity")) {
-	              	  companyElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
+				  if(user.getAttributes().toString().startsWith("{")) {
+					  obj = new JSONObject(user.getAttributes().toString());
+		          	  if(obj.has("sfdaCompanyActivity")) {
+		              	  companyElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
 
-	          	  }
-	          	  if(obj.has("activity")) {
-	              	  companyElmData.setActivity(obj.getString("activity"));
+		          	  }
+		          	  if(obj.has("activity")) {
+		              	  companyElmData.setActivity(obj.getString("activity"));
 
-	        	  }
+		        	  }
+				  }
+
+	          	 
 			  }
           	  
           	  
@@ -2372,15 +2376,17 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 				  
 				  JSONObject obj = new JSONObject();
 				  if(user.getAttributes() != null) {
-		          	  obj = new JSONObject(user.getAttributes().toString());
-		          	if(obj.has("sfdaCompanyActivity")) {
-		          		individualHijriElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
+					  if(user.getAttributes().toString().startsWith("{")) {
+						  obj = new JSONObject(user.getAttributes().toString());
+			          	  if(obj.has("sfdaCompanyActivity")) {
+			          		individualHijriElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
 
-		          	  }
-		          	  if(obj.has("activity")) {
-		          		individualHijriElmData.setActivity(obj.getString("activity"));
+			          	  }
+			          	  if(obj.has("activity")) {
+			          		individualHijriElmData.setActivity(obj.getString("activity"));
 
-		        	  }
+			        	  }
+					  }
 				  }
 	          	  
 				  bodyToMiddleWare.put("dataObject", individualHijriElmData);
@@ -2400,15 +2406,19 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 				 
 				  JSONObject obj = new JSONObject();
 				  if(user.getAttributes() != null) {
-		          	  obj = new JSONObject(user.getAttributes().toString());
-		          	if(obj.has("sfdaCompanyActivity")) {
-		          		individualGregorianElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
+					  if(user.getAttributes().toString().startsWith("{")) {
+						  obj = new JSONObject(user.getAttributes().toString());
+			          	  if(obj.has("sfdaCompanyActivity")) {
+			          		individualGregorianElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
 
-		          	  }
-		          	  if(obj.has("activity")) {
-		          		individualGregorianElmData.setActivity(obj.getString("activity"));
+			          	  }
+			          	  if(obj.has("activity")) {
+			          		individualGregorianElmData.setActivity(obj.getString("activity"));
 
-		        	  }
+			        	  }
+					  }
+
+		          	  
 				  }
 	          	  
 	          	  
@@ -2746,16 +2756,19 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 		  JSONObject obj = new JSONObject();
 		  
 		  if(device.getAttributes() != null) {
-			  obj = new JSONObject(device.getAttributes().toString());		
-	      	  
-	      	  if(obj.has("activity")) {
-	          	  deviceElmData.setActivity(obj.getString("activity"));
+			  if(device.getAttributes().toString().startsWith("{")) {
+				  obj = new JSONObject(device.getAttributes().toString());		
+		      	  
+		      	  if(obj.has("activity")) {
+		          	  deviceElmData.setActivity(obj.getString("activity"));
 
-	      	  }
-	      	  if(obj.has("storingCategory")) {
-	          	  deviceElmData.setStoringCategory(obj.getString("storingCategory"));
+		      	  }
+		      	  if(obj.has("storingCategory")) {
+		          	  deviceElmData.setStoringCategory(obj.getString("storingCategory"));
 
-	    	  }
+		    	  }
+			  }
+			  
 		  }
       	 
       	  
