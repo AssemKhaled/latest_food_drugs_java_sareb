@@ -141,8 +141,8 @@ public class ElmConnectionsRestControllerSFDA {
 	
 	@GetMapping(path ="/warehouseRegistrtaion")
 	public ResponseEntity<?> warehouseRegistrtaion(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-			                                     @RequestParam (value = "warehouseId", defaultValue = "0") Long warehouseId,
-			                                     @RequestParam (value = "userId", defaultValue = "0") Long userId){
+			                                       @RequestParam (value = "warehouseId", defaultValue = "0") Long warehouseId,
+			                                       @RequestParam (value = "userId", defaultValue = "0") Long userId){
 		
 		return elmServiceImplSFDA.warehouseRegistrtaion(TOKEN,warehouseId,userId);
 	}

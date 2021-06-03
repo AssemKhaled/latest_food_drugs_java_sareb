@@ -14,4 +14,7 @@ public interface ReportServiceSFDA {
 
 	public ResponseEntity<?> getviewTripDetails(String TOKEN,Long deviceId,String startTime,String endTime,String exportData,int offset);
 
+	
+	public ResponseEntity<?> getVehicleTempHumPDF(String TOKEN,Long deviceId,int offset,String start,String end,String search,Long userId,String exportData);
+
 }

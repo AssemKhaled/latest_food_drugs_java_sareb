@@ -28,6 +28,8 @@ import org.springframework.stereotype.Repository;
 
 import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
 import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.entity.MonitorStaticstics;
+import com.example.food_drugs.entity.Series;
 import com.mongodb.BasicDBObject;
 
 @Repository
@@ -35,6 +37,233 @@ public class MongoPositionRepoSFDA {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	public List<MonitorStaticstics> getVehicleTempHumListDigram(List<Long> allDevices,Date start,Date end){
+
+		Calendar calendarFrom = Calendar.getInstance();
+		calendarFrom.setTime(start);
+		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+		start = calendarFrom.getTime();
+	    
+		Calendar calendarTo = Calendar.getInstance();
+		calendarTo.setTime(end);
+		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+		end = calendarTo.getTime();
+		
+		
+		List<Series> seriesTemp = new  ArrayList<Series>();
+//		List<Series> seriesHum = new  ArrayList<Series>();
+		
+	    Aggregation aggregation = newAggregation(
+	            match(Criteria.where("deviceid").in(allDevices).and("devicetime").gte(start).lte(end)),
+	            project("deviceid","attributes","speed","deviceName","weight").and("devicetime").dateAsFormattedString("%Y-%m-%dT%H:%M:%S.%LZ").as("devicetime"),
+	            sort(Sort.Direction.DESC, "devicetime")
+	            
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
+
+	    
+	        AggregationResults<BasicDBObject> groupResults
+	            = mongoTemplate.aggregate(aggregation,"tc_positions", BasicDBObject.class);
+
+	        
+            if(groupResults.getMappedResults().size() > 0) {
+	        	
+	            Iterator<BasicDBObject> iterator = groupResults.getMappedResults().iterator();
+	            while (iterator.hasNext()) {
+	            	BasicDBObject object = (BasicDBObject) iterator.next();
+
+
+    	            Series objTemp = new Series(); 
+    	            Series objHum = new Series(); 
+
+	            	
+	            	if(object.containsField("attributes") && object.get("attributes").toString() != null) {
+	
+                       JSONObject obj = new JSONObject(object.get("attributes").toString());
+	                	
+                       Integer countTemp = 0;
+	                   Integer countHum = 0;
+	                   	
+	                   	Double Temp = (double) 0;
+	                   	Double Hum = (double) 0;
+	                   	
+
+                    	if(obj.has("temp1")) {
+                    		if(obj.getDouble("temp1") != 0) {
+	                    		Temp = Temp + obj.getDouble("temp1");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("temp2")) {
+                    		if(obj.getDouble("temp2") != 0) {
+	                    		Temp = Temp + obj.getDouble("temp2");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("temp3")) {
+                    		if(obj.getDouble("temp3") != 0) {
+	                    		Temp = Temp + obj.getDouble("temp3");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("temp4")) {
+                    		if(obj.getDouble("temp4") != 0) {
+                    			Temp = Temp + obj.getDouble("temp4");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	
+                    	if(obj.has("hum1")) {
+                    		if(obj.getDouble("hum1") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum1");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("hum2")) {
+                    		if(obj.getDouble("hum2") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum2");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("hum3")) {
+                    		if(obj.getDouble("hum3") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum3");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("hum4")) {
+                    		if(obj.getDouble("hum4") != 0) {
+	                    		Hum = Hum + obj.getDouble("hum4");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	
+                    	if(obj.has("wiretemp1")) {
+                    		if(obj.getDouble("wiretemp1") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp1");
+	                    		countTemp = countTemp + 1;
+                    		}
+						}
+                    	if(obj.has("wiretemp2")) {
+                    		if(obj.getDouble("wiretemp2") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp2");
+	                    		countTemp = countTemp + 1;
+                    		}
+
+						}
+                    	if(obj.has("wiretemp3")) {
+                    		if(obj.getDouble("wiretemp3") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp3");
+	                    		countTemp = countTemp + 1;
+                    		}
+
+						}
+                    	if(obj.has("wiretemp4")) {
+                    		if(obj.getDouble("wiretemp4") != 0) {
+	                    		Temp = Temp + obj.getDouble("wiretemp4");
+	                    		countTemp = countTemp + 1;
+                    		}
+
+						}
+                    	
+                    	if(obj.has("wirehum1")) {
+                    		if(obj.getDouble("wirehum1") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum1");
+	                    		countHum = countHum + 1;
+                    		}
+						}
+                    	if(obj.has("wirehum2")) {
+                    		if(obj.getDouble("wirehum2") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum2");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("wirehum3")) {
+                    		if(obj.getDouble("wirehum3") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum3");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	if(obj.has("wirehum4")) {
+                    		if(obj.getDouble("wirehum4") != 0) {
+	                    		Hum = Hum + obj.getDouble("wirehum4");
+	                    		countHum = countHum + 1;
+                    		}
+
+						}
+                    	
+	                   	Double avgTemp = (double) 0;
+	                   	Double avgHum = (double) 0;
+	                   	if(countTemp != 0) {
+		                    	avgTemp = Temp / countTemp;
+	
+	                   	}
+	                   	if(countHum != 0) {
+	                   		avgHum = Hum / countHum;
+	
+	                   	}
+	                   	avgHum = Math.round(avgHum * 100.0) / 100.0;
+                    	avgTemp = Math.round(avgTemp * 100.0) / 100.0;
+                    	
+        	            objTemp.setValue(avgTemp);
+//        	            objHum.setValue(avgHum);
+
+	            	}
+	            	
+					if(object.containsField("devicetime") && object.get("devicetime") != null) {
+						
+						Date dateTime = null;
+						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+						SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss aa");
+
+						try {
+							dateTime = inputFormat.parse(object.getString("devicetime"));
+
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
+
+						
+	    	            objTemp.setName(outputFormat.format(dateTime));
+	    	            objHum.setName(outputFormat.format(dateTime));
+						
+						
+	                }
+					
+					
+					seriesTemp.add(objTemp);
+//					seriesHum.add(objHum);
+	            }
+	        }
+    	MonitorStaticstics dataTemp = new MonitorStaticstics();
+    	dataTemp.setName("Temperature");
+    	dataTemp.setSeries(seriesTemp);
+    	
+//    	MonitorStaticstics dataHum = new MonitorStaticstics();
+//    	dataHum.setName("Humidity");
+//    	dataHum.setSeries(seriesHum);
+    	
+		List<MonitorStaticstics> sensors = new ArrayList<MonitorStaticstics>();
+		sensors.add(dataTemp);
+//		sensors.add(dataHum);
+
+		
+		
+		return sensors;
+	}
 	
 	public List<DeviceTempHum> getVehicleTempHumListScheduled(List<Long> allDevices,Date start,Date end){
 

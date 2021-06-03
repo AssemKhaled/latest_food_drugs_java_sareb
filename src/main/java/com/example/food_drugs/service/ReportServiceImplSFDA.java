@@ -4,10 +4,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +33,10 @@ import com.example.food_drugs.entity.DeviceTempHum;
 import com.example.food_drugs.entity.Inventory;
 import com.example.food_drugs.entity.InventoryLastData;
 import com.example.food_drugs.entity.InventoryNotification;
+import com.example.food_drugs.entity.MonitorStaticstics;
+import com.example.food_drugs.entity.MonogInventoryNotification;
+import com.example.food_drugs.entity.NotificationAttributes;
+import com.example.food_drugs.entity.Series;
 import com.example.food_drugs.entity.Warehouse;
 import com.example.food_drugs.repository.InventoryRepository;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepo;
@@ -1365,6 +1372,739 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 		}
 		
+	}
+	
+	@Override
+	public ResponseEntity<?> getVehicleTempHumPDF(String TOKEN, Long deviceId, int offset, String from,
+			String to, String search, Long userId, String exportData) {
+		 logger.info("************************ getSensorsReport STARTED ***************************");
+
+			List<MonitorStaticstics> positionsList = new ArrayList<MonitorStaticstics>();
+			if(TOKEN.equals("")) {
+				 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",positionsList);
+				 logger.info("************************ getSensorsReport ENDED ***************************");
+				 return  ResponseEntity.badRequest().body(getObjectResponse);
+			}
+			
+			
+			if(!TOKEN.equals("Schedule")) {
+				if(super.checkActive(TOKEN)!= null)
+				{
+					return super.checkActive(TOKEN);
+				}
+			}
+			
+			
+			User loggedUser = new User();
+			if(userId != 0) {
+				
+				loggedUser = userServiceImpl.findById(userId);
+				if(loggedUser == null) {
+					getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "logged user is not found",positionsList);
+					 logger.info("************************ getSensorsReport ENDED ***************************");
+					return  ResponseEntity.status(404).body(getObjectResponse);
+				}
+			}	
+			
+			if(!loggedUser.getAccountType().equals(1)) {
+				if(!userRoleService.checkUserHasPermission(userId, "SENSORWEIGHT", "list")) {
+					 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "this user doesnot has permission to get SENSORWEIGHT list",positionsList);
+					 logger.info("************************ getSensorsReport ENDED ***************************");
+					return  ResponseEntity.badRequest().body(getObjectResponse);
+				}
+			}
+			
+			
+			
+			List<Long>allDevices= new ArrayList<>();
+			allDevices.add(deviceId);
+			Device device =deviceServiceImpl.findById(deviceId);
+
+			String storingCategory="";
+		    if(device.getAttributes() != null) {
+			   if(device.getAttributes().toString().startsWith("{")) {
+				   JSONObject object = new JSONObject();
+
+				   object = new JSONObject(device.getAttributes().toString());		
+		      	  
+		      	   if(object.has("storingCategory")) {
+		          	  storingCategory = object.getString("storingCategory");
+		    	   }
+			   }
+			  
+		    }
+			
+
+			Date dateFrom;
+			Date dateTo;
+
+			SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS SSSS");
+			SimpleDateFormat inputFormat1 = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+			inputFormat1.setLenient(false);
+			inputFormat.setLenient(false);
+			outputFormat.setLenient(false);
+
+			
+			try {
+				dateFrom = inputFormat2.parse(from);
+				from = outputFormat.format(dateFrom);
+				
+
+			} catch (ParseException e2) {
+				try {
+					dateFrom = inputFormat.parse(from);
+					from = outputFormat.format(dateFrom);
+					
+
+				} catch (ParseException e3) {
+					// TODO Auto-generated catch block
+					try {
+						dateFrom = inputFormat1.parse(from);
+						from = outputFormat.format(dateFrom);
+
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						
+						getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z' or yyyy-MM-dd'T'HH:mm:ss.SSS SSSS",null);
+						logger.info("************************ getEventsReport ENDED ***************************");		
+						return  ResponseEntity.badRequest().body(getObjectResponse);
+					}
+					
+				}
+				
+			}
+			
+			
+			try {
+				dateTo = inputFormat2.parse(to);
+				to = outputFormat.format(dateTo);
+				
+
+			} catch (ParseException e2) {
+				try {
+					dateTo = inputFormat.parse(to);
+					to = outputFormat.format(dateTo);
+					
+
+				} catch (ParseException e3) {
+					// TODO Auto-generated catch block
+					try {
+						dateTo = inputFormat1.parse(to);
+						to = outputFormat.format(dateTo);
+
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",null);
+						logger.info("************************ getEventsReport ENDED ***************************");		
+						return  ResponseEntity.badRequest().body(getObjectResponse);
+					}
+					
+				}
+				
+			}
+				
+				
+			
+
+			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListDigram(allDevices,dateFrom, dateTo);
+			
+			List<Map> list = new ArrayList<>();
+		    Map obj = new HashMap();
+		    
+
+            double high=0.0;
+            double low=0.0;
+            double avg=0.0;
+
+		    Map rec = new HashMap();
+		    rec.put("sequenceNumber",device.getSequence_number());
+		    rec.put("uniqueId",device.getUniqueid());
+		    rec.put("low",null);
+		    rec.put("high",null);
+		    rec.put("lowExtreme",null);
+		    rec.put("highExtreme",null);
+		    rec.put("size", null);
+		    rec.put("start", null);
+		    rec.put("end", null);
+		    rec.put("avg",null);
+		    rec.put("lowCheck", false);
+		    rec.put("highCheck", false);
+		    rec.put("lowAlarm", false);
+		    rec.put("highAlarm", false);
+		    rec.put("lowLimit", null);
+		    rec.put("highLimit", null);
+		    rec.put("storingCategory", storingCategory);
+
+			for(MonitorStaticstics position:positionsList) {
+				if(position.getName().equals("Temperature")) {
+				    rec.put("size", position.getSeries().size());
+				    if(position.getSeries().size() > 0) {
+					    rec.put("end", position.getSeries().get(0).getName());
+					    rec.put("start", position.getSeries().get(position.getSeries().size()-1).getName());
+					    low=position.getSeries().get(0).getValue();
+					    high=position.getSeries().get(0).getValue();
+
+				    }
+
+					for(Series series:position.getSeries()) {
+						
+						if(low>series.getValue()) {
+							low = series.getValue();
+						}
+						
+						if(high<series.getValue()) {
+							high = series.getValue();
+						}
+						avg +=series.getValue();
+
+					    rec = checkTemp(storingCategory,series.getValue(),rec);
+
+						
+					}
+					
+				    rec.put("avg",Math.round( (avg/position.getSeries().size()) * 100.0) / 100.0);
+
+				}
+			}
+		    rec.put("low",low);
+		    rec.put("high",high);
+
+		    
+
+		    
+		    
+		    obj.put("digram", positionsList);
+		    obj.put("data", rec);
+		    list.add(obj);
+			
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",list);
+			logger.info("************************ getSensorsReport ENDED ***************************");
+			return  ResponseEntity.ok().body(getObjectResponse);
+			
+			
+	}
+
+	public Map checkTemp(String category,Double AvgTemp,Map record) {
+		// TODO Auto-generated method stub
+        
+	
+		
+		//SCD1 -20°C to -10°C
+		if(category.equals("SCD1")) {
+			
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", -20);
+			record.put("highLimit", -10);
+			
+
+			if(AvgTemp < -20) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > -10) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+
+		}
+		
+        //SCD2 2°C to 8°C
+		else if(category.equals("SCD2")) {
+			
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", 2);
+			record.put("highLimit", 8);
+			
+			if(AvgTemp < 2) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > 8) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+		}
+		
+        //SCD3 Less than 25°C
+		else if(category.equals("SCD3")) {
+			
+			record.put("highAlarm", true);
+			record.put("highLimit", 25);
+			
+			
+			if(AvgTemp >= 25) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+        //SCC1 Less than 25°C
+		else if(category.equals("SCC1")) {
+			
+			record.put("highAlarm", true);
+			record.put("highLimit", 25);
+			
+			if(AvgTemp >= 25) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+        //SCM1 -20°C to -10°C
+		else if(category.equals("SCM1")) {
+			
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", -20);
+			record.put("highLimit", -10);
+			
+			if(AvgTemp < -20) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > -10) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+		}
+	
+        //SCM2 2°C to 8°C
+		else if(category.equals("SCM2")) {
+			
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", 2);
+			record.put("highLimit", 8);
+			
+			if(AvgTemp < 2) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > 8) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+		}
+		
+		//SCM3 8°C to 15°C
+		else if(category.equals("SCM3")) {
+            
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", 8);
+			record.put("highLimit", 15);
+			
+			if(AvgTemp < 8) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > 15) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+		}
+		
+		//SCM4 15°C to 30°C
+		else if(category.equals("SCM4")) {
+            
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", 15);
+			record.put("highLimit", 30);
+			
+			if(AvgTemp < 15) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > 30) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+        //SCM5 Should not exceed 40°C
+		else if(category.equals("SCM5")) {
+			
+			record.put("highAlarm", true);
+			record.put("highLimit", 40);	
+
+			
+			if(AvgTemp > 40) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+		//SCF1 Should not exceed 25°C
+		else if(category.equals("SCF1")) {
+            
+			record.put("highAlarm", true);
+			record.put("highLimit", 25);		
+			
+			if(AvgTemp > 25) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+		}
+		
+		//SCF2 -1.5°C to 10°C
+		else if(category.equals("SCF2")) {
+
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", -1.5);
+			record.put("highLimit", 10);
+			
+			
+			if(AvgTemp < -1.5) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > 10) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+		}
+		
+        //SCF3 -1.5°C to 21°C 
+		else if(category.equals("SCF3")) {
+			
+			record.put("lowAlarm", true);
+			record.put("highAlarm", true);
+			
+			record.put("lowLimit", -1.5);
+			record.put("highLimit", 21);
+			
+			
+			if(AvgTemp < -1.5) {
+				record.put("lowCheck", true);
+
+				if(record.get("lowExtreme") != null) {
+					if((double)record.get("lowExtreme") > AvgTemp) {
+						record.put("lowExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("lowExtreme",AvgTemp);
+
+				}
+
+			}
+			
+			if(AvgTemp > 21) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+		//SCF4 Should not exceed (-18)°C
+		else if(category.equals("SCF4")) {
+            
+			record.put("highAlarm", true);
+			record.put("highLimit", -18);
+			
+
+			if(AvgTemp > -18) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+		//SCA1 Should not exceed 30°C
+		else if(category.equals("SCA1")) {
+			record.put("highAlarm", true);
+			record.put("highLimit", 30);
+			
+			if(AvgTemp > 30) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+        //SCP1 Should not exceed 35°C
+		else if(category.equals("SCP1")) {
+			
+			record.put("highAlarm", true);
+			record.put("highLimit", 35);
+			
+			if(AvgTemp > 35) {
+				record.put("highCheck", true);
+
+				if(record.get("highExtreme") != null) {
+					if((double)record.get("highExtreme") < AvgTemp) {
+						record.put("highExtreme",AvgTemp);
+
+					}
+				}
+				else {
+					record.put("highExtreme",AvgTemp);
+
+				}
+
+			}
+
+		}
+		
+		
+		return record;
 	}
 	
 	
