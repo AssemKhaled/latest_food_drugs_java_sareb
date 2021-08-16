@@ -2267,6 +2267,14 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 
 			  for(TripReport tripReportOne : tripReport ) {
 				  Device device= deviceServiceImpl.findById(tripReportOne.getDeviceId());
+				  Set<User>companies = device.getUser();
+				  User user = new User();
+				  for(User company : companies) {
+					  user = company;
+					  break;
+				  }
+				  String companyName = user.getName();
+				  tripReportOne.setCompanyName(companyName);
 
 				  Double totalDistance = 0.0 ;
 				  double roundOffDistance = 0.0;

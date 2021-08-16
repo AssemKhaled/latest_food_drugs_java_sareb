@@ -117,7 +117,7 @@ public class MongoInventoryLastDataRepo {
 	    		
 
 	            match(Criteria.where("inventory_id").in(allInventories)),
-	            project("temperature","humidity","inventory_id").and("create_date").dateAsFormattedString("%Y-%m-%d %H:%M:%S.%LZ").as("create_date"),
+	            project("temperature","humidity","inventory_id","create_date"),
 	            sort(Sort.Direction.ASC, "create_date"),
 	            group("inventory_id").last("$$ROOT").as("test"),
 	            replaceRoot("test"),
@@ -159,22 +159,21 @@ public class MongoInventoryLastDataRepo {
 	            		inventory.setHumidity(roundHum);
 	
 	            	}
+	            	System.out.println("Object:   "+object);
 					if(object.containsField("create_date") && object.get("create_date") !=null) {
 						
 						Date dateTime = null;
 						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+						
 
-						try {
-							dateTime = inputFormat.parse(object.getString("create_date"));
-
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						dateTime = object.getDate("create_date");
 						
 						
 						inventory.setCreate_date(outputFormat.format(dateTime));
+						//for change create_date from string to date
+						
+//						inventory.setCreate_date(dateTime);
 						
 	                }
 					if(object.containsField("_id") && object.get("_id") !=null) {
@@ -254,6 +253,8 @@ public class MongoInventoryLastDataRepo {
 						
 
 						inventory.setCreate_date(outputFormat.format(dateTime));
+						//as change create_date from string to date
+//						inventory.setCreate_date(dateTime);
 	                }
 					if(object.containsField("_id") && object.get("_id") !=null) {
 		            	
@@ -328,8 +329,10 @@ public class MongoInventoryLastDataRepo {
 							e.printStackTrace();
 						}
 						
-
+						
 						inventory.setCreate_date(outputFormat.format(dateTime));
+						//as change create_date from string to date
+//						inventory.setCreate_date(dateTime);
 	                }
 					if(object.containsField("_id") && object.get("_id") !=null) {
 		            	
@@ -405,7 +408,9 @@ public class MongoInventoryLastDataRepo {
 						}
 						
 						
-						inventory.setCreate_date(outputFormat.format(dateTime));    		
+						inventory.setCreate_date(outputFormat.format(dateTime));   
+						//as change create_date from string to date
+//						inventory.setCreate_date(dateTime);
 	                }
 					if(object.containsField("_id") && object.get("_id") !=null) {
 		            	

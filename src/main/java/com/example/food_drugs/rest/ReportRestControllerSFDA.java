@@ -4,6 +4,8 @@ package com.example.food_drugs.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.examplequerydslspringdatajpamaven.service.ReportServiceImpl;
+import com.example.food_drugs.entity.DeviceSFDA;
+import com.example.food_drugs.entity.TripDetailsRequest;
 import com.example.food_drugs.service.ReportServiceImplSFDA;
 
 /**
@@ -402,5 +406,12 @@ public class ReportRestControllerSFDA {
     	return  reportServiceImplSFDA.getviewTripDetails(TOKEN, deviceId,startTime, endTime,exportData,offset);
 
 	}
-
+	
+	@PostMapping(value = "/getTripPdf")
+	public @ResponseBody ResponseEntity<?>getTripPdf(@RequestHeader(value = "TOKEN", defaultValue = "") String TOKEN,
+			@RequestBody(required = false) TripDetailsRequest request){
+		
+		return reportServiceImplSFDA.getTripPdfDetails(request);
+	}
+	
 }

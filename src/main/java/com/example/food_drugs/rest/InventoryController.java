@@ -1,8 +1,17 @@
 package com.example.food_drugs.rest;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -220,5 +229,28 @@ public class InventoryController {
 												 @RequestParam (value = "toUserId", defaultValue = "0") Long toUserId){
 		return inventoryServiceImpl.assignInventoryToUser(TOKEN,userId,inventoryId,toUserId);
 	}
+	@GetMapping(value = "/assign")
+	public Date assign() throws ParseException{
+		Instant nowUtc = Instant.now();
+		ZoneId asiaSingapore = ZoneId.of("Asia/Riyadh");
+		ZonedDateTime nowAsiaSingapore = ZonedDateTime.ofInstant(nowUtc, asiaSingapore);
+		System.out.println(nowAsiaSingapore);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.Z");
+		String formattedString = nowAsiaSingapore.format(formatter);
+		System.out.println(formattedString);
+		
+//		Date now = new Date();
+//		System.out.println(now);
+		SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		input.setTimeZone(TimeZone.getTimeZone("Aisa/Riyadh"));
+//		String create_date = input.format(now);
+//		System.out.println(create_date);
+		Date dateTime = input.parse(formattedString) ;
+				//input.parse(formattedString);
+		System.out.println("finalDate"+dateTime);
+		return dateTime;
+//		return inventoryServiceImpl.assignInventoryToUser(TOKEN,userId,inventoryId,toUserId);
+	}
+	
 	
 }

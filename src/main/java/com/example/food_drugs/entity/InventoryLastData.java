@@ -1,5 +1,7 @@
 package com.example.food_drugs.entity;
 
+import java.util.Date;
+
 public class InventoryLastData {
 
 	private String _id;
@@ -37,9 +39,12 @@ public class InventoryLastData {
 		this.inventory_id = inventory_id;
 	}
 	public String getCreate_date() {
+		
+		
 		return create_date;
 	}
 	public void setCreate_date(String create_date) {
+		
 		this.create_date = create_date;
 	}
 	public Integer getIs_sent() {
@@ -54,7 +59,7 @@ public class InventoryLastData {
 	public void setInventoryName(String inventoryName) {
 		this.inventoryName = inventoryName;
 	}
-	public InventoryLastData(String _id, Double temperature, Double humidity, Long inventory_id, String create_date,
+	public InventoryLastData(String _id, Double temperature, Double humidity, Long inventory_id,  String create_date,
 			Integer is_sent, String inventoryName) {
 		super();
 		this._id = _id;

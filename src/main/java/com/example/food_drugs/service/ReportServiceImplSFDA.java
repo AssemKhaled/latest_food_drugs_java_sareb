@@ -6,16 +6,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import com.example.examplequerydslspringdatajpamaven.entity.Attributes;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Group;
 import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
@@ -36,12 +40,15 @@ import com.example.food_drugs.entity.InventoryNotification;
 import com.example.food_drugs.entity.MonitorStaticstics;
 import com.example.food_drugs.entity.MonogInventoryNotification;
 import com.example.food_drugs.entity.NotificationAttributes;
+import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.entity.Series;
+import com.example.food_drugs.entity.TripDetailsRequest;
 import com.example.food_drugs.entity.Warehouse;
 import com.example.food_drugs.repository.InventoryRepository;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepo;
 import com.example.food_drugs.repository.MongoInventoryNotificationRepo;
 import com.example.food_drugs.repository.MongoPositionRepoSFDA;
+import com.example.food_drugs.repository.PositionMongoSFDARepository;
 import com.example.food_drugs.repository.WarehousesRepository;
 
 
@@ -93,6 +100,9 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	
 	@Autowired
 	private MongoPositionRepoSFDA mongoPositionRepoSFDA;
+	
+	@Autowired
+	private PositionMongoSFDARepository positionMongoSFDARepository ;
 	
 	@Override
 	public ResponseEntity<?> getInventoriesReport(String TOKEN, Long[] inventoryIds, int offset, String start,
@@ -2106,6 +2116,43 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 		return record;
 	}
+
+	@Override
+	public ResponseEntity<?> getTripPdfDetails(TripDetailsRequest request) {
+		//get trip summary data --->maryam
+		//get trip alarms ---->ehab
+		//get graphs data ----> ehab
+		//get trip details --->maryam
+		return null;
+		
+	}
+	
+	public void getSummaryData(TripDetailsRequest request) {
+		System.out.println("startTime"+request.getStartTime());
+		System.out.println("endTime"+request.getEndTime());
+
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+		formatter.setLenient(false);
+
+		try {
+			Date date = formatter.parse(request.getStartTime());
+			Date date2 = formatter.parse(request.getEndTime());
+			List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(date,date2,12L) ;
+			for(Position position :pos) {
+//				String attr = position.getAttributes();
+				System.out.println("deviceid:"+position.getDeviceid());
+			}
+
+			System.out.println("date"+date);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// TODO Auto-generated method stub
+		
+		
+	}
+	
 	
 	
 }

@@ -12,11 +12,13 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bson.Document;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -24,13 +26,21 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
 import com.example.food_drugs.entity.DeviceTempHum;
 import com.example.food_drugs.entity.MonitorStaticstics;
+import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.entity.Series;
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 @Repository
 public class MongoPositionRepoSFDA {
@@ -1428,6 +1438,57 @@ public class MongoPositionRepoSFDA {
         
 		return positions;
 	}	
-	
+	public void getPdfSummaryData() {
+		/*
+		 * Requires the MongoDB Java Driver.
+		 * https://mongodb.github.io/mongo-java-driver
+		 */
+
+//		MongoClient mongoClient = new MongoClient(
+//		    new MongoClientURI(
+//		        "mongodb://myAdmin:Alevs99!!456!!@b3.sareb.co:27017/?authSource=admin&ssl=false"
+//		    )
+//		);
+//		MongoDatabase database = mongoClient.getDatabase("food_drugs_db");
+//		MongoCollection<Document> collection = database.getCollection("tc_positions");
+//
+//		AggregateIterable<Document> result =  collection.aggregate(Arrays.asList(new Document("$match", 
+//		    new Document("deviceid", 12)), 
+//		    new Document("$project", 
+//		    new Document("deviceid", 1)
+//		            .append("averageTemp", 
+//		    new Document("$avg", Arrays.asList("$attributes.temp1", "$attributes.wrieTemp1", "$attributes.temp2", "$attributes.temp3", "$attributes.temp4", "$attributes.temp6", "$attributes.temp7", "$attributes.temp8", "$attributes.wrieTemp2")))), 
+//		    new Document("$group", 
+//		    new Document("_id", "$deviceid")
+//		            .append("count", 
+//		    new Document("$sum", 1))
+//		            .append("max", 
+//		    new Document("$max", "$averageTemp"))
+//		            .append("min", 
+//		    new Document("$min", "$averageTemp"))
+//		            .append("avg", 
+//		    new Document("$avg", "$averageTemp")))));
+		
+		
+//	    Aggregation aggregation = newAggregation(
+//	            match(Criteria.where("deviceid").in(12))
+////	            project("deviceid","attributes").andExpression("attributes", "$avg:[$attributes.temp1,$attributes.wireTemp1,$attributes.temp2,$attributes.temp3,$attributes.temp4,$attributes.temp6, $attributes.temp7 ,$attributes.temp7 ,$attributes.temp8 ,$attributes.wireTemp2]").as("averageTemp")
+////	            .and("devicetime").dateAsFormattedString("%Y-%m-%dT%H:%M:%S.%LZ").as("devicetime")
+////	            .and("servertime").dateAsFormattedString("%Y-%m-%dT%H:%M:%S.%LZ").as("servertime")
+////	            .and("fixtime").dateAsFormattedString("%Y-%m-%dT%H:%M:%S.%LZ").as("fixtime"),
+////	            sort(Sort.Direction.DESC, "devicetime")
+//	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
+//
+//	    
+//	        AggregationResults<BasicDBObject> groupResults
+//	            = mongoTemplate.aggregate(aggregation,"tc_positions", BasicDBObject.class);
+//		
+//		System.out.println(groupResults);
+		Query query = new Query();
+		query.addCriteria(Criteria.where("deviceid").in(12));
+		List<Position> users = mongoTemplate.find(query, Position.class);
+		System.out.println(users);
+		
+	}
 	
 }

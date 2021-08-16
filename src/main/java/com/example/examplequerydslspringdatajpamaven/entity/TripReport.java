@@ -28,6 +28,7 @@ public class TripReport {
 	private String startOdometer;
 	private String startPositionId;
 	private String startTime;
+	private String companyName;
 	
 	
 	
@@ -37,7 +38,7 @@ public class TripReport {
 	public TripReport(String averageSpeed, Long deviceId, String deviceName, String distance, String driverName,
 			String driverUniqueId, String duration, String endAddress, String endLat, String endLon, String endOdometer,
 			String endPositionId, String endTime, String maxSpeed, String spentFuel, String startAddress, String startLat,
-			String startLon, String startOdometer, String startPositionId, String startTime) {
+			String startLon, String startOdometer, String startPositionId, String startTime, String companyName) {
 		super();
 		this.averageSpeed = averageSpeed;
 		this.deviceId = deviceId;
@@ -60,6 +61,7 @@ public class TripReport {
 		this.startOdometer = startOdometer;
 		this.startPositionId = startPositionId;
 		this.startTime = startTime;
+		this.companyName = companyName;
 	}
 	public String getAverageSpeed() {
 		return averageSpeed;
@@ -186,6 +188,12 @@ public class TripReport {
 	}
 	public void setStartTime(String startTime) {
 		this.startTime = startTime;
+	}
+	public String getCompanyName() {
+		return companyName;
+	}
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 	
 	

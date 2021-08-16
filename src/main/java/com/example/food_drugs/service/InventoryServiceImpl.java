@@ -6,6 +6,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.net.ssl.SSLContext;
 import javax.persistence.Column;
@@ -2136,29 +2141,53 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			Date dateTime = null;
 			String create_date = null;
 			if(DateOfSensor == null) {
-				Date now = new Date();
-				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			
+//				Date now = new Date();
+//				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//				 input.setTimeZone(TimeZone.getTimeZone("Aisa/Riyadh"));
+				Instant nowUtc = Instant.now();
+				ZoneId asiaSingapore = ZoneId.of("Asia/Riyadh");
+				ZonedDateTime nowAsiaSingapore = ZonedDateTime.ofInstant(nowUtc, asiaSingapore);
+				System.out.println(nowAsiaSingapore);
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.Z");
+				String formattedString = nowAsiaSingapore.format(formatter);
+				System.out.println(formattedString);
 				
-				try {
-					create_date = input.format(now);
-					try {
-						dateTime = input.parse(create_date);
-					} catch (java.text.ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-				} catch (ParseException e) {
+				 try {
+					dateTime = input.parse(formattedString) ;
+				} catch (java.text.ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+						//input.parse(formattedString);
+				System.out.println("finalDate"+dateTime);
+				
+//				
+//				try {
+//					create_date = input.format(now);
+//					try {
+//						dateTime = input.parse(create_date);
+//						
+//					} catch (java.text.ParseException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//
+//				} catch (ParseException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			}
 			else {
 				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
-				SimpleDateFormat input = new SimpleDateFormat("ddMMMyy hh:mm", Locale.ENGLISH); 
+				SimpleDateFormat input = new SimpleDateFormat("ddMMMyy hh:mm"); 
 
 				try {
 					try {
+					
+						
 						dateTime = input.parse(DateOfSensor.toString());
 					} catch (java.text.ParseException e) {
 						// TODO Auto-generated catch block

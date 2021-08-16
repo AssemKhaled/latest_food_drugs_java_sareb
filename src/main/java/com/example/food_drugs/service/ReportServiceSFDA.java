@@ -3,6 +3,8 @@ package com.example.food_drugs.service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.food_drugs.entity.TripDetailsRequest;
+
 @Service
 public interface ReportServiceSFDA {
 
@@ -16,5 +18,5 @@ public interface ReportServiceSFDA {
 
 	
 	public ResponseEntity<?> getVehicleTempHumPDF(String TOKEN,Long deviceId,int offset,String start,String end,String search,Long userId,String exportData);
-
+	public ResponseEntity<?>getTripPdfDetails(TripDetailsRequest request);
 }
