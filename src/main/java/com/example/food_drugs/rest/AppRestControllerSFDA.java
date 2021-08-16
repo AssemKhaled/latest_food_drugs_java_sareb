@@ -34,7 +34,6 @@ import com.example.food_drugs.service.AppServiceImplSFDA;
 @RequestMapping(path = "/appSFDA")
 public class AppRestControllerSFDA {
 	
-	
 	@Autowired
 	private AppServiceImpl appService;
 	
