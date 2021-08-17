@@ -2230,7 +2230,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //			    }
 				
 			}
-			avg = avg/count;
+			if(count >0) {
+				avg = avg/count;
+			}
+			
 			System.out.println("max"+ max);
 			System.out.println("min"+ min);
 			System.out.println("avg"+ avg);
@@ -2406,13 +2409,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						.name(position.getDevicetime().toString())
 						.value(getAvgTemp(position.getAttributes()))
 						.build());
-				double hum = (Double)position.getAttributes().get("hum1") ;
-				if(hum>0&&hum<300){
+//				double hum = (Double)position.getAttributes().get("hum1") ;
+//				if(hum>0&&hum<300){
 					humidityGraph.add(GraphObject.builder()
 							.name(position.getDevicetime().toString())
-							.value(hum)
+							.value(getAvgTemp(position.getAttributes()))
 							.build());
-				}
+//				}
 			}
 
 
@@ -2546,6 +2549,28 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		return avg;
 		
 	}
+	public Double getHumAvg(Map attributesMap){
+		int count = 0;
+		Double avg = 0.0;
+		List<Double> avgs = new ArrayList<>();
+		if(attributesMap.keySet().toString().contains("hum")){
+			attributesMap.keySet().stream().filter(o ->
+					o.toString().contains("hum"))
+					.forEach(o -> {
+						if(!attributesMap.get(o).equals(0.0) && !attributesMap.get(o).equals(300.0)) {
+							avgs.add((Double) attributesMap.get(o));
+						}
+
+					});
+		}
+		for(Double avrage : avgs){
+			avg+=avrage;
+		}
+		if(avgs.size()>0){
+			avg/=avgs.size();
+		}
+		return avg;
+	}
 	
 	public List<List<ReportDetails>> getReportDetails(List<Position> positions) {
 		List<ReportDetails> reportDetailsList = new ArrayList();
@@ -2558,13 +2583,9 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			ReportDetails reportDetails = new ReportDetails();
 			Map attributesMap = position.getAttributes();
 			Double recordAvgTemp = getAvgTemp(attributesMap);
-			Double humidity = 0.0;
-			if(attributesMap.containsKey("hum1")) {
-				if((Double)attributesMap.get("hum1")!= 300) {
-					humidity = (Double)attributesMap.get("hum1");
-				}
-				
-			}
+			
+			Double humidity = getHumAvg(attributesMap);;
+			
 			String devicetimeAsDateStr = formatDateJava.format(position.getDevicetime());
 			String devicetimeAsTimeStr = formatTime.format(position.getDevicetime());
 			
