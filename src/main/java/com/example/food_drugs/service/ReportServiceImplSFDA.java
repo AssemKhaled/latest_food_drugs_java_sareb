@@ -2125,24 +2125,28 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		//get trip summary data --->maryam
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 		formatter.setLenient(false);
-//		Date from;
+		PdfSummaryData summaryData = new PdfSummaryData();
+		List<ReportDetails> reportDetails = new ArrayList();
 		try {
 			Date from = formatter.parse(request.getStartTime());
 			Date to = formatter.parse(request.getEndTime());
 			List<Position> positions = getDevicePositionsWithinDateRange(from , to , 12L);
+			summaryData = getSummaryData(positions);
+			reportDetails = getReportDetails(positions);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		
-		PdfSummaryData summaryData = getSummaryData(request);
+		
 		//get trip alarms ---->ehab
 		//get graphs data ----> ehab
 		//get trip details --->maryam
 		
-		ArrayList<PdfSummaryData> response = new ArrayList();
+		ArrayList<Object> response = new ArrayList();
 		response.add(summaryData);
+		response.add(reportDetails);
 //		here
 		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",response);
 		return  ResponseEntity.ok().body(getObjectResponse);
@@ -2150,21 +2154,15 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 	}
 	
-	public PdfSummaryData getSummaryData(TripDetailsRequest request) {
+	public PdfSummaryData getSummaryData(List<Position> positions) {
 		int count = 0;
 		Double avg = 0.0;
 		Double max = 0.0;
 		Double min = 0.0;
 		PdfSummaryData pdfSummary = new PdfSummaryData() ;
 
-		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
-		formatter.setLenient(false);
-
-		try {
-			Date date = formatter.parse(request.getStartTime());
-			Date date2 = formatter.parse(request.getEndTime());
-			List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(date,date2,12L) ;
-			for(Position position :pos) {
+		
+			for(Position position :positions) {
 
 				Map attributesMap = position.getAttributes();
 				Iterator<Map.Entry<String, Integer>> iterator = attributesMap.entrySet().iterator();
@@ -2204,16 +2202,12 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			System.out.println("max"+ max);
 			System.out.println("min"+ min);
 			System.out.println("avg"+ avg);
+			double mkt = calcMKT(positions);
 			pdfSummary = PdfSummaryData.builder().average(avg)
-					.max(max).min(min).totalLength(pos.size())
+					.max(max).min(min).totalLength(positions.size()).mkt(mkt)
 					  .build();
 			
 
-			System.out.println("date"+date);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		// TODO Auto-generated method stub
 		return pdfSummary;
 //		return null;
@@ -2310,15 +2304,63 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 	}
 	
-	public ReportDetails getReportDetails() {
+	public List<ReportDetails> getReportDetails(List<Position> positions) {
+		List<ReportDetails> reportDetailsList = new ArrayList();
+		SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-mm-dd");
+		SimpleDateFormat formatTime = new SimpleDateFormat("HH:MM:SS");
 		
+		for(Position position : positions) {
+			
+			ReportDetails reportDetails = new ReportDetails();
+			Map attributesMap = position.getAttributes();
+			Double recordAvgTemp = getAvgTemp(attributesMap);
+			Double humidity = 0.0;
+			if(attributesMap.containsKey("hum1")) {
+				if((Double)attributesMap.get("hum1")!= 300) {
+					humidity = (Double)attributesMap.get("hum1");
+				}
+				
+			}
+			String devicetimeAsDateStr = formatDateJava.format(position.getDevicetime());
+			String devicetimeAsTimeStr = formatTime.format(position.getDevicetime());
+			
+			reportDetails = reportDetails.builder().date(devicetimeAsDateStr).time(devicetimeAsTimeStr)
+					.temperature(recordAvgTemp).humidity(humidity)
+					  .build();
+			
+			
+			reportDetailsList.add(reportDetails);
+			
+		}
 		
-		return null;
+		return reportDetailsList;
 	}
 	
 	public List<Position> getDevicePositionsWithinDateRange(Date from , Date to , long deviceid){
 		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(from,to,12L);
 		return pos;
+	}
+	
+	public Double calcMKT(List<Position> positions) {
+		double allExponenials = 0.0;
+		double result = 0.0;
+		for(Position position :positions) {
+			Map attributesMap = position.getAttributes();
+			Double recordAvg = getAvgTemp(attributesMap);
+			 double t1 = -(10000/(recordAvg+273.1));//t1 value is ΔH/RT, according to the formula: H/R=10000K K = 273.1 + temperature, so 10000 divided by K equals t1
+			 double e1 = Math.exp(t1);//Find the value of e to the power of t1 //Math.exp(x) e to the power of x
+			 allExponenials += e1;
+		}
+		int n = positions.size();
+		if (n>0) {
+			result = Math.log((allExponenials)/n);
+			result = ((-10000/result)-273.1);
+		}
+		return result;
+		 
+		        
+		 
+		         
 	}
 	
 	

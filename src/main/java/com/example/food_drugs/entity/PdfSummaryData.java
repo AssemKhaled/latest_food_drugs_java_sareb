@@ -21,4 +21,6 @@ public class PdfSummaryData {
 	
 	private Integer totalLength;
 	
+	private Double mkt;
+	
 }

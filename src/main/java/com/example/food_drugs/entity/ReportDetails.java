@@ -15,7 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReportDetails {
 	
-	private Date date ;
+	private String date ;
+	private String time;
 	private Double temperature;
 	private Double humidity;
 	 
