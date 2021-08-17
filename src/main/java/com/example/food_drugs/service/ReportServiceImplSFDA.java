@@ -2191,6 +2191,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		Double avg = 0.0;
 		Double max = 0.0;
 		Double min = 0.0;
+		Double avgHum = 0.0;
+		Double maxHum = 0.0;
+		Double minHum = 1000.0;
+		Double sumAvg = 0.0;
+		int countHum = 0;
 		PdfSummaryData pdfSummary = new PdfSummaryData() ;
 
 		
@@ -2198,11 +2203,21 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 				Map attributesMap = position.getAttributes();
 				Iterator<Map.Entry<String, Integer>> iterator = attributesMap.entrySet().iterator();
-//				System.out.println(getAvgTemp(attributesMap));
 				Double recordAvg = getAvgTemp(attributesMap);
-				
+				Double humAvg = getHumAvg(attributesMap);
+				if(humAvg!=0.0){
+					if(humAvg<minHum){
+						minHum = humAvg;
+					}
+					if(humAvg>maxHum){
+						maxHum=humAvg;
+					}
+					sumAvg+=humAvg;
+					countHum++;
+				}
+				avgHum=sumAvg/countHum;
+
 				if(recordAvg != 0.0) {
-//					
 					if(count == 0) {
 						max = recordAvg;
 						min = recordAvg;
@@ -2222,30 +2237,29 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					}
 					
 				}
-				
-				
-//			    while (iterator.hasNext()) {
-//			        Map.Entry<String, Integer> entry = iterator.next();
-//			        System.out.println(entry.getKey() + ":" + entry.getValue());
-//			    }
+
 				
 			}
 			if(count >0) {
 				avg = avg/count;
 			}
 			
-			System.out.println("max"+ max);
-			System.out.println("min"+ min);
-			System.out.println("avg"+ avg);
-			double mkt = calcMKT(positions);
-			pdfSummary = PdfSummaryData.builder().average(avg)
-					.max(max).min(min).totalLength(positions.size()).mkt(mkt)
-					  .build();
-			
 
-		// TODO Auto-generated method stub
+			double mkt = calcMKT(positions);
+			pdfSummary = PdfSummaryData
+					.builder()
+					.avgTemp(avg)
+					.maxTemp(max)
+					.minTemp(min)
+					.totalLength(positions.size())
+					.mkt(mkt)
+					.maxHum(maxHum)
+					.minHum(minHum==1000.0?0.0:minHum)
+					.averageHum(avgHum)
+					.build();
+
 		return pdfSummary;
-//		return null;
+
 		
 	}
 

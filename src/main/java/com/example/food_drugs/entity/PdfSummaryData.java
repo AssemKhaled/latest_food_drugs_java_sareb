@@ -13,14 +13,19 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PdfSummaryData {
 	
-	private Double average;
+	private Double avgTemp;
 	
-	private Double max;
+	private Double maxTemp;
 	
-	private Double min;
+	private Double minTemp;
 	
 	private Integer totalLength;
 	
 	private Double mkt;
-	
+
+	private Double averageHum;
+
+	private Double maxHum;
+
+	private Double minHum;
 }
