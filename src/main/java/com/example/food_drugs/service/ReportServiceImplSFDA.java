@@ -2165,8 +2165,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		//get trip details --->maryam
 		
 		ArrayList<Object> response = new ArrayList();
-		response.add(summaryData);
-		response.add(reportDetails);
+//		response.add(summaryData);
+//		response.add(reportDetails);
 
 		//getSummaryData(request);
 		//get trip alarms ---->ehab
@@ -2176,7 +2176,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //		here
 		AlarmsReportResponseWrapper alarmsReport = new AlarmsReportResponseWrapper();
 		alarmsReport = getAlarmSection(request.getVehilceId(),request.getStartTime(),request.getEndTime());
+		alarmsReport.setReportDetailsData(reportDetails);
+		alarmsReport.setSummaryData(summaryData);
 		response.add(alarmsReport);
+		
 		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",response);
 		return  ResponseEntity.ok().body(getObjectResponse);
 		
