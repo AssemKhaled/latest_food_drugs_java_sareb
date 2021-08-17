@@ -9,7 +9,10 @@ import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
 import com.example.food_drugs.repository.*;
+import com.example.food_drugs.responses.AlarmsReportResponseWrapper;
 import com.example.food_drugs.responses.DeviceAttributes;
+import com.example.food_drugs.responses.GraphDataWrapper;
+import com.example.food_drugs.responses.GraphObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -2148,7 +2151,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 	}
 
-	public void getAlarmSection(long deviceID,String start,String end){
+	public AlarmsReportResponseWrapper getAlarmSection(long deviceID,String start,String end){
 		try {
 
 			String storingCategory = new ObjectMapper().readValue(
@@ -2227,29 +2230,37 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			List<MongoEvents> tempOverAlarms = mongoEventsRepository
 					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
 							endDate,"tepmperatureIncreasedAlarm");
-			tempOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			if(tempOverAlarms.size()>1){
+				tempOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
 
 
 			List<MongoEvents> tempBelowAlarms = mongoEventsRepository
 					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
 							endDate,"tepmperatureDecreasedAlarm");
-			tempBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			if(tempBelowAlarms.size()>1){
+				tempBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
 
 
 			List<MongoEvents> humidityOverAlarms = mongoEventsRepository
 					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
 							endDate,"humidityIncreasedAlarm");
-			humidityOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			if(humidityOverAlarms.size()>1){
+				humidityOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
 
 			List<MongoEvents> humidityBelowAlarms = mongoEventsRepository
 					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
 							endDate,"humidityDecreasedAlarm");
-			humidityBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			if(humidityBelowAlarms.size()>1){
+				humidityBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
 
 
 			List<AlarmSectionWrapperResponse> alarmSectionWrapperList = new ArrayList<>();
 
-			if(!tempAlarmConditionOver.equals("")){
+			if(!tempAlarmConditionOver.equals("")&&tempOverAlarms.size()>0){
 
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
@@ -2260,7 +2271,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 			}
 
-			if(!tempAlarmConditionBelow.equals("")){
+			if(!tempAlarmConditionBelow.equals("")&&tempBelowAlarms.size()>0){
 				alarmSectionWrapperList.add(
 					AlarmSectionWrapperResponse.builder()
 							.alarmCondition(tempAlarmConditionBelow)
@@ -2270,7 +2281,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				);
 			}
 
-			if(!humAlarmConditionOver.equals("")){
+			if(!humAlarmConditionOver.equals("")&&humidityOverAlarms.size()>0){
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 								.alarmCondition(humAlarmConditionOver)
@@ -2280,7 +2291,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				);
 			}
 
-			if(!humAlarmConditionBelow.equals("")){
+			if(!humAlarmConditionBelow.equals("")&&humidityBelowAlarms.size()>0){
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 								.alarmCondition(humAlarmConditionBelow)
@@ -2289,13 +2300,39 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 								.build()
 				);
 			}
+
+
 			List<Position> positionList =positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(startDate,endDate,deviceID);
+			List<GraphObject> temperatureGraph = new ArrayList<>();
+			List<GraphObject> humidityGraph = new ArrayList<>();
+			List<GraphDataWrapper> graphDataWrapperList = new ArrayList<>();
 			for(Position position :positionList){
-				getAvgTemp(position.getAttributes());
+				temperatureGraph.add(GraphObject.builder()
+						.name(position.getDevicetime().toString())
+						.value(getAvgTemp(position.getAttributes()))
+						.build());
+				humidityGraph.add(GraphObject.builder()
+						.name(position.getDevicetime().toString())
+						.value((Double)position.getAttributes().get("hum1"))
+						.build());
 			}
+			graphDataWrapperList.add(GraphDataWrapper.builder()
+					.series("series")
+					.graphObjectList(temperatureGraph).build());
+
+			graphDataWrapperList.add(GraphDataWrapper.builder()
+					.series("series")
+					.graphObjectList(humidityGraph).build());
+
+			return AlarmsReportResponseWrapper.builder()
+					.alarmsSection(alarmSectionWrapperList)
+					.graphDataWrapperList(graphDataWrapperList)
+					.build();
 
 		}catch (Exception e){
-
+			System.out.println(e);
+			System.out.println(e.getMessage());
+			return null;
 		}
 	}
 
@@ -2304,91 +2341,106 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	public Double getAvgTemp(Map attributesMap) {
 		int count = 0;
 		Double avg = 0.0;
-		System.out.println(attributesMap.keySet());
-		System.out.println(attributesMap.containsKey("temp"));
-		System.out.println(attributesMap.containsKey("temp1"));
-		if(attributesMap.containsKey("temp1")) {
-			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
-				System.out.println("temp1"+attributesMap.get("temp1")); 
-				count++;
-				avg += (Double)attributesMap.get("temp1");
-			}
+		List<Double> avgs = new ArrayList<>();
+		if(attributesMap.keySet().toString().contains("temp")){
+			attributesMap.keySet().stream().filter(o ->
+					o.toString().contains("temp"))
+					.forEach(o -> {
+						if(!attributesMap.get(o).equals(0.0) && !attributesMap.get(o).equals(300.0)) {
+							avgs.add(Double.parseDouble(attributesMap.get(o).toString()));
+						}
+
+
+					});
 		}
-		if(attributesMap.containsKey("temp2") && !attributesMap.get("temp2").equals(300.0)) {
-			if(!attributesMap.get("temp2").equals(0.0)){
-				System.out.println("temp2"+attributesMap.get("temp2")); 
-				count++;
-				avg += (Double)attributesMap.get("temp2");
-			}
+		for(Double avrage : avgs){
+			avg+=avrage;
 		}
-		if(attributesMap.containsKey("temp3") && !attributesMap.get("temp2").equals(300.0)) {
-			if(!attributesMap.get("temp3").equals(0.0)){
-				System.out.println("temp3"+attributesMap.get("temp3"));
-				count++;
-				avg += (Double)attributesMap.get("temp3");
-			}
+		if(avgs.size()>0){
+			avg/=avgs.size();
 		}
-		if(attributesMap.containsKey("temp4") && !attributesMap.get("temp2").equals(300.0)) {
-			if(!attributesMap.get("temp4").equals(0)){
-				System.out.println("temp4"+attributesMap.get("temp4"));
-				count++;
-				avg += (Double)attributesMap.get("temp4");
-			}
-		}
-		if(attributesMap.containsKey("temp6") && !attributesMap.get("temp6").equals(300.0)) {
-			if(!attributesMap.get("temp6").equals(0.0)){
-				System.out.println("temp6"+attributesMap.get("temp6"));
-				count++;
-				avg += (Double)attributesMap.get("temp6");
-			}
-		}
-		if(attributesMap.containsKey("temp7") && !attributesMap.get("temp7").equals(300.0)) {
-			if(!attributesMap.get("temp7").equals(0.0)){
-				System.out.println("temp7"+attributesMap.get("temp7"));
-				count++;
-				avg += (Double)attributesMap.get("temp7");
-				
-			}
-		}
-		if(attributesMap.containsKey("temp8") && !attributesMap.get("temp8").equals(300.0)) {
-			if(!attributesMap.get("temp8").equals(0.0)){
-				System.out.println("temp8"+attributesMap.get("temp8"));
-				count++;
-				avg += (Double)attributesMap.get("temp8");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp1") && !attributesMap.get("wiretemp1").equals(300.0)) {
-			if(!attributesMap.get("wiretemp1").equals(0.0)){
-				System.out.println("wire1"+attributesMap.get("wiretemp1"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp1");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp2") && !attributesMap.get("wiretemp2").equals(300.0)) {
-			if(!attributesMap.get("wiretemp2").equals(0.0)){
-				System.out.println("wire2"+attributesMap.get("wiretemp2"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp2");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp3") && !attributesMap.get("wiretemp3").equals(300.0)) {
-			if(!attributesMap.get("wiretemp3").equals(0.0)){
-				System.out.println("wire3"+attributesMap.get("wiretemp3"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp3");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp4") && !attributesMap.get("wiretemp4").equals(300.0)) {
-			if(!attributesMap.get("wiretemp4").equals(0.0)){
-				System.out.println("wire4"+attributesMap.get("wiretemp4"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp4");
-			}
-		}
-		if(avg>0) {
-			avg = avg/count;
-		}
-		
+//		if(attributesMap.containsKey("temp1")) {
+//			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
+//				System.out.println("temp1"+attributesMap.get("temp1"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp1");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp2") && !attributesMap.get("temp2").equals(300.0)) {
+//			if(!attributesMap.get("temp2").equals(0.0)){
+//				System.out.println("temp2"+attributesMap.get("temp2"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp2");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp3") && !attributesMap.get("temp2").equals(300.0)) {
+//			if(!attributesMap.get("temp3").equals(0.0)){
+//				System.out.println("temp3"+attributesMap.get("temp3"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp3");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp4") && !attributesMap.get("temp2").equals(300.0)) {
+//			if(!attributesMap.get("temp4").equals(0)){
+//				System.out.println("temp4"+attributesMap.get("temp4"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp4");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp6") && !attributesMap.get("temp6").equals(300.0)) {
+//			if(!attributesMap.get("temp6").equals(0.0)){
+//				System.out.println("temp6"+attributesMap.get("temp6"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp6");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp7") && !attributesMap.get("temp7").equals(300.0)) {
+//			if(!attributesMap.get("temp7").equals(0.0)){
+//				System.out.println("temp7"+attributesMap.get("temp7"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp7");
+//
+//			}
+//		}
+//		if(attributesMap.containsKey("temp8") && !attributesMap.get("temp8").equals(300.0)) {
+//			if(!attributesMap.get("temp8").equals(0.0)){
+//				System.out.println("temp8"+attributesMap.get("temp8"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp8");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp1") && !attributesMap.get("wiretemp1").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp1").equals(0.0)){
+//				System.out.println("wire1"+attributesMap.get("wiretemp1"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp1");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp2") && !attributesMap.get("wiretemp2").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp2").equals(0.0)){
+//				System.out.println("wire2"+attributesMap.get("wiretemp2"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp2");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp3") && !attributesMap.get("wiretemp3").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp3").equals(0.0)){
+//				System.out.println("wire3"+attributesMap.get("wiretemp3"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp3");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp4") && !attributesMap.get("wiretemp4").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp4").equals(0.0)){
+//				System.out.println("wire4"+attributesMap.get("wiretemp4"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp4");
+//			}
+//		}
+//		if(avg>0) {
+//			avg = avg/count;
+//		}
+//
 		return avg;
 		
 	}
