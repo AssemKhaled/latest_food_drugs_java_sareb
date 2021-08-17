@@ -2158,22 +2158,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			e.printStackTrace();
 		}
 		
-		
-		
-		//get trip alarms ---->ehab
-		//get graphs data ----> ehab
-		//get trip details --->maryam
-		
+
+
+
 		ArrayList<Object> response = new ArrayList();
-//		response.add(summaryData);
-//		response.add(reportDetails);
 
-		//getSummaryData(request);
-		//get trip alarms ---->ehab
-		//get graphs data ----> ehab
-		//get trip details --->maryam
-
-//		here
 		AlarmsReportResponseWrapper alarmsReport = new AlarmsReportResponseWrapper();
 		alarmsReport = getAlarmSection(request.getVehilceId(),request.getStartTime(),request.getEndTime());
 		alarmsReport.setReportDetailsData(reportDetails);
@@ -2369,8 +2358,9 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				humidityBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
 			}
 
-			SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-mm-dd HH:MM:SS");
-			SimpleDateFormat formatForGraph = new SimpleDateFormat("yyyy-mm-dd HH:MM");
+
+			SimpleDateFormat formatForGraph = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
 
 			List<AlarmSectionWrapperResponse> alarmSectionWrapperList = new ArrayList<>();
 
@@ -2379,7 +2369,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 						.alarmCondition(tempAlarmConditionOver)
-						.firstAlarmTime(formatDateJava.format(tempOverAlarms.get(0).getServertime()))
+						.firstAlarmTime(formatForGraph.format(tempOverAlarms.get(0).getServertime()))
 						.numOfAlarms(tempOverAlarms.size())
 						.build());
 
@@ -2389,7 +2379,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 					AlarmSectionWrapperResponse.builder()
 							.alarmCondition(tempAlarmConditionBelow)
-							.firstAlarmTime(formatDateJava.format(tempBelowAlarms.get(0).getServertime()))
+							.firstAlarmTime(formatForGraph.format(tempBelowAlarms.get(0).getServertime()))
 							.numOfAlarms(tempBelowAlarms.size())
 							.build()
 				);
@@ -2399,7 +2389,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 								.alarmCondition(humAlarmConditionOver)
-								.firstAlarmTime(formatDateJava.format(humidityOverAlarms.get(0).getServertime()))
+								.firstAlarmTime(formatForGraph.format(humidityOverAlarms.get(0).getServertime()))
 								.numOfAlarms(humidityOverAlarms.size())
 								.build()
 				);
@@ -2409,7 +2399,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 								.alarmCondition(humAlarmConditionBelow)
-								.firstAlarmTime(formatDateJava.format(humidityBelowAlarms.get(0).getServertime()))
+								.firstAlarmTime(formatForGraph.format(humidityBelowAlarms.get(0).getServertime()))
 								.numOfAlarms(humidityBelowAlarms.size())
 								.build()
 				);
@@ -2425,13 +2415,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						.name(formatForGraph.format(position.getDevicetime()))
 						.value(getAvgTemp(position.getAttributes()))
 						.build());
-//				double hum = (Double)position.getAttributes().get("hum1") ;
-//				if(hum>0&&hum<300){
+
 					humidityGraph.add(GraphObject.builder()
 							.name(formatForGraph.format(position.getDevicetime()))
 							.value(getHumAvg(position.getAttributes()))
 							.build());
-//				}
 			}
 
 
@@ -2590,10 +2578,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	
 	public List<List<ReportDetails>> getReportDetails(List<Position> positions) {
 		List<ReportDetails> reportDetailsList = new ArrayList();
-		SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-mm-dd");
-		SimpleDateFormat formatTime = new SimpleDateFormat("HH:MM:SS");
-		
-		
+		SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat formatTime = new SimpleDateFormat("hh:mm:ss");
 		for(Position position : positions) {
 			
 			ReportDetails reportDetails = new ReportDetails();
@@ -2638,7 +2624,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	}
 	
 	public List<Position> getDevicePositionsWithinDateRange(Date from , Date to , long deviceid){
-		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(from,to,12L);
+		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(from,to,deviceid);
 		return pos;
 	}
 	
