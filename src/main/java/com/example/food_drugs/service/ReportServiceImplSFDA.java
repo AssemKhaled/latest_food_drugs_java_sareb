@@ -2355,7 +2355,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				humidityBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
 			}
 
-
+			SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-mm-dd HH:MM:SS");
 			List<AlarmSectionWrapperResponse> alarmSectionWrapperList = new ArrayList<>();
 
 			if(!tempAlarmConditionOver.equals("")&&tempOverAlarms.size()>0){
@@ -2363,7 +2363,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 						.alarmCondition(tempAlarmConditionOver)
-						.firstAlarmTime(tempOverAlarms.get(0).getServertime())
+						.firstAlarmTime(formatDateJava.format(tempOverAlarms.get(0).getServertime()))
 						.numOfAlarms(tempOverAlarms.size())
 						.build());
 
@@ -2373,7 +2373,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 					AlarmSectionWrapperResponse.builder()
 							.alarmCondition(tempAlarmConditionBelow)
-							.firstAlarmTime(tempBelowAlarms.get(0).getServertime())
+							.firstAlarmTime(formatDateJava.format(tempBelowAlarms.get(0).getServertime()))
 							.numOfAlarms(tempBelowAlarms.size())
 							.build()
 				);
@@ -2383,7 +2383,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 								.alarmCondition(humAlarmConditionOver)
-								.firstAlarmTime(humidityOverAlarms.get(0).getServertime())
+								.firstAlarmTime(formatDateJava.format(humidityOverAlarms.get(0).getServertime()))
 								.numOfAlarms(humidityOverAlarms.size())
 								.build()
 				);
@@ -2393,7 +2393,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				alarmSectionWrapperList.add(
 						AlarmSectionWrapperResponse.builder()
 								.alarmCondition(humAlarmConditionBelow)
-								.firstAlarmTime(humidityBelowAlarms.get(0).getServertime())
+								.firstAlarmTime(formatDateJava.format(humidityBelowAlarms.get(0).getServertime()))
 								.numOfAlarms(humidityBelowAlarms.size())
 								.build()
 				);

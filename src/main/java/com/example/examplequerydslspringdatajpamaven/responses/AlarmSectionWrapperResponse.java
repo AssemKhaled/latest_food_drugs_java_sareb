@@ -10,6 +10,6 @@ import java.util.*;
 @Builder
 public class AlarmSectionWrapperResponse {
     String alarmCondition;
-    Date firstAlarmTime;
+    String firstAlarmTime;
     int numOfAlarms;
 }
