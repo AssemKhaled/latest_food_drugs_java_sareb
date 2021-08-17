@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,7 +41,9 @@ import com.example.food_drugs.entity.InventoryNotification;
 import com.example.food_drugs.entity.MonitorStaticstics;
 import com.example.food_drugs.entity.MonogInventoryNotification;
 import com.example.food_drugs.entity.NotificationAttributes;
+import com.example.food_drugs.entity.PdfSummaryData;
 import com.example.food_drugs.entity.Position;
+import com.example.food_drugs.entity.ReportDetails;
 import com.example.food_drugs.entity.Series;
 import com.example.food_drugs.entity.TripDetailsRequest;
 import com.example.food_drugs.entity.Warehouse;
@@ -2120,18 +2123,39 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	@Override
 	public ResponseEntity<?> getTripPdfDetails(TripDetailsRequest request) {
 		//get trip summary data --->maryam
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+		formatter.setLenient(false);
+//		Date from;
+		try {
+			Date from = formatter.parse(request.getStartTime());
+			Date to = formatter.parse(request.getEndTime());
+			List<Position> positions = getDevicePositionsWithinDateRange(from , to , 12L);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		PdfSummaryData summaryData = getSummaryData(request);
 		//get trip alarms ---->ehab
 		//get graphs data ----> ehab
 		//get trip details --->maryam
-//		here
 		
-		return null;
+		ArrayList<PdfSummaryData> response = new ArrayList();
+		response.add(summaryData);
+//		here
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",response);
+		return  ResponseEntity.ok().body(getObjectResponse);
+//		return null;
 		
 	}
 	
-	public void getSummaryData(TripDetailsRequest request) {
-		System.out.println("startTime"+request.getStartTime());
-		System.out.println("endTime"+request.getEndTime());
+	public PdfSummaryData getSummaryData(TripDetailsRequest request) {
+		int count = 0;
+		Double avg = 0.0;
+		Double max = 0.0;
+		Double min = 0.0;
+		PdfSummaryData pdfSummary = new PdfSummaryData() ;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 		formatter.setLenient(false);
@@ -2141,9 +2165,49 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			Date date2 = formatter.parse(request.getEndTime());
 			List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(date,date2,12L) ;
 			for(Position position :pos) {
-//				String attr = position.getAttributes();
-				System.out.println("deviceid:"+position.getDeviceid());
+
+				Map attributesMap = position.getAttributes();
+				Iterator<Map.Entry<String, Integer>> iterator = attributesMap.entrySet().iterator();
+//				System.out.println(getAvgTemp(attributesMap));
+				Double recordAvg = getAvgTemp(attributesMap);
+				
+				if(recordAvg != 0.0) {
+//					
+					if(count == 0) {
+						max = recordAvg;
+						min = recordAvg;
+						avg = recordAvg;
+						count ++;
+					}
+					else {
+						if(recordAvg > max) {
+							max = recordAvg;
+						}
+						if(recordAvg < min) {
+							min = recordAvg;
+						}
+						avg += recordAvg;
+						count ++;
+						
+					}
+					
+				}
+				
+				
+//			    while (iterator.hasNext()) {
+//			        Map.Entry<String, Integer> entry = iterator.next();
+//			        System.out.println(entry.getKey() + ":" + entry.getValue());
+//			    }
+				
 			}
+			avg = avg/count;
+			System.out.println("max"+ max);
+			System.out.println("min"+ min);
+			System.out.println("avg"+ avg);
+			pdfSummary = PdfSummaryData.builder().average(avg)
+					.max(max).min(min).totalLength(pos.size())
+					  .build();
+			
 
 			System.out.println("date"+date);
 		} catch (ParseException e) {
@@ -2151,9 +2215,112 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			e.printStackTrace();
 		}
 		// TODO Auto-generated method stub
-		
+		return pdfSummary;
+//		return null;
 		
 	}
+	
+	public Double getAvgTemp(Map attributesMap) {
+		int count = 0;
+		Double avg = 0.0;
+		System.out.println(attributesMap.containsKey("temp1"));  
+		if(attributesMap.containsKey("temp1")) {
+			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
+				System.out.println("temp1"+attributesMap.get("temp1")); 
+				count++;
+				avg += (Double)attributesMap.get("temp1");
+			}
+		}
+		if(attributesMap.containsKey("temp2") && !attributesMap.get("temp2").equals(300.0)) {
+			if(!attributesMap.get("temp2").equals(0.0)){
+				System.out.println("temp2"+attributesMap.get("temp2")); 
+				count++;
+				avg += (Double)attributesMap.get("temp2");
+			}
+		}
+		if(attributesMap.containsKey("temp3") && !attributesMap.get("temp2").equals(300.0)) {
+			if(!attributesMap.get("temp3").equals(0.0)){
+				System.out.println("temp3"+attributesMap.get("temp3"));
+				count++;
+				avg += (Double)attributesMap.get("temp3");
+			}
+		}
+		if(attributesMap.containsKey("temp4") && !attributesMap.get("temp2").equals(300.0)) {
+			if(!attributesMap.get("temp4").equals(0)){
+				System.out.println("temp4"+attributesMap.get("temp4"));
+				count++;
+				avg += (Double)attributesMap.get("temp4");
+			}
+		}
+		if(attributesMap.containsKey("temp6") && !attributesMap.get("temp6").equals(300.0)) {
+			if(!attributesMap.get("temp6").equals(0.0)){
+				System.out.println("temp6"+attributesMap.get("temp6"));
+				count++;
+				avg += (Double)attributesMap.get("temp6");
+			}
+		}
+		if(attributesMap.containsKey("temp7") && !attributesMap.get("temp7").equals(300.0)) {
+			if(!attributesMap.get("temp7").equals(0.0)){
+				System.out.println("temp7"+attributesMap.get("temp7"));
+				count++;
+				avg += (Double)attributesMap.get("temp7");
+				
+			}
+		}
+		if(attributesMap.containsKey("temp8") && !attributesMap.get("temp8").equals(300.0)) {
+			if(!attributesMap.get("temp8").equals(0.0)){
+				System.out.println("temp8"+attributesMap.get("temp8"));
+				count++;
+				avg += (Double)attributesMap.get("temp8");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp1") && !attributesMap.get("wiretemp1").equals(300.0)) {
+			if(!attributesMap.get("wiretemp1").equals(0.0)){
+				System.out.println("wire1"+attributesMap.get("wiretemp1"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp1");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp2") && !attributesMap.get("wiretemp2").equals(300.0)) {
+			if(!attributesMap.get("wiretemp2").equals(0.0)){
+				System.out.println("wire2"+attributesMap.get("wiretemp2"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp2");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp3") && !attributesMap.get("wiretemp3").equals(300.0)) {
+			if(!attributesMap.get("wiretemp3").equals(0.0)){
+				System.out.println("wire3"+attributesMap.get("wiretemp3"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp3");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp4") && !attributesMap.get("wiretemp4").equals(300.0)) {
+			if(!attributesMap.get("wiretemp4").equals(0.0)){
+				System.out.println("wire4"+attributesMap.get("wiretemp4"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp4");
+			}
+		}
+		if(avg>0) {
+			avg = avg/count;
+		}
+		
+		return avg;
+		
+	}
+	
+	public ReportDetails getReportDetails() {
+		
+		
+		return null;
+	}
+	
+	public List<Position> getDevicePositionsWithinDateRange(Date from , Date to , long deviceid){
+		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(from,to,12L);
+		return pos;
+	}
+	
 	
 	
 	

@@ -1,6 +1,8 @@
 package com.example.food_drugs.entity;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Id;
 
@@ -10,19 +12,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.example.examplequerydslspringdatajpamaven.entity.Attributes;
 
 @Document(collection = "tc_positions")
-public class Position extends Attributes{
-	
-	public Position(ObjectId _id) {
+public class Position {
+
+
+	public Position(ObjectId _id, Date devicetime, Long deviceid, Map<String, Object> attributes) {
 		super();
 		this._id = _id;
-//		this.protocol = protocol;
-//		this.servertime = servertime;
 		this.devicetime = devicetime;
-//		this.fixtime = fixtime;
-//		this.latitude = latitude;
-//		this.longitude = longitude;
-//		this.speed = speed;
 		this.deviceid = deviceid;
+		this.attributes = attributes;
 	}
 
 	public Position() {
@@ -48,6 +46,8 @@ public class Position extends Attributes{
 //	private Double speed;
 //	
 	private Long deviceid;
+	
+	private Map<String, Object> attributes = new LinkedHashMap<>();
 
 	public ObjectId get_id() {
 		return _id;
@@ -119,6 +119,14 @@ public class Position extends Attributes{
 
 	public void setDeviceid(Long deviceid) {
 		this.deviceid = deviceid;
+	}
+
+	public Map<String, Object> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(Map<String, Object> attributes) {
+		this.attributes = attributes;
 	}
 
 	
