@@ -2356,6 +2356,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			}
 
 			SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-mm-dd HH:MM:SS");
+			SimpleDateFormat formatForGraph = new SimpleDateFormat("yyyy-mm-dd HH:MM");
+
 			List<AlarmSectionWrapperResponse> alarmSectionWrapperList = new ArrayList<>();
 
 			if(!tempAlarmConditionOver.equals("")&&tempOverAlarms.size()>0){
@@ -2406,14 +2408,14 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 			for(Position position :positionList){
 				temperatureGraph.add(GraphObject.builder()
-						.name(position.getDevicetime().toString())
+						.name(formatForGraph.format(position.getDevicetime()))
 						.value(getAvgTemp(position.getAttributes()))
 						.build());
 //				double hum = (Double)position.getAttributes().get("hum1") ;
 //				if(hum>0&&hum<300){
 					humidityGraph.add(GraphObject.builder()
-							.name(position.getDevicetime().toString())
-							.value(getAvgTemp(position.getAttributes()))
+							.name(formatForGraph.format(position.getDevicetime()))
+							.value(getHumAvg(position.getAttributes()))
 							.build());
 //				}
 			}
