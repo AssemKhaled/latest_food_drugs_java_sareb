@@ -2,15 +2,23 @@ package com.example.food_drugs.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.*;
 
 import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
-import com.example.food_drugs.entity.*;
 import com.example.food_drugs.repository.*;
 import com.example.food_drugs.responses.DeviceAttributes;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -32,6 +40,24 @@ import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.GroupsServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
+
+import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.entity.Inventory;
+import com.example.food_drugs.entity.InventoryLastData;
+import com.example.food_drugs.entity.InventoryNotification;
+import com.example.food_drugs.entity.MonitorStaticstics;
+import com.example.food_drugs.entity.Position;
+import com.example.food_drugs.entity.ReportDetails;
+import com.example.food_drugs.entity.Series;
+import com.example.food_drugs.entity.TripDetailsRequest;
+import com.example.food_drugs.entity.Warehouse;
+import com.example.food_drugs.repository.InventoryRepository;
+import com.example.food_drugs.repository.MongoInventoryLastDataRepo;
+import com.example.food_drugs.repository.MongoInventoryNotificationRepo;
+import com.example.food_drugs.repository.MongoPositionRepoSFDA;
+import com.example.food_drugs.repository.PositionMongoSFDARepository;
+import com.example.food_drugs.repository.WarehousesRepository;
+
 
 
 /**
@@ -83,14 +109,15 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	@Autowired
 	private MongoPositionRepoSFDA mongoPositionRepoSFDA;
 	
-	@Autowired
-	private PositionMongoSFDARepository positionMongoSFDARepository ;
+
+	private final PositionMongoSFDARepository positionMongoSFDARepository ;
 
 	private final DeviceRepositorySFDA deviceRepositorySFDA ;
 
 	private final MongoEventsRepository mongoEventsRepository;
 
-	public ReportServiceImplSFDA(DeviceRepositorySFDA deviceRepositorySFDA, MongoEventsRepository mongoEventsRepository) {
+	public ReportServiceImplSFDA(PositionMongoSFDARepository positionMongoSFDARepository, DeviceRepositorySFDA deviceRepositorySFDA, MongoEventsRepository mongoEventsRepository) {
+		this.positionMongoSFDARepository = positionMongoSFDARepository;
 		this.deviceRepositorySFDA = deviceRepositorySFDA;
 		this.mongoEventsRepository = mongoEventsRepository;
 	}
@@ -2262,39 +2289,121 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 								.build()
 				);
 			}
-
+			List<Position> positionList =positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(startDate,endDate,deviceID);
+			for(Position position :positionList){
+				getAvgTemp(position.getAttributes());
+			}
 
 		}catch (Exception e){
 
 		}
 	}
-	public void getSummaryData(TripDetailsRequest request) {
-		System.out.println("startTime"+request.getStartTime());
-		System.out.println("endTime"+request.getEndTime());
 
-		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
-		formatter.setLenient(false);
 
-		try {
-			Date date = formatter.parse(request.getStartTime());
-			Date date2 = formatter.parse(request.getEndTime());
-			List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(date,date2,12L) ;
-			for(Position position :pos) {
-//				String attr = position.getAttributes();
-				Map attributesMap = position.getAttributes();
-				System.out.println("deviceid:"+position.getDeviceid());
-				System.out.println("deviceattr:"+attributesMap);
+
+	public Double getAvgTemp(Map attributesMap) {
+		int count = 0;
+		Double avg = 0.0;
+		System.out.println(attributesMap.keySet());
+		System.out.println(attributesMap.containsKey("temp"));
+		System.out.println(attributesMap.containsKey("temp1"));
+		if(attributesMap.containsKey("temp1")) {
+			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
+				System.out.println("temp1"+attributesMap.get("temp1")); 
+				count++;
+				avg += (Double)attributesMap.get("temp1");
 			}
-
-			System.out.println("date"+date);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		// TODO Auto-generated method stub
+		if(attributesMap.containsKey("temp2") && !attributesMap.get("temp2").equals(300.0)) {
+			if(!attributesMap.get("temp2").equals(0.0)){
+				System.out.println("temp2"+attributesMap.get("temp2")); 
+				count++;
+				avg += (Double)attributesMap.get("temp2");
+			}
+		}
+		if(attributesMap.containsKey("temp3") && !attributesMap.get("temp2").equals(300.0)) {
+			if(!attributesMap.get("temp3").equals(0.0)){
+				System.out.println("temp3"+attributesMap.get("temp3"));
+				count++;
+				avg += (Double)attributesMap.get("temp3");
+			}
+		}
+		if(attributesMap.containsKey("temp4") && !attributesMap.get("temp2").equals(300.0)) {
+			if(!attributesMap.get("temp4").equals(0)){
+				System.out.println("temp4"+attributesMap.get("temp4"));
+				count++;
+				avg += (Double)attributesMap.get("temp4");
+			}
+		}
+		if(attributesMap.containsKey("temp6") && !attributesMap.get("temp6").equals(300.0)) {
+			if(!attributesMap.get("temp6").equals(0.0)){
+				System.out.println("temp6"+attributesMap.get("temp6"));
+				count++;
+				avg += (Double)attributesMap.get("temp6");
+			}
+		}
+		if(attributesMap.containsKey("temp7") && !attributesMap.get("temp7").equals(300.0)) {
+			if(!attributesMap.get("temp7").equals(0.0)){
+				System.out.println("temp7"+attributesMap.get("temp7"));
+				count++;
+				avg += (Double)attributesMap.get("temp7");
+				
+			}
+		}
+		if(attributesMap.containsKey("temp8") && !attributesMap.get("temp8").equals(300.0)) {
+			if(!attributesMap.get("temp8").equals(0.0)){
+				System.out.println("temp8"+attributesMap.get("temp8"));
+				count++;
+				avg += (Double)attributesMap.get("temp8");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp1") && !attributesMap.get("wiretemp1").equals(300.0)) {
+			if(!attributesMap.get("wiretemp1").equals(0.0)){
+				System.out.println("wire1"+attributesMap.get("wiretemp1"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp1");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp2") && !attributesMap.get("wiretemp2").equals(300.0)) {
+			if(!attributesMap.get("wiretemp2").equals(0.0)){
+				System.out.println("wire2"+attributesMap.get("wiretemp2"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp2");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp3") && !attributesMap.get("wiretemp3").equals(300.0)) {
+			if(!attributesMap.get("wiretemp3").equals(0.0)){
+				System.out.println("wire3"+attributesMap.get("wiretemp3"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp3");
+			}
+		}
+		if(attributesMap.containsKey("wiretemp4") && !attributesMap.get("wiretemp4").equals(300.0)) {
+			if(!attributesMap.get("wiretemp4").equals(0.0)){
+				System.out.println("wire4"+attributesMap.get("wiretemp4"));
+				count++;
+				avg += (Double)attributesMap.get("wiretemp4");
+			}
+		}
+		if(avg>0) {
+			avg = avg/count;
+		}
 		
+		return avg;
 		
 	}
+	
+	public ReportDetails getReportDetails() {
+		
+		
+		return null;
+	}
+	
+	public List<Position> getDevicePositionsWithinDateRange(Date from , Date to , long deviceid){
+		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(from,to,12L);
+		return pos;
+	}
+	
 	
 	
 	

@@ -15,13 +15,13 @@ import com.example.food_drugs.entity.Position;
 public interface PositionMongoSFDARepository extends MongoRepository<Position, String> {
 	
 //	@Override
-	public Position findBy_id(ObjectId _id);
+	Position findBy_id(ObjectId _id);
 	
-	public List<Position> findAllByDeviceid(long i);
+	List<Position> findAllByDeviceid(long i);
 	
 
-	public List<Position> findAllByDevicetimeBetweenAndDeviceid(Date from,Date to,long i);
-	
+	List<Position> findAllByDevicetimeBetweenAndDeviceid(Date from,Date to,long i);
+
 	
 	
 //	public static List<Position> getPositions(){
