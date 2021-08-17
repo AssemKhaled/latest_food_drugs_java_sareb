@@ -10,5 +10,6 @@ import java.util.*;
 @Builder
 public class AlarmsReportResponseWrapper {
     List<AlarmSectionWrapperResponse> alarmsSection ;
-    List<GraphDataWrapper> graphDataWrapperList ;
+    GraphDataWrapper temperatureDataGraph ;
+    GraphDataWrapper humidityDataGraph ;
 }

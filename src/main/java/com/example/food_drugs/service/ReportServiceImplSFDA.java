@@ -2397,7 +2397,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			List<Position> positionList =positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(startDate,endDate,deviceID);
 			List<GraphObject> temperatureGraph = new ArrayList<>();
 			List<GraphObject> humidityGraph = new ArrayList<>();
-			List<GraphDataWrapper> graphDataWrapperList = new ArrayList<>();
+
 			for(Position position :positionList){
 				temperatureGraph.add(GraphObject.builder()
 						.name(position.getDevicetime().toString())
@@ -2411,17 +2411,20 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 							.build());
 				}
 			}
-			graphDataWrapperList.add(GraphDataWrapper.builder()
-					.series("series")
-					.graphObjectList(temperatureGraph).build());
 
-			graphDataWrapperList.add(GraphDataWrapper.builder()
-					.series("series")
-					.graphObjectList(humidityGraph).build());
+
+
 
 			return AlarmsReportResponseWrapper.builder()
 					.alarmsSection(alarmSectionWrapperList)
-					.graphDataWrapperList(graphDataWrapperList)
+					.temperatureDataGraph(
+							GraphDataWrapper.builder()
+							.series("series")
+							.graphObjectList(temperatureGraph).build())
+					.humidityDataGraph(
+							GraphDataWrapper.builder()
+							.series("series")
+							.graphObjectList(humidityGraph).build())
 					.build();
 
 		}catch (Exception e){
@@ -2443,9 +2446,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					o.toString().contains("temp"))
 					.forEach(o -> {
 						if(!attributesMap.get(o).equals(0.0) && !attributesMap.get(o).equals(300.0)) {
-							avgs.add(Double.parseDouble(attributesMap.get(o).toString()));
+							avgs.add((Double) attributesMap.get(o));
 						}
-
 
 					});
 		}
