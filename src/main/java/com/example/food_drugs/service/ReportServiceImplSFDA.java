@@ -2146,7 +2146,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 		formatter.setLenient(false);
 		PdfSummaryData summaryData = new PdfSummaryData();
-		List<ReportDetails> reportDetails = new ArrayList();
+		List<List<ReportDetails>> reportDetails = new ArrayList();
 		try {
 			Date from = formatter.parse(request.getStartTime());
 			Date to = formatter.parse(request.getEndTime());
@@ -2538,10 +2538,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 	}
 	
-	public List<ReportDetails> getReportDetails(List<Position> positions) {
+	public List<List<ReportDetails>> getReportDetails(List<Position> positions) {
 		List<ReportDetails> reportDetailsList = new ArrayList();
 		SimpleDateFormat formatDateJava = new SimpleDateFormat("yyyy-mm-dd");
 		SimpleDateFormat formatTime = new SimpleDateFormat("HH:MM:SS");
+		
 		
 		for(Position position : positions) {
 			
@@ -2566,8 +2567,28 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			reportDetailsList.add(reportDetails);
 			
 		}
+		List<List<ReportDetails>> recordsList = new ArrayList<>();
+		int numOfSensorRecords = positions.size();
+		if(numOfSensorRecords>240){
+			int recordLengthUnit = (numOfSensorRecords/4) +1;
+			recordsList.add(reportDetailsList.subList(0,recordLengthUnit));
+			recordsList.add(reportDetailsList.subList(recordLengthUnit,2*recordLengthUnit));
+			recordsList.add(reportDetailsList.subList((2*recordLengthUnit),3*recordLengthUnit));
+			recordsList.add(reportDetailsList.subList((3*recordLengthUnit),numOfSensorRecords));
+		}else if(numOfSensorRecords>118){
+			int recordLengthUnit = 59;
+			recordsList.add(reportDetailsList.subList(0,recordLengthUnit));
+			recordsList.add(reportDetailsList.subList(recordLengthUnit,2*recordLengthUnit));
+			recordsList.add(reportDetailsList.subList(2*recordLengthUnit,numOfSensorRecords));
+		}else if (numOfSensorRecords>59){
+			int recordLengthUnit = 59;
+			recordsList.add(reportDetailsList.subList(0,recordLengthUnit));
+			recordsList.add(reportDetailsList.subList(recordLengthUnit,numOfSensorRecords));
+		}else{
+			recordsList.add(reportDetailsList);
+		}
 		
-		return reportDetailsList;
+		return recordsList;
 	}
 	
 	public List<Position> getDevicePositionsWithinDateRange(Date from , Date to , long deviceid){
