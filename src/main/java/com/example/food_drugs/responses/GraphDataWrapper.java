@@ -8,6 +8,6 @@ import java.util.*;
 @Setter
 @Getter
 public class GraphDataWrapper {
-    String series;
-    List<GraphObject> graphObjectList;
+    String name;
+    List<GraphObject> series;
 }

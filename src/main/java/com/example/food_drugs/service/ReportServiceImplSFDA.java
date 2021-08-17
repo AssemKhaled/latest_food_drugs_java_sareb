@@ -2419,12 +2419,12 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					.alarmsSection(alarmSectionWrapperList)
 					.temperatureDataGraph(
 							GraphDataWrapper.builder()
-							.series("series")
-							.graphObjectList(temperatureGraph).build())
+							.name("temperature")
+							.series(temperatureGraph).build())
 					.humidityDataGraph(
 							GraphDataWrapper.builder()
-							.series("series")
-							.graphObjectList(humidityGraph).build())
+							.name("humidity")
+							.series(humidityGraph).build())
 					.build();
 
 		}catch (Exception e){
@@ -2434,6 +2434,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		}
 
 	}
+
 
 
 
