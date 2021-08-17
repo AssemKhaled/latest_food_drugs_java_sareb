@@ -2403,10 +2403,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						.name(position.getDevicetime().toString())
 						.value(getAvgTemp(position.getAttributes()))
 						.build());
-				humidityGraph.add(GraphObject.builder()
-						.name(position.getDevicetime().toString())
-						.value((Double)position.getAttributes().get("hum1"))
-						.build());
+				double hum = (Double)position.getAttributes().get("hum1") ;
+				if(hum>0&&hum<300){
+					humidityGraph.add(GraphObject.builder()
+							.name(position.getDevicetime().toString())
+							.value(hum)
+							.build());
+				}
 			}
 			graphDataWrapperList.add(GraphDataWrapper.builder()
 					.series("series")
