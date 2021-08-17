@@ -2150,7 +2150,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		try {
 			Date from = formatter.parse(request.getStartTime());
 			Date to = formatter.parse(request.getEndTime());
-			List<Position> positions = getDevicePositionsWithinDateRange(from , to , 12L);
+			List<Position> positions = getDevicePositionsWithinDateRange(from , to , request.getVehilceId());
 			summaryData = getSummaryData(positions);
 			reportDetails = getReportDetails(positions);
 		} catch (ParseException e) {
@@ -2165,8 +2165,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		//get trip details --->maryam
 		
 		ArrayList<Object> response = new ArrayList();
-		response.add(summaryData);
-		response.add(reportDetails);
+//		response.add(summaryData);
+//		response.add(reportDetails);
 
 		//getSummaryData(request);
 		//get trip alarms ---->ehab
@@ -2176,7 +2176,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //		here
 		AlarmsReportResponseWrapper alarmsReport = new AlarmsReportResponseWrapper();
 		alarmsReport = getAlarmSection(request.getVehilceId(),request.getStartTime(),request.getEndTime());
+		alarmsReport.setReportDetailsData(reportDetails);
+		alarmsReport.setSummaryData(summaryData);
 		response.add(alarmsReport);
+		
 		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",response);
 		return  ResponseEntity.ok().body(getObjectResponse);
 		

@@ -154,7 +154,7 @@ public class InventoryController {
 	
 
 	@GetMapping("/getEasyCloudData")
-//    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
 	public ResponseEntity<?> getEasyCloudData() {
 		
 		return inventoryServiceImpl.getEasyCloudData();
