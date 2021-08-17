@@ -2,16 +2,17 @@ package com.example.food_drugs.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
+import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
+import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
+import com.example.food_drugs.entity.*;
+import com.example.food_drugs.repository.*;
+import com.example.food_drugs.responses.DeviceAttributes;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,10 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.example.examplequerydslspringdatajpamaven.entity.Attributes;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Group;
-import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.GroupRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
@@ -33,23 +32,6 @@ import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.GroupsServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
-import com.example.food_drugs.entity.DeviceTempHum;
-import com.example.food_drugs.entity.Inventory;
-import com.example.food_drugs.entity.InventoryLastData;
-import com.example.food_drugs.entity.InventoryNotification;
-import com.example.food_drugs.entity.MonitorStaticstics;
-import com.example.food_drugs.entity.MonogInventoryNotification;
-import com.example.food_drugs.entity.NotificationAttributes;
-import com.example.food_drugs.entity.Position;
-import com.example.food_drugs.entity.Series;
-import com.example.food_drugs.entity.TripDetailsRequest;
-import com.example.food_drugs.entity.Warehouse;
-import com.example.food_drugs.repository.InventoryRepository;
-import com.example.food_drugs.repository.MongoInventoryLastDataRepo;
-import com.example.food_drugs.repository.MongoInventoryNotificationRepo;
-import com.example.food_drugs.repository.MongoPositionRepoSFDA;
-import com.example.food_drugs.repository.PositionMongoSFDARepository;
-import com.example.food_drugs.repository.WarehousesRepository;
 
 
 /**
@@ -103,7 +85,16 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	
 	@Autowired
 	private PositionMongoSFDARepository positionMongoSFDARepository ;
-	
+
+	private final DeviceRepositorySFDA deviceRepositorySFDA ;
+
+	private final MongoEventsRepository mongoEventsRepository;
+
+	public ReportServiceImplSFDA(DeviceRepositorySFDA deviceRepositorySFDA, MongoEventsRepository mongoEventsRepository) {
+		this.deviceRepositorySFDA = deviceRepositorySFDA;
+		this.mongoEventsRepository = mongoEventsRepository;
+	}
+
 	@Override
 	public ResponseEntity<?> getInventoriesReport(String TOKEN, Long[] inventoryIds, int offset, String start,
 			String end, String search, Long userId,String exportData) {
@@ -2120,15 +2111,163 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	@Override
 	public ResponseEntity<?> getTripPdfDetails(TripDetailsRequest request) {
 		//get trip summary data --->maryam
+		//getSummaryData(request);
 		//get trip alarms ---->ehab
 		//get graphs data ----> ehab
 		//get trip details --->maryam
 //		here
-		
+		getAlarmSection(request.getVehilceId(),request.getStartTime(),request.getEndTime());
 		return null;
 		
 	}
-	
+
+	public void getAlarmSection(long deviceID,String start,String end){
+		try {
+
+			String storingCategory = new ObjectMapper().readValue(
+					deviceRepositorySFDA.findOne(deviceID).getAttributes()
+					, DeviceAttributes.class).getStoringCategory();
+			SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+			formatter.setLenient(false);
+			Date startDate = formatter.parse(start);
+			Date endDate = formatter.parse(end);
+			String tempAlarmConditionOver = "";
+			String tempAlarmConditionBelow = "";
+			String humAlarmConditionOver = "";
+			String humAlarmConditionBelow = "";
+			switch (storingCategory){
+				case "SCD1":
+				case "SCM1":
+					tempAlarmConditionOver = "Temperature Over -10°C";
+					tempAlarmConditionBelow = "Temperature  Below -20°C";
+					break;
+				case "SCD2":
+				case "SCM2":
+					tempAlarmConditionOver = "Temperature Over 8°C";
+					tempAlarmConditionBelow = "Temperature Below 2°C";
+					break;
+				case "SCD3":
+				case "SCC1":
+					tempAlarmConditionOver = "Temperature Over 25°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCM3":
+					tempAlarmConditionOver = "Temperature Over 15°C";
+					tempAlarmConditionBelow = "Temperature Below 8°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCM4":
+					tempAlarmConditionOver = "Temperature Over 30°C";
+					tempAlarmConditionBelow ="Temperature Below 15°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCM5":
+					tempAlarmConditionOver = "Temperature Over 40°C";
+					break;
+				case "SCF1":
+					tempAlarmConditionOver = "Temperature Over 25°C ";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCF2":
+					tempAlarmConditionOver = "Temperature over 10°C";
+					tempAlarmConditionBelow = "Temperature Below -1.5°C";
+					humAlarmConditionOver = "Humidity Over 90%";
+					humAlarmConditionBelow = "Humidity Below 75%";
+					break;
+				case "SCF3":
+					tempAlarmConditionOver = "Temperature over 21°C";
+					tempAlarmConditionBelow = "Temperature Below -1.5°C";
+					humAlarmConditionOver = "Humidity Over 95%";
+					humAlarmConditionBelow = "Humidity Below 85%";
+					break;
+				case "SCF4":
+					tempAlarmConditionOver = "Temperature over -18°C";
+					humAlarmConditionOver = "Humidity Over 75%";
+					humAlarmConditionBelow = "Humidity Below 99%";
+					break;
+				case "SCA1":
+					tempAlarmConditionOver = "Temperature over 30°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCP1":
+					tempAlarmConditionOver = "Temperature over 35°C";
+					break;
+				default:
+					tempAlarmConditionOver = "";
+					humAlarmConditionOver = "";
+			}
+
+			List<MongoEvents> tempOverAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"tepmperatureIncreasedAlarm");
+			tempOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+
+
+			List<MongoEvents> tempBelowAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"tepmperatureDecreasedAlarm");
+			tempBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+
+
+			List<MongoEvents> humidityOverAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"humidityIncreasedAlarm");
+			humidityOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+
+			List<MongoEvents> humidityBelowAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"humidityDecreasedAlarm");
+			humidityBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+
+
+			List<AlarmSectionWrapperResponse> alarmSectionWrapperList = new ArrayList<>();
+
+			if(!tempAlarmConditionOver.equals("")){
+
+				alarmSectionWrapperList.add(
+						AlarmSectionWrapperResponse.builder()
+						.alarmCondition(tempAlarmConditionOver)
+						.firstAlarmTime(tempOverAlarms.get(0).getServertime())
+						.numOfAlarms(tempOverAlarms.size())
+						.build());
+
+			}
+
+			if(!tempAlarmConditionBelow.equals("")){
+				alarmSectionWrapperList.add(
+					AlarmSectionWrapperResponse.builder()
+							.alarmCondition(tempAlarmConditionBelow)
+							.firstAlarmTime(tempBelowAlarms.get(0).getServertime())
+							.numOfAlarms(tempBelowAlarms.size())
+							.build()
+				);
+			}
+
+			if(!humAlarmConditionOver.equals("")){
+				alarmSectionWrapperList.add(
+						AlarmSectionWrapperResponse.builder()
+								.alarmCondition(humAlarmConditionOver)
+								.firstAlarmTime(humidityOverAlarms.get(0).getServertime())
+								.numOfAlarms(humidityOverAlarms.size())
+								.build()
+				);
+			}
+
+			if(!humAlarmConditionBelow.equals("")){
+				alarmSectionWrapperList.add(
+						AlarmSectionWrapperResponse.builder()
+								.alarmCondition(humAlarmConditionBelow)
+								.firstAlarmTime(humidityBelowAlarms.get(0).getServertime())
+								.numOfAlarms(humidityBelowAlarms.size())
+								.build()
+				);
+			}
+
+
+		}catch (Exception e){
+
+		}
+	}
 	public void getSummaryData(TripDetailsRequest request) {
 		System.out.println("startTime"+request.getStartTime());
 		System.out.println("endTime"+request.getEndTime());
@@ -2142,7 +2281,9 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(date,date2,12L) ;
 			for(Position position :pos) {
 //				String attr = position.getAttributes();
+				Map attributesMap = position.getAttributes();
 				System.out.println("deviceid:"+position.getDeviceid());
+				System.out.println("deviceattr:"+attributesMap);
 			}
 
 			System.out.println("date"+date);
