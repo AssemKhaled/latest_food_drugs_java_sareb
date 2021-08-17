@@ -2150,7 +2150,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		try {
 			Date from = formatter.parse(request.getStartTime());
 			Date to = formatter.parse(request.getEndTime());
-			List<Position> positions = getDevicePositionsWithinDateRange(from , to , 12L);
+			List<Position> positions = getDevicePositionsWithinDateRange(from , to , request.getVehilceId());
 			summaryData = getSummaryData(positions);
 			reportDetails = getReportDetails(positions);
 		} catch (ParseException e) {

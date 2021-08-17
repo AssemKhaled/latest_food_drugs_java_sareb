@@ -219,14 +219,14 @@ public class ElmConnectionsRestControllerSFDA {
 	}
 	
 	@GetMapping(path ="/lastLocations")
-//    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
 	public ResponseEntity<?> lastLocations(){
 		
 		return elmServiceImplSFDA.lastLocationsSFDA();
 	}
 	
 	@GetMapping(path ="/getExpiredVehicles")
-//	@Scheduled(cron = "0 59 23 ? * *")
+	@Scheduled(cron = "0 59 23 ? * *")
 	public ResponseEntity<?> getExpiredVehicles(){
 		
 		return elmServiceImpl.getExpiredVehicles();
