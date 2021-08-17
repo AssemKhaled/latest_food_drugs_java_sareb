@@ -1,5 +1,6 @@
 package com.example.examplequerydslspringdatajpamaven.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -15,6 +16,8 @@ import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
 public interface MongoEventsRepository extends MongoRepository<MongoEvents, String>{
 
 	@Query(value="{ '_id' : { $in: ?0 } }", delete = true)
-	public List<MongoEvents> deleteByIdIn(List<String> positionIds);
+	List<MongoEvents> deleteByIdIn(List<String> positionIds);
+
+	List<MongoEvents> findAllByDeviceidAndServertimeBetweenAndType(Long deviceId, Date start,Date end , String type);
 
 }

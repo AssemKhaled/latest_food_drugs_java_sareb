@@ -2,17 +2,28 @@ package com.example.food_drugs.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import java.util.*;
+
+import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
+import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
+import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
+import com.example.food_drugs.repository.*;
+import com.example.food_drugs.responses.AlarmsReportResponseWrapper;
+import com.example.food_drugs.responses.DeviceAttributes;
+import com.example.food_drugs.responses.GraphDataWrapper;
+import com.example.food_drugs.responses.GraphObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,10 +31,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.example.examplequerydslspringdatajpamaven.entity.Attributes;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Group;
-import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.GroupRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
@@ -34,13 +43,12 @@ import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.GroupsServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
+
 import com.example.food_drugs.entity.DeviceTempHum;
 import com.example.food_drugs.entity.Inventory;
 import com.example.food_drugs.entity.InventoryLastData;
 import com.example.food_drugs.entity.InventoryNotification;
 import com.example.food_drugs.entity.MonitorStaticstics;
-import com.example.food_drugs.entity.MonogInventoryNotification;
-import com.example.food_drugs.entity.NotificationAttributes;
 import com.example.food_drugs.entity.PdfSummaryData;
 import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.entity.ReportDetails;
@@ -53,6 +61,7 @@ import com.example.food_drugs.repository.MongoInventoryNotificationRepo;
 import com.example.food_drugs.repository.MongoPositionRepoSFDA;
 import com.example.food_drugs.repository.PositionMongoSFDARepository;
 import com.example.food_drugs.repository.WarehousesRepository;
+
 
 
 /**
@@ -104,9 +113,19 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	@Autowired
 	private MongoPositionRepoSFDA mongoPositionRepoSFDA;
 	
-	@Autowired
-	private PositionMongoSFDARepository positionMongoSFDARepository ;
-	
+
+	private final PositionMongoSFDARepository positionMongoSFDARepository ;
+
+	private final DeviceRepositorySFDA deviceRepositorySFDA ;
+
+	private final MongoEventsRepository mongoEventsRepository;
+
+	public ReportServiceImplSFDA(PositionMongoSFDARepository positionMongoSFDARepository, DeviceRepositorySFDA deviceRepositorySFDA, MongoEventsRepository mongoEventsRepository) {
+		this.positionMongoSFDARepository = positionMongoSFDARepository;
+		this.deviceRepositorySFDA = deviceRepositorySFDA;
+		this.mongoEventsRepository = mongoEventsRepository;
+	}
+
 	@Override
 	public ResponseEntity<?> getInventoriesReport(String TOKEN, Long[] inventoryIds, int offset, String start,
 			String end, String search, Long userId,String exportData) {
@@ -2123,6 +2142,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	@Override
 	public ResponseEntity<?> getTripPdfDetails(TripDetailsRequest request) {
 		//get trip summary data --->maryam
+
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 		formatter.setLenient(false);
 		PdfSummaryData summaryData = new PdfSummaryData();
@@ -2147,12 +2167,21 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		ArrayList<Object> response = new ArrayList();
 		response.add(summaryData);
 		response.add(reportDetails);
+
+		//getSummaryData(request);
+		//get trip alarms ---->ehab
+		//get graphs data ----> ehab
+		//get trip details --->maryam
+
 //		here
+		AlarmsReportResponseWrapper alarmsReport = new AlarmsReportResponseWrapper();
+		alarmsReport = getAlarmSection(request.getVehilceId(),request.getStartTime(),request.getEndTime());
+		response.add(alarmsReport);
 		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",response);
 		return  ResponseEntity.ok().body(getObjectResponse);
-//		return null;
 		
 	}
+
 	
 	public PdfSummaryData getSummaryData(List<Position> positions) {
 		int count = 0;
@@ -2213,93 +2242,298 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //		return null;
 		
 	}
-	
+
+	public AlarmsReportResponseWrapper getAlarmSection(long deviceID,String start,String end){
+		try {
+
+			String storingCategory = new ObjectMapper().readValue(
+					deviceRepositorySFDA.findOne(deviceID).getAttributes()
+					, DeviceAttributes.class).getStoringCategory();
+			SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+			formatter.setLenient(false);
+			Date startDate = formatter.parse(start);
+			Date endDate = formatter.parse(end);
+			String tempAlarmConditionOver = "";
+			String tempAlarmConditionBelow = "";
+			String humAlarmConditionOver = "";
+			String humAlarmConditionBelow = "";
+			switch (storingCategory){
+				case "SCD1":
+				case "SCM1":
+					tempAlarmConditionOver = "Temperature Over -10°C";
+					tempAlarmConditionBelow = "Temperature  Below -20°C";
+					break;
+				case "SCD2":
+				case "SCM2":
+					tempAlarmConditionOver = "Temperature Over 8°C";
+					tempAlarmConditionBelow = "Temperature Below 2°C";
+					break;
+				case "SCD3":
+				case "SCC1":
+					tempAlarmConditionOver = "Temperature Over 25°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCM3":
+					tempAlarmConditionOver = "Temperature Over 15°C";
+					tempAlarmConditionBelow = "Temperature Below 8°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCM4":
+					tempAlarmConditionOver = "Temperature Over 30°C";
+					tempAlarmConditionBelow ="Temperature Below 15°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCM5":
+					tempAlarmConditionOver = "Temperature Over 40°C";
+					break;
+				case "SCF1":
+					tempAlarmConditionOver = "Temperature Over 25°C ";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCF2":
+					tempAlarmConditionOver = "Temperature over 10°C";
+					tempAlarmConditionBelow = "Temperature Below -1.5°C";
+					humAlarmConditionOver = "Humidity Over 90%";
+					humAlarmConditionBelow = "Humidity Below 75%";
+					break;
+				case "SCF3":
+					tempAlarmConditionOver = "Temperature over 21°C";
+					tempAlarmConditionBelow = "Temperature Below -1.5°C";
+					humAlarmConditionOver = "Humidity Over 95%";
+					humAlarmConditionBelow = "Humidity Below 85%";
+					break;
+				case "SCF4":
+					tempAlarmConditionOver = "Temperature over -18°C";
+					humAlarmConditionOver = "Humidity Over 75%";
+					humAlarmConditionBelow = "Humidity Below 99%";
+					break;
+				case "SCA1":
+					tempAlarmConditionOver = "Temperature over 30°C";
+					humAlarmConditionOver = "Humidity Over 60%";
+					break;
+				case "SCP1":
+					tempAlarmConditionOver = "Temperature over 35°C";
+					break;
+				default:
+					tempAlarmConditionOver = "";
+					humAlarmConditionOver = "";
+			}
+
+			List<MongoEvents> tempOverAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"tepmperatureIncreasedAlarm");
+			if(tempOverAlarms.size()>1){
+				tempOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
+
+
+			List<MongoEvents> tempBelowAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"tepmperatureDecreasedAlarm");
+			if(tempBelowAlarms.size()>1){
+				tempBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
+
+
+			List<MongoEvents> humidityOverAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"humidityIncreasedAlarm");
+			if(humidityOverAlarms.size()>1){
+				humidityOverAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
+
+			List<MongoEvents> humidityBelowAlarms = mongoEventsRepository
+					.findAllByDeviceidAndServertimeBetweenAndType(deviceID,startDate,
+							endDate,"humidityDecreasedAlarm");
+			if(humidityBelowAlarms.size()>1){
+				humidityBelowAlarms.sort(Comparator.comparing(MongoEvents::getServertime));
+			}
+
+
+			List<AlarmSectionWrapperResponse> alarmSectionWrapperList = new ArrayList<>();
+
+			if(!tempAlarmConditionOver.equals("")&&tempOverAlarms.size()>0){
+
+				alarmSectionWrapperList.add(
+						AlarmSectionWrapperResponse.builder()
+						.alarmCondition(tempAlarmConditionOver)
+						.firstAlarmTime(tempOverAlarms.get(0).getServertime())
+						.numOfAlarms(tempOverAlarms.size())
+						.build());
+
+			}
+
+			if(!tempAlarmConditionBelow.equals("")&&tempBelowAlarms.size()>0){
+				alarmSectionWrapperList.add(
+					AlarmSectionWrapperResponse.builder()
+							.alarmCondition(tempAlarmConditionBelow)
+							.firstAlarmTime(tempBelowAlarms.get(0).getServertime())
+							.numOfAlarms(tempBelowAlarms.size())
+							.build()
+				);
+			}
+
+			if(!humAlarmConditionOver.equals("")&&humidityOverAlarms.size()>0){
+				alarmSectionWrapperList.add(
+						AlarmSectionWrapperResponse.builder()
+								.alarmCondition(humAlarmConditionOver)
+								.firstAlarmTime(humidityOverAlarms.get(0).getServertime())
+								.numOfAlarms(humidityOverAlarms.size())
+								.build()
+				);
+			}
+
+			if(!humAlarmConditionBelow.equals("")&&humidityBelowAlarms.size()>0){
+				alarmSectionWrapperList.add(
+						AlarmSectionWrapperResponse.builder()
+								.alarmCondition(humAlarmConditionBelow)
+								.firstAlarmTime(humidityBelowAlarms.get(0).getServertime())
+								.numOfAlarms(humidityBelowAlarms.size())
+								.build()
+				);
+			}
+
+
+			List<Position> positionList =positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(startDate,endDate,deviceID);
+			List<GraphObject> temperatureGraph = new ArrayList<>();
+			List<GraphObject> humidityGraph = new ArrayList<>();
+			List<GraphDataWrapper> graphDataWrapperList = new ArrayList<>();
+			for(Position position :positionList){
+				temperatureGraph.add(GraphObject.builder()
+						.name(position.getDevicetime().toString())
+						.value(getAvgTemp(position.getAttributes()))
+						.build());
+				humidityGraph.add(GraphObject.builder()
+						.name(position.getDevicetime().toString())
+						.value((Double)position.getAttributes().get("hum1"))
+						.build());
+			}
+			graphDataWrapperList.add(GraphDataWrapper.builder()
+					.series("series")
+					.graphObjectList(temperatureGraph).build());
+
+			graphDataWrapperList.add(GraphDataWrapper.builder()
+					.series("series")
+					.graphObjectList(humidityGraph).build());
+
+			return AlarmsReportResponseWrapper.builder()
+					.alarmsSection(alarmSectionWrapperList)
+					.graphDataWrapperList(graphDataWrapperList)
+					.build();
+
+		}catch (Exception e){
+			System.out.println(e);
+			System.out.println(e.getMessage());
+			return null;
+		}
+
+	}
+
+
+
 	public Double getAvgTemp(Map attributesMap) {
 		int count = 0;
 		Double avg = 0.0;
-		System.out.println(attributesMap.containsKey("temp1"));  
-		if(attributesMap.containsKey("temp1")) {
-			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
-				System.out.println("temp1"+attributesMap.get("temp1")); 
-				count++;
-				avg += (Double)attributesMap.get("temp1");
-			}
+		List<Double> avgs = new ArrayList<>();
+		if(attributesMap.keySet().toString().contains("temp")){
+			attributesMap.keySet().stream().filter(o ->
+					o.toString().contains("temp"))
+					.forEach(o -> {
+						if(!attributesMap.get(o).equals(0.0) && !attributesMap.get(o).equals(300.0)) {
+							avgs.add(Double.parseDouble(attributesMap.get(o).toString()));
+						}
+
+
+					});
 		}
-		if(attributesMap.containsKey("temp2") && !attributesMap.get("temp2").equals(300.0)) {
-			if(!attributesMap.get("temp2").equals(0.0)){
-				System.out.println("temp2"+attributesMap.get("temp2")); 
-				count++;
-				avg += (Double)attributesMap.get("temp2");
-			}
+		for(Double avrage : avgs){
+			avg+=avrage;
 		}
-		if(attributesMap.containsKey("temp3") && !attributesMap.get("temp2").equals(300.0)) {
-			if(!attributesMap.get("temp3").equals(0.0)){
-				System.out.println("temp3"+attributesMap.get("temp3"));
-				count++;
-				avg += (Double)attributesMap.get("temp3");
-			}
+		if(avgs.size()>0){
+			avg/=avgs.size();
 		}
-		if(attributesMap.containsKey("temp4") && !attributesMap.get("temp2").equals(300.0)) {
-			if(!attributesMap.get("temp4").equals(0)){
-				System.out.println("temp4"+attributesMap.get("temp4"));
-				count++;
-				avg += (Double)attributesMap.get("temp4");
-			}
-		}
-		if(attributesMap.containsKey("temp6") && !attributesMap.get("temp6").equals(300.0)) {
-			if(!attributesMap.get("temp6").equals(0.0)){
-				System.out.println("temp6"+attributesMap.get("temp6"));
-				count++;
-				avg += (Double)attributesMap.get("temp6");
-			}
-		}
-		if(attributesMap.containsKey("temp7") && !attributesMap.get("temp7").equals(300.0)) {
-			if(!attributesMap.get("temp7").equals(0.0)){
-				System.out.println("temp7"+attributesMap.get("temp7"));
-				count++;
-				avg += (Double)attributesMap.get("temp7");
-				
-			}
-		}
-		if(attributesMap.containsKey("temp8") && !attributesMap.get("temp8").equals(300.0)) {
-			if(!attributesMap.get("temp8").equals(0.0)){
-				System.out.println("temp8"+attributesMap.get("temp8"));
-				count++;
-				avg += (Double)attributesMap.get("temp8");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp1") && !attributesMap.get("wiretemp1").equals(300.0)) {
-			if(!attributesMap.get("wiretemp1").equals(0.0)){
-				System.out.println("wire1"+attributesMap.get("wiretemp1"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp1");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp2") && !attributesMap.get("wiretemp2").equals(300.0)) {
-			if(!attributesMap.get("wiretemp2").equals(0.0)){
-				System.out.println("wire2"+attributesMap.get("wiretemp2"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp2");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp3") && !attributesMap.get("wiretemp3").equals(300.0)) {
-			if(!attributesMap.get("wiretemp3").equals(0.0)){
-				System.out.println("wire3"+attributesMap.get("wiretemp3"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp3");
-			}
-		}
-		if(attributesMap.containsKey("wiretemp4") && !attributesMap.get("wiretemp4").equals(300.0)) {
-			if(!attributesMap.get("wiretemp4").equals(0.0)){
-				System.out.println("wire4"+attributesMap.get("wiretemp4"));
-				count++;
-				avg += (Double)attributesMap.get("wiretemp4");
-			}
-		}
-		if(avg>0) {
-			avg = avg/count;
-		}
-		
+//		if(attributesMap.containsKey("temp1")) {
+//			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
+//				System.out.println("temp1"+attributesMap.get("temp1"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp1");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp2") && !attributesMap.get("temp2").equals(300.0)) {
+//			if(!attributesMap.get("temp2").equals(0.0)){
+//				System.out.println("temp2"+attributesMap.get("temp2"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp2");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp3") && !attributesMap.get("temp2").equals(300.0)) {
+//			if(!attributesMap.get("temp3").equals(0.0)){
+//				System.out.println("temp3"+attributesMap.get("temp3"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp3");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp4") && !attributesMap.get("temp2").equals(300.0)) {
+//			if(!attributesMap.get("temp4").equals(0)){
+//				System.out.println("temp4"+attributesMap.get("temp4"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp4");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp6") && !attributesMap.get("temp6").equals(300.0)) {
+//			if(!attributesMap.get("temp6").equals(0.0)){
+//				System.out.println("temp6"+attributesMap.get("temp6"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp6");
+//			}
+//		}
+//		if(attributesMap.containsKey("temp7") && !attributesMap.get("temp7").equals(300.0)) {
+//			if(!attributesMap.get("temp7").equals(0.0)){
+//				System.out.println("temp7"+attributesMap.get("temp7"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp7");
+//
+//			}
+//		}
+//		if(attributesMap.containsKey("temp8") && !attributesMap.get("temp8").equals(300.0)) {
+//			if(!attributesMap.get("temp8").equals(0.0)){
+//				System.out.println("temp8"+attributesMap.get("temp8"));
+//				count++;
+//				avg += (Double)attributesMap.get("temp8");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp1") && !attributesMap.get("wiretemp1").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp1").equals(0.0)){
+//				System.out.println("wire1"+attributesMap.get("wiretemp1"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp1");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp2") && !attributesMap.get("wiretemp2").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp2").equals(0.0)){
+//				System.out.println("wire2"+attributesMap.get("wiretemp2"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp2");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp3") && !attributesMap.get("wiretemp3").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp3").equals(0.0)){
+//				System.out.println("wire3"+attributesMap.get("wiretemp3"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp3");
+//			}
+//		}
+//		if(attributesMap.containsKey("wiretemp4") && !attributesMap.get("wiretemp4").equals(300.0)) {
+//			if(!attributesMap.get("wiretemp4").equals(0.0)){
+//				System.out.println("wire4"+attributesMap.get("wiretemp4"));
+//				count++;
+//				avg += (Double)attributesMap.get("wiretemp4");
+//			}
+//		}
+//		if(avg>0) {
+//			avg = avg/count;
+//		}
+//
 		return avg;
 		
 	}
