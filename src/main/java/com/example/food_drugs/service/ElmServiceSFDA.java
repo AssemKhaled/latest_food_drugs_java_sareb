@@ -23,5 +23,7 @@ public interface ElmServiceSFDA {
 	public ResponseEntity<?> inventoryDelete(String TOKEN,Long InventoryId,Long userId);
 	
 	public ResponseEntity<?> deviceUpdateStoring(String TOKEN,Map<String, String> data,Long deviceId,Long userId);
+
+	ResponseEntity<?> warehouseInquiry(String TOKEN , Long loggedUserId , Long userId);
 	
 }

@@ -14,6 +14,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
+
+import com.example.food_drugs.responses.ElmInquiryResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -58,7 +60,6 @@ import com.example.food_drugs.entity.DeviceElmDataSFDA;
 import com.example.food_drugs.entity.IndividualGregorianElmDataSFDA;
 import com.example.food_drugs.entity.IndividualHijriElmDataSFDA;
 import com.example.food_drugs.entity.Inventory;
-import com.example.food_drugs.entity.InventoryLastData;
 import com.example.food_drugs.entity.MongoElmLiveLocationSFDA;
 import com.example.food_drugs.entity.Warehouse;
 import com.example.food_drugs.repository.DeviceRepositorySFDA;
@@ -143,7 +144,12 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 	
 	@Autowired
 	private WarehousesRepository warehousesRepository;
-	
+
+	private final UserServiceImplSFDA userServiceImplSFDA;
+
+	public ElmServiceImplSFDA(UserServiceImplSFDA userServiceImplSFDA) {
+		this.userServiceImplSFDA = userServiceImplSFDA;
+	}
 
 	@Override
 	public ResponseEntity<?> warehouseRegistrtaion(String TOKEN, Long WarehouseId, Long userId) {
@@ -2162,6 +2168,153 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 				logger.info("************************ deviceUpdate ENDED ***************************");
 				return  ResponseEntity.ok().body(getObjectResponse);	
 			  }
+	}
+
+
+
+
+	@Override
+	public ResponseEntity<?> warehouseInquiry(String TOKEN, Long loggedUserId , Long userId) {
+		try {
+			ResponseEntity loggedUserResponse = userServiceImplSFDA.userAndTokenErrorChecker(TOKEN,loggedUserId);
+			if (loggedUserResponse.getStatusCode().value()!=HttpStatus.OK.value()){
+				return loggedUserResponse;
+			}
+			ResponseEntity userResponse = userServiceImplSFDA.userErrorChecker(userId);
+			if(userResponse.getStatusCode().value()!=HttpStatus.OK.value()){
+				return userResponse;
+			}
+			Map response = new HashMap();
+			User user = userServiceImpl.findById(userId);
+			String userReferenceKey = user.getReference_key();
+			String type = "Get Warehouse Inquiry";
+			String url = elmCompanies+"/"+userReferenceKey+"/warehouses/inquiry?activity=SFDA";
+			System.out.println(url);
+
+			Map<Object,Object>  bodyToMiddleWare = new HashMap();
+			Date date = new Date();
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String time = formatter.format(date);
+			SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+			String currentDate=formatter.format(date);
+
+			Date dateReg = null;
+			try {
+				dateReg = output.parse(currentDate);
+			} catch (ParseException e) {
+
+				e.printStackTrace();
+			}
+
+			bodyToMiddleWare.put("url",url);
+			bodyToMiddleWare.put("methodType","GET");
+
+
+			Map requet = bodyToMiddleWare;
+			TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+			SSLContext sslContext = null;
+			try {
+				sslContext = org.apache.http.ssl.SSLContexts.custom()
+						.loadTrustMaterial(null, acceptingTrustStrategy)
+						.build();
+			} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+				e.printStackTrace();
+			}
+
+			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+			CloseableHttpClient httpClient = HttpClients.custom()
+					.setSSLSocketFactory(csf)
+					.build();
+
+			HttpComponentsClientHttpRequestFactory requestFactory =
+					new HttpComponentsClientHttpRequestFactory();
+
+			requestFactory.setHttpClient(httpClient);
+
+			RestTemplate restTemplate = new RestTemplate(requestFactory);
+
+
+			restTemplate.getMessageConverters()
+					.add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+
+			HttpEntity<Object> entity = new HttpEntity<Object>(bodyToMiddleWare);
+			ResponseEntity<ElmInquiryResponse> rateResponse;
+
+			List<ElmInquiryResponse> data = new ArrayList<ElmInquiryResponse>();
+
+			try {
+				rateResponse = restTemplate.exchange(middleWare, HttpMethod.POST, entity, ElmInquiryResponse.class);
+			} catch (Exception e) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),
+						"Can't Request To Elm Error in Elm Server "+e.getMessage() ,data);
+				logger.info("************************ warehouseInquiry ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+			}
+
+			if(rateResponse.getStatusCode().OK == null) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"Not Requested To Elm",data);
+				logger.info("************************ warehouseInquiry ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+			}
+
+			ElmInquiryResponse elmReturn = rateResponse.getBody();
+
+
+			response.put("body", elmReturn.getBody());
+			response.put("statusCode", elmReturn.getStatusCode());
+			response.put("message", elmReturn.getMessage());
+
+			//send Logs
+
+			MongoElmLogsSFDA elmLogs = new MongoElmLogsSFDA();
+			elmLogs.setUserId(userId);
+			elmLogs.setUserName(user.getName());
+			elmLogs.setTime(time);
+			elmLogs.setType(type);
+			elmLogs.setRequet(requet);
+			elmLogs.setResponse(response);
+
+			elmLogsRepository.save(elmLogs);
+
+			data.add(elmReturn);
+
+			if(rateResponse.getStatusCode().OK == null) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),elmReturn.getMessage(),data);
+				logger.info("************************ warehouseInquiry ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+			}
+
+			if(elmReturn!=null) {
+				if(elmReturn.getStatusCode()==200) {
+					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"success",data);
+					logger.info("************************ warehouseInquiry ENDED ***************************");
+					return  ResponseEntity.ok().body(getObjectResponse);
+
+				}
+				else {
+					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),elmReturn.getStatusCode().toString(),data);
+					logger.info("************************ warehouseInquiry ENDED ***************************");
+					return  ResponseEntity.ok().body(getObjectResponse);
+				}
+
+			}
+			else {
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"cann't request to elm",data);
+				logger.info("************************ warehouseInquiry ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+			}
+
+
+
+		}catch (Exception | Error e){
+			getObjectResponse = new GetObjectResponse(HttpStatus.EXPECTATION_FAILED.value(),e.getMessage(),null);
+			return ResponseEntity.badRequest().body(getObjectResponse);
+		}
+
 	}
 
 	@Override

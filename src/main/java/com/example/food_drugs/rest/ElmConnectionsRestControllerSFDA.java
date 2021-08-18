@@ -2,6 +2,8 @@
 package com.example.food_drugs.rest;
 
 import java.util.Map;
+
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -252,6 +254,14 @@ public class ElmConnectionsRestControllerSFDA {
 			                                     @RequestParam (value = "deviceId", defaultValue = "0") Long deviceId){
 		
 		return elmServiceImpl.deleteVehicleFromElm(TOKEN,deviceId,userId,data);
+	}
+
+	@GetMapping(path ="/warehouseInquiry")
+	public ResponseEntity<?> deleteVehicleFromElm(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+												  @RequestParam (value = "userId", defaultValue = "0") Long userId,
+												  @RequestParam (value = "loggerId", defaultValue = "0") Long loggedUserId){
+
+		return elmServiceImplSFDA.warehouseInquiry(TOKEN,loggedUserId,userId);
 	}
 
 }
