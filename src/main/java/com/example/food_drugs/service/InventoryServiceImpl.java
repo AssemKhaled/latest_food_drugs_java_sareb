@@ -1,5 +1,6 @@
 package com.example.food_drugs.service;
 
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -10,16 +11,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 import javax.persistence.Column;
@@ -1282,7 +1276,10 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 							}
 						}
-							
+						if(Pattern.matches(".*\\S.*" , search)){
+							inventories = inventories.stream().filter(inventoryLastData ->
+									inventoryLastData.getInventoryName().contains(search)).collect(Collectors.toList());
+						}
 					}
 
 				    
