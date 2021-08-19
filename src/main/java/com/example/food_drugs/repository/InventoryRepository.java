@@ -2,6 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
+import com.example.food_drugs.responses.InventorySamWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -76,6 +77,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	@Query(value = "SELECT tc_inventories.id FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null", nativeQuery = true)
 	public List<Long> getAllInventoriesIds(@Param("userIds")List<Long> userIds);
+
+	@Query(value = "SELECT tc_inventories.id , tc_inventories.name ,tc_inventories.lastDataId  FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null LIMIT 0,10 ", nativeQuery = true)
+	public List<InventorySamWrapper> getAllInventoriesSummaryData(@Param("userIds")List<Long> userIds);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.protocolType =:type", nativeQuery = true)

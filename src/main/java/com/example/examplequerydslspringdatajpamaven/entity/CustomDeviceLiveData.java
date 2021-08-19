@@ -11,13 +11,53 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.persistence.ColumnResult;
+
 /**
  * Initial Model to bind data with query
  * @author fuinco
  *
  */
 public class CustomDeviceLiveData {
-	
+
+
+
+	private String attributesSTR;
+
+
+	public CustomDeviceLiveData(int id,
+								String deviceName,
+								String uniqueId,
+								String lastUpdate,
+								Boolean expired,
+								String positionId,
+								String photo,
+								String create_date,
+								Long leftDays,
+								Double temperature,
+								Double humidity,
+								String attributesSTR) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.uniqueId = uniqueId;
+		this.lastUpdate = lastUpdate;
+		this.expired = expired;
+		this.leftDays = leftDays;
+		this.temperature = temperature;
+		this.humidity = humidity;
+		this.create_date = create_date;
+		this.photo = photo;
+		this.positionId = positionId;
+		this.attributesSTR = attributesSTR;
+	}
+
+	public String getAttributesSTR() {
+		return attributesSTR;
+	}
+
+	public void setAttributesSTR(String attributesSTR) {
+		this.attributesSTR = attributesSTR;
+	}
 
 	private int id;
 	private String deviceName;
@@ -62,6 +102,55 @@ public class CustomDeviceLiveData {
 	private Double temperature;
 	private Double humidity;
 	private String create_date;
+
+	public CustomDeviceLiveData(int id, String deviceName, String uniqueId, String lastUpdate, Double weight, Double latitude, Double operator, Double longitude, String address, ArrayList<Map<Object, Object>> lastPoints, Object attributes, String crash, String batteryUnpluged, String powerUnpluged, String todayHoursString, String deviceWorkingHoursPerDay, String driverWorkingHoursPerDay, Double power, String photo, Double speed, String status, String vehicleStatus, String positionId, JSONObject jsonAttributes, String hours, Boolean motion, Boolean valid, String totalDistance, Boolean ignition, String alarm, Double battery, String driverName, String leftLetter, String middleLetter, String rightLetter, String plate_num, String sequence_number, String owner_name, Boolean expired, Long leftDays, Double temperature, Double humidity, String create_date, String attributesSTR) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.uniqueId = uniqueId;
+		this.lastUpdate = lastUpdate;
+		this.weight = weight;
+		this.latitude = latitude;
+		this.operator = operator;
+		this.longitude = longitude;
+		this.address = address;
+		this.lastPoints = lastPoints;
+		this.attributes = attributes;
+		this.crash = crash;
+		this.batteryUnpluged = batteryUnpluged;
+		PowerUnpluged = powerUnpluged;
+		this.todayHoursString = todayHoursString;
+		this.deviceWorkingHoursPerDay = deviceWorkingHoursPerDay;
+		this.driverWorkingHoursPerDay = driverWorkingHoursPerDay;
+		this.power = power;
+		this.photo = photo;
+		this.speed = speed;
+		this.status = status;
+		this.vehicleStatus = vehicleStatus;
+		this.positionId = positionId;
+		this.jsonAttributes = jsonAttributes;
+		this.hours = hours;
+		this.motion = motion;
+		this.valid = valid;
+		this.totalDistance = totalDistance;
+		this.ignition = ignition;
+		this.alarm = alarm;
+		this.battery = battery;
+		this.driverName = driverName;
+		this.leftLetter = leftLetter;
+		this.middleLetter = middleLetter;
+		this.rightLetter = rightLetter;
+		this.plate_num = plate_num;
+		this.sequence_number = sequence_number;
+		this.owner_name = owner_name;
+		this.expired = expired;
+		this.leftDays = leftDays;
+		this.temperature = temperature;
+		this.humidity = humidity;
+		this.create_date = create_date;
+		this.attributesSTR = attributesSTR;
+	}
+
+
 
 	
 	public String getCreate_date() {
@@ -173,7 +262,9 @@ public class CustomDeviceLiveData {
 		this.attributes = attributes;
 		this.speed = speed;
 	}
-	public CustomDeviceLiveData(int id ,String deviceName , String lastUpdate , String address , Object attributes ,  Double latitude ,
+	public CustomDeviceLiveData(int id ,String deviceName ,
+								String lastUpdate , String address ,
+								Object attributes ,  Double latitude ,
 			  Double longitude ,Double speed , String photo , String positionId) {
 		this.id = id ;
 		this.deviceName = deviceName ;
@@ -306,8 +397,19 @@ public class CustomDeviceLiveData {
 		
 		
 	}
-	public CustomDeviceLiveData(int id ,String deviceName , String lastUpdate , String address , Object attributes ,  Double latitude ,
-			  Double longitude ,Double speed ,String positionId, String leftLetter,String middleLetter,String rightLetter,String driverName ) {
+	public CustomDeviceLiveData(int id ,
+								String deviceName ,
+								String lastUpdate ,
+								String address ,
+								Object attributes ,
+								Double latitude ,
+			  					Double longitude ,
+								Double speed ,
+								String positionId,
+								String leftLetter,
+								String middleLetter,
+								String rightLetter,
+								String driverName ) {
 		this.id = id ;
 		this.deviceName = deviceName ;
 		this.lastUpdate = lastUpdate;

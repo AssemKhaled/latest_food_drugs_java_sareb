@@ -98,6 +98,15 @@ public class DashBoardRestControllerSFDA {
 		return inventoryServiceImpl.getAllInventoriesLastInfo(TOKEN,userId, offset, search);
 
 	}
+
+	@GetMapping(path = "/getAllInventoriesLastInfoNew")
+	public ResponseEntity<?> getAllInventoriesLastInfoNew(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+													   @RequestParam (value = "userId", defaultValue = "0") Long userId,
+													   @RequestParam (value = "offset", defaultValue = "0")int offset,
+													   @RequestParam (value = "search", defaultValue = "") String search ){
+		return inventoryServiceImpl.getAllInventoriesLastInfoNew(TOKEN,userId, offset, search);
+
+	}
 	
 	@GetMapping(path ="/getInventoryStatus")
 	public ResponseEntity<?> getInventoryStatus(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,

@@ -241,10 +241,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
                      @ColumnResult(name="create_date",type=String.class),
                      @ColumnResult(name="leftDays",type=Long.class),
                      @ColumnResult(name="temperature",type=Double.class),
-                     @ColumnResult(name="humidity",type=Double.class)
+                     @ColumnResult(name="humidity",type=Double.class),
+					 @ColumnResult(name="attributesSTR",type=String.class)
 
-
-                     }
+                }
            ),
            
         }
@@ -474,7 +474,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			"  tc_devices.positionid as positionId, " + 
 			" tc_devices.photo as photo ,tc_devices.create_date as create_date "
 			+ ", DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays  "
-			+ " , tc_devices.lastTemp as temperature , tc_devices.lastHum as humidity "
+			+ " , tc_devices.lastTemp as temperature , tc_devices.lastHum as humidity ," +
+			"tc_devices.attributes as attributesSTR "
 			+ "FROM tc_devices "
 			+ " INNER JOIN  tc_user_device ON tc_devices.id=tc_user_device.deviceid " 
 			+ " where tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null "
@@ -482,13 +483,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " GROUP BY tc_devices.id LIMIT :offset,10"),
 	
 	@NamedNativeQuery(name="getDevicesDataByIds", 
-	resultSetMapping="DevicesData", 
+	resultSetMapping="DevicesData",
 	query=" SELECT  tc_devices.id as id ,tc_devices.uniqueid as uniqueId ,tc_devices.name as deviceName ,"
 			+ " tc_devices.lastupdate as lastUpdate , tc_devices.expired as expired , " + 
 			"  tc_devices.positionid as positionId, " + 
 			" tc_devices.photo as photo ,tc_devices.create_date as create_date  ,"
 			+ " DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays "
-			+ " , tc_devices.lastTemp as temperature , tc_devices.lastHum as humidity "
+			+ " , tc_devices.lastTemp as temperature , tc_devices.lastHum as humidity ," +
+			"tc_devices.attributes as attributesSTR"
 			+ " FROM tc_devices "
 			+ " where tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null "
 			+ "  AND ( (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"

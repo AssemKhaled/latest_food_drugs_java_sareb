@@ -2204,7 +2204,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					sumAvg+=humAvg;
 					countHum++;
 				}
-				avgHum=sumAvg/countHum;
+//				avgHum=sumAvg/countHum;
 
 				if(recordAvg != 0.0) {
 					if(count == 0) {
@@ -2230,7 +2230,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				
 			}
 			if(count >0) {
-				avg = avg/count;
+				avg = sumAvg/count;
+				avgHum=sumAvg/countHum;
 			}
 			
 
@@ -2244,7 +2245,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					.mkt(mkt)
 					.maxHum(maxHum)
 					.minHum(minHum==1000.0?0.0:minHum)
-					.averageHum(avgHum)
+					.averageHum(avgHum==null?0.0:avgHum)
 					.build();
 
 		return pdfSummary;

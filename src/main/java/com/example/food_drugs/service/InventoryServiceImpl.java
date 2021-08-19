@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 import javax.persistence.Column;
 
+import com.example.food_drugs.responses.InventorySamWrapper;
+import com.example.food_drugs.responses.MongoInventoryWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -1260,6 +1262,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 					 allInventories = inventoryRepository.getAllInventoriesIds(usersIds);
 
+
 				 }
 				 
 
@@ -1307,6 +1310,121 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 		}
 	}
+
+	@Override
+	public ResponseEntity<?> getAllInventoriesLastInfoNew(String TOKEN, Long userId, int offset, String search) {
+		logger.info("************************ getAllInventoriesLastInfo STARTED ***************************");
+
+		List<InventoryLastData> inventories = new ArrayList<InventoryLastData>();
+		if(TOKEN.equals("")) {
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventories);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+
+		if(super.checkActive(TOKEN)!= null)
+		{
+			return super.checkActive(TOKEN);
+		}
+		List<MongoInventoryWrapper> inventoryLastData =  new ArrayList<>();
+		List<InventorySamWrapper> allInventoriesSumData = new ArrayList<>();
+		List<Long>usersIds= new ArrayList<>();
+		if(userId != 0) {
+
+			User user = userServiceImpl.findById(userId);
+			if(user != null) {
+				userServiceImpl.resetChildernArray();
+
+				if(user.getAccountType() == 4) {
+
+					allInventoriesSumData = inventoryRepository.getAllInventoriesSummaryData(usersIds);
+
+				}
+				else {
+					usersIds.add(userId);
+
+					List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
+					if(childernUsers.isEmpty()) {
+						usersIds.add(userId);
+					}
+					else {
+						usersIds.add(userId);
+						for(User object : childernUsers) {
+							usersIds.add(object.getId());
+						}
+					}
+
+					allInventoriesSumData = inventoryRepository.getAllInventoriesSummaryData(usersIds);
+
+				}
+
+
+
+
+
+				for (InventorySamWrapper inventorySamWrapper : allInventoriesSumData){
+					if(inventorySamWrapper.getLastDataId()!=null){
+						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findOne(inventorySamWrapper.getLastDataId());
+						inventoryLastData.add(
+								MongoInventoryWrapper
+										.builder()
+										._id(mongoInv.get_id())
+										.temperature(mongoInv.getTemperature())
+										.inventoryId(mongoInv.getInventory_id())
+										.inventoryName(inventorySamWrapper.getName())
+										.createDate(mongoInv.getCreate_date())
+										.humidity(mongoInv.getHumidity())
+										.build());
+					}
+
+				}
+
+				Integer size=0;
+				if(inventories.size()>0) {
+//					size= mongoInventoryLastDataRepo.getLastDataSize(allInventoriesIds);
+//					for(int i=0;i<inventories.size();i++) {
+//
+//						Inventory inventory = inventoryRepository.findOne(inventories.get(i).getInventory_id());
+//						if(inventory != null) {
+//							inventories.get(i).setInventoryName(inventory.getName());
+//
+//						}
+//					}
+					if(Pattern.matches(".*\\S.*" , search)){
+						inventoryLastData = inventoryLastData.stream().filter(inventoryLastDatas ->
+								inventoryLastDatas.getInventoryName().contains(search)).collect(Collectors.toList());
+					}
+				}
+
+
+
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",inventoryLastData,size);
+				logger.info("************************ getNotifications ENDED ***************************");
+				return  ResponseEntity.ok().body(getObjectResponse);
+
+
+			}
+			else {
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "User ID is not found",inventoryLastData);
+				logger.info("************************ getNotifications ENDED ***************************");
+				return  ResponseEntity.status(404).body(getObjectResponse);
+
+			}
+
+
+
+		}
+		else {
+			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",inventoryLastData);
+			logger.info("************************ getNotifications ENDED ***************************");
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+
+		}
+	}
+
+
+
+
+
 
 	@Override
 	public ResponseEntity<?> getSelectListInventories(String TOKEN, Long id) {
