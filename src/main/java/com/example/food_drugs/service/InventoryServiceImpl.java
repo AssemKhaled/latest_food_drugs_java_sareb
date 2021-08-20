@@ -19,6 +19,7 @@ import javax.net.ssl.SSLContext;
 import javax.persistence.Column;
 
 import com.example.food_drugs.responses.InventorySamWrapper;
+import com.example.food_drugs.responses.InventorySammaryDataWrapper;
 import com.example.food_drugs.responses.MongoInventoryWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -1326,7 +1327,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			return super.checkActive(TOKEN);
 		}
 		List<MongoInventoryWrapper> inventoryLastData =  new ArrayList<>();
-		List<InventorySamWrapper> allInventoriesSumData = new ArrayList<>();
+		List<InventorySammaryDataWrapper> allInventoriesSumDataFromMySQL = new ArrayList<>();
 		List<Long>usersIds= new ArrayList<>();
 		if(userId != 0) {
 
@@ -1334,14 +1335,10 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			if(user != null) {
 				userServiceImpl.resetChildernArray();
 
-				if(user.getAccountType() == 4) {
-
-					allInventoriesSumData = inventoryRepository.getAllInventoriesSummaryData(usersIds);
-
-				}
+				if(user.getAccountType() == 4)
+					allInventoriesSumDataFromMySQL = inventoryRepository.getAllInventoriesSummaryData(usersIds, offset);
 				else {
 					usersIds.add(userId);
-
 					List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
 					if(childernUsers.isEmpty()) {
 						usersIds.add(userId);
@@ -1353,49 +1350,35 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						}
 					}
 
-					allInventoriesSumData = inventoryRepository.getAllInventoriesSummaryData(usersIds);
+					allInventoriesSumDataFromMySQL = inventoryRepository.getAllInventoriesSummaryData(usersIds,offset);
 
 				}
 
-
-
-
-
-				for (InventorySamWrapper inventorySamWrapper : allInventoriesSumData){
+				for (InventorySammaryDataWrapper inventorySamWrapper : allInventoriesSumDataFromMySQL){
 					if(inventorySamWrapper.getLastDataId()!=null){
-						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findOne(inventorySamWrapper.getLastDataId());
-						inventoryLastData.add(
-								MongoInventoryWrapper
-										.builder()
-										._id(mongoInv.get_id())
-										.temperature(mongoInv.getTemperature())
-										.inventoryId(mongoInv.getInventory_id())
-										.inventoryName(inventorySamWrapper.getName())
-										.createDate(mongoInv.getCreate_date())
-										.humidity(mongoInv.getHumidity())
-										.build());
+						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findById(inventorySamWrapper.getName());
+						if(mongoInv!=null){
+							inventoryLastData.add(
+									MongoInventoryWrapper
+											.builder()
+											._id(mongoInv.get_id())
+											.temperature(mongoInv.getTemperature())
+											.inventoryId(mongoInv.getInventory_id())
+											.inventoryName(inventorySamWrapper.getLastDataId())
+											.createDate(mongoInv.getCreate_date())
+											.humidity(mongoInv.getHumidity())
+											.build());
+						}
+
 					}
 
 				}
 
-				Integer size=0;
-				if(inventories.size()>0) {
-//					size= mongoInventoryLastDataRepo.getLastDataSize(allInventoriesIds);
-//					for(int i=0;i<inventories.size();i++) {
-//
-//						Inventory inventory = inventoryRepository.findOne(inventories.get(i).getInventory_id());
-//						if(inventory != null) {
-//							inventories.get(i).setInventoryName(inventory.getName());
-//
-//						}
-//					}
-					if(Pattern.matches(".*\\S.*" , search)){
-						inventoryLastData = inventoryLastData.stream().filter(inventoryLastDatas ->
-								inventoryLastDatas.getInventoryName().contains(search)).collect(Collectors.toList());
-					}
+				Integer size=inventoryRepository.getInventoriesSize(usersIds);
+				if(inventoryLastData.size()>0 && Pattern.matches(".*\\S.*" , search)){
+					inventoryLastData = inventoryLastData.stream().filter(inventoryLastDatas ->
+							inventoryLastDatas.getInventoryName().contains(search)).collect(Collectors.toList());
 				}
-
-
 
 				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",inventoryLastData,size);
 				logger.info("************************ getNotifications ENDED ***************************");

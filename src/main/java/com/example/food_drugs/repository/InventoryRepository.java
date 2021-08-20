@@ -3,6 +3,7 @@ package com.example.food_drugs.repository;
 import java.util.List;
 
 import com.example.food_drugs.responses.InventorySamWrapper;
+import com.example.food_drugs.responses.InventorySammaryDataWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -24,7 +25,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" + 
 			" LIMIT :offset,10 ", nativeQuery = true)
 	public List<Inventory> getInventories(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
-	
+
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null"
 			+ " and ( (tc_inventories.name Like %:search%) or (tc_inventories.inventoryNumber Like %:search%) or (tc_inventories.trackerIMEI Like %:search%) )" , nativeQuery = true)
@@ -33,7 +34,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	
 	@Query(value = "SELECT count(*) FROM tc_inventories " + 
 			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null " , nativeQuery = true)
-	public Integer getInventoriesSize(@Param("userIds")List<Long> userIds);
+	Integer getInventoriesSize(@Param("userIds")List<Long> userIds);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.id IN(:inventoryIds) and tc_inventories.delete_date is null"
@@ -78,9 +79,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null", nativeQuery = true)
 	public List<Long> getAllInventoriesIds(@Param("userIds")List<Long> userIds);
 
-	@Query(value = "SELECT tc_inventories.id , tc_inventories.name ,tc_inventories.lastDataId  FROM tc_inventories"
-			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null LIMIT 0,10 ", nativeQuery = true)
-	public List<InventorySamWrapper> getAllInventoriesSummaryData(@Param("userIds")List<Long> userIds);
+	@Query(value = "SELECT tc_inventories.id as id , tc_inventories.name as name , tc_inventories.lastDataId as lastDataId FROM tc_inventories"
+			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null  " +
+			"and tc_inventories.lastDataId is Not null LIMIT :offset,10 ", nativeQuery = true)
+	List<InventorySammaryDataWrapper> getAllInventoriesSummaryData(@Param("userIds")List<Long> userIds, @Param("offset") int offset);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.protocolType =:type", nativeQuery = true)

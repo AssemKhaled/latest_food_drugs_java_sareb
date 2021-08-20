@@ -2,7 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
-import com.example.food_drugs.responses.InventorySamWrapper;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
