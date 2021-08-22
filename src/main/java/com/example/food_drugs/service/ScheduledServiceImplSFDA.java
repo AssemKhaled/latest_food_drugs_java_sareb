@@ -536,8 +536,12 @@ public class ScheduledServiceImplSFDA extends RestServiceController implements S
 		    	if(reports.get(i).equals("vehicleTempHum")) {
 		    		
 		    		ResponseEntity<?> response = reportServiceImplSFDA.getVehicleTempHum("Schedule", deviIds, grouIds, 0, from, to, "", userId,"");
-		    		
-		    		getObjectResponse = (GetObjectResponse) response.getBody();
+
+
+//					ResponseEntity<?> response = reportServiceImplSFDA.getVehicleTempHumNew("Schedule", deviIds, grouIds, 0, from, to, "", userId,"");
+
+
+					getObjectResponse = (GetObjectResponse) response.getBody();
 		    		List<DeviceTempHum> sensorReports = (List<DeviceTempHum>) getObjectResponse.getEntity();
 
 					Random rand = new Random();

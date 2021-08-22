@@ -3,7 +3,9 @@ package com.example.food_drugs.repository;
 import java.util.Date;
 import java.util.List;
 
+import com.example.food_drugs.entity.DeviceTempHum;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -22,8 +24,12 @@ public interface PositionMongoSFDARepository extends MongoRepository<Position, S
 
 	List<Position> findAllByDevicetimeBetweenAndDeviceid(Date from,Date to,long i);
 
-	
-	
+	List<Position> findAllByDeviceidAndDevicetimeBetween(long i , Date from, Date to );
+	Integer countAllByDeviceidAndDevicetimeBetween( long i ,Date from, Date to);
+
+
+
+
 //	public static List<Position> getPositions(){
 //		Query query = new Query();
 //		query.addCriteria(Criteria.where("name").is("Eric"));

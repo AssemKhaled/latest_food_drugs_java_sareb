@@ -1,6 +1,5 @@
 package com.example.food_drugs.service;
 
-import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -16,10 +15,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
-import javax.persistence.Column;
 
-import com.example.food_drugs.responses.InventorySamWrapper;
-import com.example.food_drugs.responses.InventorySammaryDataWrapper;
+import com.example.food_drugs.responses.InventorySummaryDataWrapper;
 import com.example.food_drugs.responses.MongoInventoryWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -50,15 +47,11 @@ import com.example.food_drugs.entity.MonogoInventoryLastData;
 import com.example.food_drugs.entity.MonogoInventoryLastDataElmSend;
 import com.example.food_drugs.entity.NotificationAttributes;
 import com.example.food_drugs.entity.SensorsInventories;
-import com.example.food_drugs.entity.UserSFDA;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
-import com.example.examplequerydslspringdatajpamaven.entity.Driver;
 import com.example.examplequerydslspringdatajpamaven.entity.DriverSelect;
-import com.example.examplequerydslspringdatajpamaven.entity.ElmReturn;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.food_drugs.entity.Warehouse;
 import com.example.food_drugs.entity.userClientInventory;
-import com.example.food_drugs.entity.userClientWarehouse;
 import com.example.food_drugs.repository.InventoryRepository;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepo;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepository;
@@ -73,7 +66,6 @@ import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
 import com.example.food_drugs.repository.WarehousesRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
@@ -1327,7 +1319,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			return super.checkActive(TOKEN);
 		}
 		List<MongoInventoryWrapper> inventoryLastData =  new ArrayList<>();
-		List<InventorySammaryDataWrapper> allInventoriesSumDataFromMySQL = new ArrayList<>();
+		List<InventorySummaryDataWrapper> allInventoriesSumDataFromMySQL = new ArrayList<>();
 		List<Long>usersIds= new ArrayList<>();
 		if(userId != 0) {
 
@@ -1354,9 +1346,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 				}
 
-				for (InventorySammaryDataWrapper inventorySamWrapper : allInventoriesSumDataFromMySQL){
-					if(inventorySamWrapper.getLastDataId()!=null){
-						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findById(inventorySamWrapper.getName());
+				for (InventorySummaryDataWrapper inventorySummaryWrapper : allInventoriesSumDataFromMySQL){
+					if(inventorySummaryWrapper.getLastDataId()!=null){
+						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findById(inventorySummaryWrapper.getName());
 						if(mongoInv!=null){
 							inventoryLastData.add(
 									MongoInventoryWrapper
@@ -1364,7 +1356,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 											._id(mongoInv.get_id())
 											.temperature(mongoInv.getTemperature())
 											.inventoryId(mongoInv.getInventory_id())
-											.inventoryName(inventorySamWrapper.getLastDataId())
+											.inventoryName(inventorySummaryWrapper.getLastDataId())
 											.createDate(mongoInv.getCreate_date())
 											.humidity(mongoInv.getHumidity())
 											.build());

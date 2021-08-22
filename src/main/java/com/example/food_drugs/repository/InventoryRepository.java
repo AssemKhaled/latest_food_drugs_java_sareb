@@ -2,8 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
-import com.example.food_drugs.responses.InventorySamWrapper;
-import com.example.food_drugs.responses.InventorySammaryDataWrapper;
+import com.example.food_drugs.responses.InventorySummaryDataWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -33,7 +32,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	
 	
 	@Query(value = "SELECT count(*) FROM tc_inventories " + 
-			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null " , nativeQuery = true)
+			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is Not null" , nativeQuery = true)
 	Integer getInventoriesSize(@Param("userIds")List<Long> userIds);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
@@ -82,7 +81,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	@Query(value = "SELECT tc_inventories.id as id , tc_inventories.name as name , tc_inventories.lastDataId as lastDataId FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null  " +
 			"and tc_inventories.lastDataId is Not null LIMIT :offset,10 ", nativeQuery = true)
-	List<InventorySammaryDataWrapper> getAllInventoriesSummaryData(@Param("userIds")List<Long> userIds, @Param("offset") int offset);
+	List<InventorySummaryDataWrapper> getAllInventoriesSummaryData(@Param("userIds")List<Long> userIds, @Param("offset") int offset);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.protocolType =:type", nativeQuery = true)

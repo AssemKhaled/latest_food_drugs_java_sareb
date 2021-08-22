@@ -9,10 +9,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -154,7 +151,7 @@ public class InventoryController {
 	
 
 	@GetMapping("/getEasyCloudData")
-//    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
 	public ResponseEntity<?> getEasyCloudData() {
 		
 		return inventoryServiceImpl.getEasyCloudData();

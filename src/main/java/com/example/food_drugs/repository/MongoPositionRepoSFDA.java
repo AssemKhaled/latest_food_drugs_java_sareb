@@ -12,13 +12,10 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import org.bson.Document;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -29,18 +26,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
+
 import com.example.food_drugs.entity.DeviceTempHum;
 import com.example.food_drugs.entity.MonitorStaticstics;
 import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.entity.Series;
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 @Repository
 public class MongoPositionRepoSFDA {

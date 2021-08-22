@@ -2,6 +2,8 @@ package com.example.food_drugs.rest;
 
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -685,14 +687,16 @@ public class AppRestControllerSFDA {
 	}
 	
 	@PostMapping(path ="/createInventoriesApp")
+	@CacheEvict(cacheNames = "inventory" , value = "inventory" ,allEntries = true)
 	public ResponseEntity<?> createInventoriesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                              @RequestParam (value = "userId",defaultValue = "0") Long userId,
 			                              @RequestBody(required = false) Inventory inventory) {
 		
 			 return appServiceSFDA.createInventoriesApp(TOKEN,inventory,userId);				
 	}
-	
+
 	@RequestMapping(value = "/editInventoriesApp", method = RequestMethod.POST)
+	@CacheEvict(cacheNames = "inventory" , value = "inventory" ,allEntries = true)
 	public @ResponseBody ResponseEntity<?> editInventoriesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                                          @RequestBody(required = false) Inventory inventory,
 			                                          @RequestParam (value = "userId", defaultValue = "0") Long id) {
@@ -712,6 +716,7 @@ public class AppRestControllerSFDA {
 	}
 	
 	@RequestMapping(value = "/deleteInventoryApp", method = RequestMethod.GET)
+	@CacheEvict(cacheNames = "inventory" , value = "inventory" ,allEntries = true)
 	public @ResponseBody ResponseEntity<?> deleteInventoryApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                                            @RequestParam (value = "inventoryId", defaultValue = "0") Long inventoryId,
 			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {
@@ -721,6 +726,7 @@ public class AppRestControllerSFDA {
 	}
 	
 	@RequestMapping(value = "/activeInventoryApp", method = RequestMethod.GET)
+	@CacheEvict(cacheNames = "inventory" , value = "inventory" ,allEntries = true)
 	public @ResponseBody ResponseEntity<?> activeInventoryApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                                            @RequestParam (value = "inventoryId", defaultValue = "0") Long inventoryId,
 			                                            @RequestParam (value = "userId", defaultValue = "0") Long userId) {

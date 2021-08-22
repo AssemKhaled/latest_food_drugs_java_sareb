@@ -380,6 +380,22 @@ public class ReportRestControllerSFDA {
     	return  reportServiceImplSFDA.getVehicleTempHum(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
 
 	}
+
+
+	@RequestMapping(value = "/getVehicleTempHumNew", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getVehicleTempHumNew(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+															 @RequestParam (value = "deviceId", defaultValue = "0") Long [] deviceId,
+															 @RequestParam (value = "groupId", defaultValue = "0") Long [] groupId,
+															 @RequestParam (value = "exportData", defaultValue = "") String exportData,
+															 @RequestParam (value = "offset", defaultValue = "0") int offset,
+															 @RequestParam (value = "start", defaultValue = "0") String start,
+															 @RequestParam (value = "end", defaultValue = "0") String end,
+															 @RequestParam (value = "search", defaultValue = "") String search,
+															 @RequestParam (value = "userId",defaultValue = "0")Long userId) {
+
+		return  reportServiceImplSFDA.getVehicleTempHumNew(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
+
+	}
 	
 	@RequestMapping(value = "/getVehicleTempHumPDF", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getVehicleTempHumPDF(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,

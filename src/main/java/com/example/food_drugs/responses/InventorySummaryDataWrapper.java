@@ -1,9 +1,9 @@
 package com.example.food_drugs.responses;
 
-public interface InventorySammaryDataWrapper {
+public interface InventorySummaryDataWrapper {
 
     Long getId();
-    
+
     String getName();
 
     String getLastDataId();
