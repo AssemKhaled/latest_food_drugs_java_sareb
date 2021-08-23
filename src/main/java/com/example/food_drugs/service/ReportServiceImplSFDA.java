@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -1285,7 +1286,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	public ResponseEntity<?> getVehicleTempHumNew(String TOKEN, Long[] deviceIds, Long[] groupIds, int offset, String start,
 											   String end, String search, Long userId, String exportData) {
 		logger.info("************************ getSensorsReport STARTED ***************************");
-
+		int pageSize = 10;
+		int page = offset;
 		List<Position> positionsList = new ArrayList<>();
 		if(TOKEN.equals("")) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",positionsList);
@@ -1567,17 +1569,21 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 		if(exportData.equals("exportData")) {
 			// First Attack
-			//positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
+//			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 
 			for(long id : allDevices){
 				System.out.println("block 1");
 				positionsList.addAll(
 						positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ));
+								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize)));
+				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
 
 
-			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,positionsList.size());
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),
+					"success",
+					positionsList,
+					size);
 			logger.info("************************ getSensorsReport ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
 
@@ -1587,11 +1593,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			// Second Attack
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
 			System.out.println("block 2");
+
 			for(long id : allDevices){
 				System.out.println("block 2");
 				positionsList.addAll(
 						positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo));
+								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize)));
+				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
 			if(positionsList.size()>0) {
 //				size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
@@ -1608,12 +1616,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				System.out.println("block 3");
 				positionsList.addAll(
 						positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo));
+								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo,new PageRequest(page, pageSize)));
+				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
 
 		}
 
-		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,positionsList.size());
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,size);
 		logger.info("************************ getSensorsReport ENDED ***************************");
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}

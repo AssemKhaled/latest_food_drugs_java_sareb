@@ -24,7 +24,7 @@ public interface PositionMongoSFDARepository extends MongoRepository<Position, S
 
 	List<Position> findAllByDevicetimeBetweenAndDeviceid(Date from,Date to,long i);
 
-	List<Position> findAllByDeviceidAndDevicetimeBetween(long i , Date from, Date to );
+	List<Position> findAllByDeviceidAndDevicetimeBetween(long i , Date from, Date to ,Pageable pageable);
 	Integer countAllByDeviceidAndDevicetimeBetween( long i ,Date from, Date to);
 
 
