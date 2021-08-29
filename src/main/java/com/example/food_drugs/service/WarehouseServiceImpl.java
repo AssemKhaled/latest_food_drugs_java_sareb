@@ -8,12 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.example.food_drugs.entity.MonogoInventoryLastData;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepository;
 import com.example.food_drugs.responses.GraphDataWrapper;
 import com.example.food_drugs.responses.GraphObject;
 import com.example.food_drugs.responses.InventoryWarehouseDataByUserIdsDataWrapper;
+import com.example.food_drugs.responses.WarehouseWrapperGraphData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1736,6 +1738,9 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 			List<InventoryWarehouseDataByUserIdsDataWrapper> mappedSQLData = new ArrayList<>();
 			String pattern = "HH:mm";
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+
+
 			for( Object[] datas : sqlData){
 
 				List<MonogoInventoryLastData> lastDataList = mongoInventoryLastDataRepository
@@ -1746,7 +1751,6 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 							.name(simpleDateFormat.format(data.getCreateDate()))
 							.value(data.getTemperature()).build());
 				}
-
 				mappedSQLData.add(InventoryWarehouseDataByUserIdsDataWrapper
 						.builder()
 								.userId((Integer) datas[0])
@@ -1756,21 +1760,28 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 								.storingCategory((String) datas[4])
 								.lastUpdate((String) datas[5])
 								.lastDataId((String) datas[6])
+								.warehouseId((Integer) datas[7])
 								.lastData(mongoInventoryLastDataRepository.findById((String) datas[6]))
-								.lastDataList(lastDataList)
-								.lastDataListSize(lastDataList.size())
 								.graphData(GraphDataWrapper.builder()
 										.name("Temperature")
 										.series(series)
 										.build())
 						.build());
-
-
-
-
-
 			}
-			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",mappedSQLData);
+			List<WarehouseWrapperGraphData> warehouseWrapperGraphData = new ArrayList<>();
+			List<Object[]> warehouses = warehousesRepository.getWarehouseForUser(usersIds);
+			for (Object[] warehouseId : warehouses){
+				List<InventoryWarehouseDataByUserIdsDataWrapper> invs = mappedSQLData
+						.stream().filter(c -> c.getWarehouseId() == ((Integer) warehouseId[0]))
+						.collect(Collectors.toList());
+				warehouseWrapperGraphData.add(
+						WarehouseWrapperGraphData.builder()
+								.inventories(invs)
+								.warehouseName((String) warehouseId[1])
+								.build());
+			}
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",warehouseWrapperGraphData);
 			logger.info("************************ getListWarehouseDataGraph ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
 		}

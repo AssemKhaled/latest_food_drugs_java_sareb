@@ -2,7 +2,7 @@ package com.example.food_drugs.responses;
 
 import com.example.food_drugs.entity.MonogoInventoryLastData;
 import lombok.*;
-import java.util.*;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,8 +17,7 @@ public class InventoryWarehouseDataByUserIdsDataWrapper {
     java.lang.String storingCategory;
     java.lang.String lastUpdate;
     java.lang.String lastDataId;
+    java.lang.Integer warehouseId;
     MonogoInventoryLastData lastData;
-    List<MonogoInventoryLastData> lastDataList;
     GraphDataWrapper graphData ;
-    Integer lastDataListSize;
 }

@@ -13,6 +13,9 @@ import com.example.food_drugs.entity.Warehouse;;
 
 public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, QueryDslPredicateExecutor<Warehouse>{
 
+
+	int countAllByUserId(Long userId);
+
 	@Query(value = "SELECT count(tc_warehouses.id) FROM tc_warehouses " + 
 			"where tc_warehouses.userId IN (:userIds) and tc_warehouses.delete_date is null ",nativeQuery = true )
 	public Integer getTotalNumberOfUserWarehouse(@Param("userIds")List<Long> userIds);
@@ -83,14 +86,18 @@ public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, Qu
 
 
 	@Query(value = " SELECT tc_warehouses.userId as userId ,tc_inventories.id as inventoryId ,tc_warehouses.name as wareHouseName , tc_inventories.name as inventoryName , "
-			+ " tc_inventories.storingCategory as storingCategory , tc_inventories.lastUpdate as lastUpdate , tc_inventories.lastDataId as lastDataId  FROM tc_inventories "
+			+ " tc_inventories.storingCategory as storingCategory , tc_inventories.lastUpdate as lastUpdate , tc_inventories.lastDataId as lastDataId , tc_warehouses.id FROM tc_inventories "
 			+ " JOIN tc_warehouses "
 			+ " ON tc_inventories.warehouseId = tc_warehouses.id "
 			+ " WHERE tc_warehouses.userId in (:usersIds) "
 			+ " AND tc_warehouses.delete_date IS NULL "
 			+ " AND tc_inventories.lastDataId IS NOT NULL " , nativeQuery = true)
 	List<Object[]> getInventoryWarehouseDataByUserIds (@Param("usersIds")List<Long> usersIds);
-	
+
+	@Query(value = " SELECT tc_warehouses.id ,tc_warehouses.name FROM `tc_warehouses`"
+			+ " WHERE tc_warehouses.userId in (:usersIds)",  nativeQuery = true)
+	List<Object[]> getWarehouseForUser (@Param("usersIds")List<Long> usersIds);
+
 	@Query(value = " SELECT tc_warehouses.id FROM tc_warehouses " + 
 			" where tc_warehouses.userId IN (:userId) and tc_warehouses.delete_date is null "
 			+ " and tc_warehouses.name=:name and tc_warehouses.licenseNumber=:licenseNumber " ,nativeQuery = true )
