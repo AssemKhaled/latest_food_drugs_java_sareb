@@ -20,4 +20,6 @@ public interface WarehouseService {
 	
 	public ResponseEntity<?> assignWarehouseToUser(String TOKEN,Long userId,Long warehouseId , Long toUserId);
 
+	ResponseEntity<?> getListWarehouseDataGraph(String TOKEN,Long userId);
+
 }

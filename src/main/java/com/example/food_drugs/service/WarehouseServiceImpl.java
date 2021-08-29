@@ -8,9 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.example.food_drugs.entity.MonogoInventoryLastData;
+import com.example.food_drugs.repository.MongoInventoryLastDataRepository;
+import com.example.food_drugs.responses.GraphDataWrapper;
+import com.example.food_drugs.responses.GraphObject;
+import com.example.food_drugs.responses.InventoryWarehouseDataByUserIdsDataWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -61,6 +69,12 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 	
 	@Autowired
 	private UserClientWarehouseRepository userClientWarehouseRepository;
+
+	private final MongoInventoryLastDataRepository mongoInventoryLastDataRepository;
+
+	public WarehouseServiceImpl(MongoInventoryLastDataRepository mongoInventoryLastDataRepository) {
+		this.mongoInventoryLastDataRepository = mongoInventoryLastDataRepository;
+	}
 
 	@Override
 	public ResponseEntity<?> getWarehousesList(String TOKEN, Long id, int offset, String search,int active,String exportData) {
@@ -1672,6 +1686,103 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 
 	}
 
-	
+	@Override
+	public ResponseEntity<?> getListWarehouseDataGraph(String TOKEN, Long userId) {
+		logger.info("************************ getListWarehouseDataGraph STARTED ***************************");
+		List<Object[]> sqlData = new ArrayList<>();
+
+		if(TOKEN.equals("")) {
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",sqlData);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+
+		if(super.checkActive(TOKEN)!= null) {
+			return super.checkActive(TOKEN);
+		}
+		if(userId != 0) {
+			User user = userServiceImpl.findById(userId);
+			if(user == null ) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This User is not Found",sqlData);
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+			if(user.getDelete_date() != null){
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(),
+						"This User Was Delete at : "
+								+user.getDelete_date().toString(),sqlData);
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+
+
+			List<Long>usersIds= new ArrayList<>();
+
+			userServiceImpl.resetChildernArray();
+			if(user.getAccountType().equals(4)) {
+				usersIds.add(userId);
+				sqlData = warehousesRepository.getInventoryWarehouseDataByUserIds(usersIds);
+			}
+			else {
+				List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
+				if(childernUsers.isEmpty()) {
+					usersIds.add(userId);
+				}
+				else {
+					usersIds.add(userId);
+					for(User object : childernUsers) {
+						usersIds.add(object.getId());
+					}
+				}
+				sqlData = warehousesRepository.getInventoryWarehouseDataByUserIds(usersIds);
+			}
+			List<InventoryWarehouseDataByUserIdsDataWrapper> mappedSQLData = new ArrayList<>();
+			String pattern = "HH:mm";
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+			for( Object[] datas : sqlData){
+
+				List<MonogoInventoryLastData> lastDataList = mongoInventoryLastDataRepository
+						.findFirst20ByInventoryIdOrderByCreateDateDesc((Integer) datas[1]);
+				List<GraphObject> series = new ArrayList<>();
+				for(MonogoInventoryLastData data:lastDataList){
+					series.add(GraphObject.builder()
+							.name(simpleDateFormat.format(data.getCreateDate()))
+							.value(data.getTemperature()).build());
+				}
+
+				mappedSQLData.add(InventoryWarehouseDataByUserIdsDataWrapper
+						.builder()
+								.userId((Integer) datas[0])
+								.inventoryId((Integer) datas[1])
+								.wareHouseName((String) datas[2])
+								.inventoryName((String) datas[3])
+								.storingCategory((String) datas[4])
+								.lastUpdate((String) datas[5])
+								.lastDataId((String) datas[6])
+								.lastData(mongoInventoryLastDataRepository.findById((String) datas[6]))
+								.lastDataList(lastDataList)
+								.lastDataListSize(lastDataList.size())
+								.graphData(GraphDataWrapper.builder()
+										.name("Temperature")
+										.series(series)
+										.build())
+						.build());
+
+
+
+
+
+			}
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",mappedSQLData);
+			logger.info("************************ getListWarehouseDataGraph ENDED ***************************");
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+
+		else{
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",sqlData);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+
+		}
+	}
+
 
 }

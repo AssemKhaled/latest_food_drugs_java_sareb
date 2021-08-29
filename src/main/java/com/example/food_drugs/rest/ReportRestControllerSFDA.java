@@ -365,6 +365,21 @@ public class ReportRestControllerSFDA {
     	return  reportServiceImplSFDA.getNotificationReport(TOKEN,inventoryId, warehouseId, offset, start, end, search, userId,exportData);
 
 	}
+
+
+	@RequestMapping(value = "/getNotificationReport/v2.0", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getNotificationReportNew(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																 @RequestParam (value = "inventoryId", defaultValue = "0") Long [] inventoryId,
+																 @RequestParam (value = "warehouseId", defaultValue = "0") Long [] warehouseId,
+																 @RequestParam (value = "exportData", defaultValue = "") String exportData,
+																 @RequestParam (value = "offset", defaultValue = "0") int offset,
+																 @RequestParam (value = "start", defaultValue = "0") String start,
+																 @RequestParam (value = "end", defaultValue = "0") String end,
+																 @RequestParam (value = "search", defaultValue = "") String search,
+																 @RequestParam (value = "userId",defaultValue = "0")Long userId) {
+		return  reportServiceImplSFDA.getNotificationReportNew(TOKEN,inventoryId, warehouseId, offset, start, end, search, userId,exportData);
+
+	}
 	
 	@RequestMapping(value = "/getVehicleTempHum", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getVehicleTempHum(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,

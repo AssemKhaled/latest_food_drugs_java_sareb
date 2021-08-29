@@ -1,6 +1,5 @@
 package com.example.food_drugs.service;
 
-import java.awt.print.Pageable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -9,11 +8,9 @@ import java.util.*;
 import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
+import com.example.food_drugs.entity.*;
 import com.example.food_drugs.repository.*;
-import com.example.food_drugs.responses.AlarmsReportResponseWrapper;
-import com.example.food_drugs.responses.DeviceAttributes;
-import com.example.food_drugs.responses.GraphDataWrapper;
-import com.example.food_drugs.responses.GraphObject;
+import com.example.food_drugs.responses.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -46,17 +43,6 @@ import com.example.examplequerydslspringdatajpamaven.service.GroupsServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
 
-import com.example.food_drugs.entity.DeviceTempHum;
-import com.example.food_drugs.entity.Inventory;
-import com.example.food_drugs.entity.InventoryLastData;
-import com.example.food_drugs.entity.InventoryNotification;
-import com.example.food_drugs.entity.MonitorStaticstics;
-import com.example.food_drugs.entity.PdfSummaryData;
-import com.example.food_drugs.entity.Position;
-import com.example.food_drugs.entity.ReportDetails;
-import com.example.food_drugs.entity.Series;
-import com.example.food_drugs.entity.TripDetailsRequest;
-import com.example.food_drugs.entity.Warehouse;
 import com.example.food_drugs.repository.InventoryRepository;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepo;
 import com.example.food_drugs.repository.MongoInventoryNotificationRepo;
@@ -64,6 +50,7 @@ import com.example.food_drugs.repository.MongoPositionRepoSFDA;
 import com.example.food_drugs.repository.PositionMongoSFDARepository;
 import com.example.food_drugs.repository.WarehousesRepository;
 
+import static org.reflections.util.ConfigurationBuilder.build;
 
 
 /**
@@ -114,7 +101,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	
 	@Autowired
 	private MongoPositionRepoSFDA mongoPositionRepoSFDA;
-	
+
+	private final MongoInventoryNotificationRepository mongoInventoryNotificationRepository;
 
 	private final PositionMongoSFDARepository positionMongoSFDARepository ;
 
@@ -122,7 +110,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 	private final MongoEventsRepository mongoEventsRepository;
 
-	public ReportServiceImplSFDA(PositionMongoSFDARepository positionMongoSFDARepository, DeviceRepositorySFDA deviceRepositorySFDA, MongoEventsRepository mongoEventsRepository) {
+	public ReportServiceImplSFDA(MongoInventoryNotificationRepository mongoInventoryNotificationRepository, PositionMongoSFDARepository positionMongoSFDARepository,
+								 DeviceRepositorySFDA deviceRepositorySFDA,
+								 MongoEventsRepository mongoEventsRepository) {
+		this.mongoInventoryNotificationRepository = mongoInventoryNotificationRepository;
 		this.positionMongoSFDARepository = positionMongoSFDARepository;
 		this.deviceRepositorySFDA = deviceRepositorySFDA;
 		this.mongoEventsRepository = mongoEventsRepository;
@@ -649,7 +640,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	}
 
 	@Override
-	public ResponseEntity<?> getNotificationReport(String TOKEN, Long[] inventoryIds, Long[] warehouseIds, int offset,
+	public ResponseEntity<?> getNotificationReportNew(String TOKEN, Long[] inventoryIds, Long[] warehouseIds, int offset,
 			String start, String end, String search, Long userId,String exportData) {
 		logger.info("************************ getInventoriesReport STARTED ***************************");		
 		List<InventoryLastData> inventoriesReport = new ArrayList<InventoryLastData>();
@@ -905,21 +896,51 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 		
 		if(exportData.equals("exportData")) {
-			data = mongoInventoryNotificationRepo.getNotificationsReportSchedule(allInventories, dateFrom, dateTo);
-			if(data.size()>0) {
-				for(int i=0;i<data.size();i++) {
-					
-					Inventory inventory = inventoryRepository.findOne(data.get(i).getInventory_id());
-					if(inventory != null) {
-						data.get(i).setInventoryName(inventory.getName());
-						Warehouse war = warehousesRepository.findOne(inventory.getWarehouseId());
-						data.get(i).setWarehouseId(war.getId());
-						data.get(i).setWarehouseName(war.getName());
-					}
+//			data = mongoInventoryNotificationRepo.getNotificationsReportSchedule(allInventories, dateFrom, dateTo);
+//			if(data.size()>0) {
+//				for(int i=0;i<data.size();i++) {
+//					Inventory inventory = inventoryRepository.findOne(data.get(i).getInventory_id());
+//					if(inventory != null) {
+//						data.get(i).setInventoryName(inventory.getName());
+//						Warehouse war = warehousesRepository.findOne(inventory.getWarehouseId());
+//						data.get(i).setWarehouseId(war.getId());
+//						data.get(i).setWarehouseName(war.getName());
+//					}
+//				}
+//			}
+			List<InventoriesAndWarehousesWrapper> inventorisAndWarehousesList  =inventoryRepository.getAllInventoriesAndWarehouses(inventoryIds);
+			InventoriesAndWarehousesWrapper inv = inventorisAndWarehousesList.get(0);
+			List<NotificationWrapper> noti = mongoInventoryNotificationRepository
+					.findAllByInventoryIdAndCreatedDateBetween(inventoryIds[0],dateFrom,dateTo);
+			for(NotificationWrapper notificationWrapper : noti){
+				if(notificationWrapper.getType().equals("temperature alarm")){
+					data.add(InventoryNotification
+							.builder()
+							._id(notificationWrapper.get_id().toString())
+							.type(notificationWrapper.getType())
+							.create_date(notificationWrapper.getCreatedDate().toString())
+							.temperature(notificationWrapper.getAttributes().getValue())
+							.inventory_id(notificationWrapper.getInventoryId())
+							.attributes(notificationWrapper.getAttributes())
+									.inventoryName(inv.getInventoryName())
+									.warehouseName(inv.getWarehouseName())
+							.build());
+				}else {
+					data.add(InventoryNotification
+							.builder()
+							._id(notificationWrapper.get_id().toString())
+							.type(notificationWrapper.getType())
+							.create_date(notificationWrapper.getCreatedDate().toString())
+							.humidity(notificationWrapper.getAttributes().getValue())
+							.inventory_id(notificationWrapper.getInventoryId())
+							.attributes(notificationWrapper.getAttributes())
+									.inventoryName(inv.getInventoryName())
+							.warehouseName(inv.getWarehouseName())
+							.build());
 				}
-					
+
 			}
-			
+
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",data,size);
 			logger.info("************************ getInventoriesReport ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
@@ -961,6 +982,325 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 		}
 		
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",data,size);
+		logger.info("************************ getInventoriesReport ENDED ***************************");
+		return  ResponseEntity.ok().body(getObjectResponse);
+	}
+
+
+
+
+	@Override
+	public ResponseEntity<?> getNotificationReport(String TOKEN, Long[] inventoryIds, Long[] warehouseIds, int offset,
+												   String start, String end, String search, Long userId,String exportData) {
+		logger.info("************************ getInventoriesReport STARTED ***************************");
+		List<InventoryLastData> inventoriesReport = new ArrayList<InventoryLastData>();
+		if(TOKEN.equals("")) {
+
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventoriesReport);
+			logger.info("************************ getInventoriesReport ENDED ***************************");
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+
+
+		if(!TOKEN.equals("Schedule")) {
+			if(super.checkActive(TOKEN)!= null)
+			{
+				return super.checkActive(TOKEN);
+			}
+		}
+
+
+		User loggedUser = new User();
+		if(userId != 0) {
+
+			loggedUser = userServiceImpl.findById(userId);
+			if(loggedUser == null) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "logged user is not found",inventoriesReport);
+				logger.info("************************ getInventoriesReport ENDED ***************************");
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+		}
+
+		if(!loggedUser.getAccountType().equals(1)) {
+			if(!userRoleService.checkUserHasPermission(userId, "NOTIFICATIONTEMPHUMD", "list")) {
+				getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "this user doesnot has permission to get inventoriesReport list",inventoriesReport);
+				logger.info("************************ getInventoriesReport ENDED ***************************");
+				return  ResponseEntity.badRequest().body(getObjectResponse);
+			}
+		}
+
+
+
+		List<Long>allInventories= new ArrayList<>();
+
+		if(inventoryIds.length != 0 ) {
+			for(Long inventoryId:inventoryIds) {
+				if(inventoryId !=0) {
+					Inventory inventory =inventoryRepository.findOne(inventoryId);
+					if(inventory != null) {
+
+						Long createdBy=inventory.getUserId();
+						Boolean isParent=false;
+
+						if(createdBy.toString().equals(userId.toString())) {
+							isParent=true;
+						}
+						List<User>childs = new ArrayList<User>();
+						if(loggedUser.getAccountType().equals(4)) {
+							List<User> parents=userServiceImpl.getAllParentsOfuser(loggedUser,loggedUser.getAccountType());
+							if(parents.isEmpty()) {
+								getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "as you are not have parent you cannot allow to edit this inventory.",null);
+								return  ResponseEntity.badRequest().body(getObjectResponse);
+							}
+							else {
+								User parentClient = new User() ;
+
+								for(User object : parents) {
+									parentClient = object;
+									break;
+								}
+
+								userServiceImpl.resetChildernArray();
+								childs = userServiceImpl.getAllChildernOfUser(parentClient.getId());
+							}
+
+						}
+						else {
+							userServiceImpl.resetChildernArray();
+							childs = userServiceImpl.getAllChildernOfUser(userId);
+						}
+
+
+
+						User parentChilds = new User();
+						if(!childs.isEmpty()) {
+							for(User object : childs) {
+								parentChilds = object;
+								if(parentChilds.getId().toString().equals(createdBy.toString())) {
+									isParent=true;
+									break;
+								}
+							}
+						}
+						if(isParent == false) {
+							getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventory",null);
+							return  ResponseEntity.badRequest().body(getObjectResponse);
+						}
+
+						allInventories.add(inventoryId);
+					}
+
+				}
+			}
+		}
+
+		List<Long>allWarehouses= new ArrayList<>();
+
+		if(warehouseIds.length != 0 ) {
+			for(Long warehouseId:warehouseIds) {
+				if(warehouseId !=0) {
+					Warehouse warehouse =warehousesRepository.findOne(warehouseId);
+					if(warehouse != null) {
+						Long createdBy=warehouse.getUserId();
+						Boolean isParent=false;
+
+						if(createdBy.toString().equals(userId.toString())) {
+							isParent=true;
+						}
+
+						List<User>childs = new ArrayList<User>();
+						if(loggedUser.getAccountType().equals(4)) {
+							List<User> parents=userServiceImpl.getAllParentsOfuser(loggedUser,loggedUser.getAccountType());
+							if(parents.isEmpty()) {
+								getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "as you are not have parent you cannot allow to edit this warehouses.",null);
+								return  ResponseEntity.badRequest().body(getObjectResponse);
+							}
+							else {
+								User parentClient = new User() ;
+
+								for(User object : parents) {
+									parentClient = object;
+									break;
+								}
+
+								userServiceImpl.resetChildernArray();
+								childs = userServiceImpl.getAllChildernOfUser(parentClient.getId());
+							}
+
+						}
+						else {
+							userServiceImpl.resetChildernArray();
+							childs = userServiceImpl.getAllChildernOfUser(userId);
+						}
+
+
+
+						User parentChilds = new User();
+						if(!childs.isEmpty()) {
+							for(User object : childs) {
+								parentChilds = object;
+								if(parentChilds.getId().toString().equals(createdBy.toString())) {
+									isParent=true;
+									break;
+								}
+							}
+						}
+						if(isParent == false) {
+							getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get warehouses",null);
+							return  ResponseEntity.badRequest().body(getObjectResponse);
+						}
+						allWarehouses.add(warehouseId);
+
+					}
+
+				}
+			}
+		}
+
+		if(!allWarehouses.isEmpty()) {
+			allInventories.addAll(inventoryRepository.getAllInventoriesOfWarehouse(allWarehouses));
+
+		}
+
+		Date dateFrom;
+		Date dateTo;
+		if(start.equals("0") || end.equals("0")) {
+			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Date start and end is Required",null);
+			logger.info("************************ getInventoriesReport ENDED ***************************");
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+
+		}
+		else {
+
+			SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			SimpleDateFormat inputFormat1 = new SimpleDateFormat("yyyy-MM-dd");
+			inputFormat1.setLenient(false);
+			inputFormat.setLenient(false);
+			outputFormat.setLenient(false);
+
+
+			try {
+				dateFrom = inputFormat.parse(start);
+				start = outputFormat.format(dateFrom);
+
+
+			} catch (ParseException e2) {
+				// TODO Auto-generated catch block
+				try {
+					dateFrom = inputFormat1.parse(start);
+					start = outputFormat.format(dateFrom);
+
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+
+					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",null);
+					logger.info("************************ getInventoriesReport ENDED ***************************");
+					return  ResponseEntity.badRequest().body(getObjectResponse);
+				}
+
+			}
+
+			try {
+				dateTo = inputFormat.parse(end);
+				end = outputFormat.format(dateTo);
+
+
+			} catch (ParseException e2) {
+				// TODO Auto-generated catch block
+				try {
+					dateTo = inputFormat1.parse(end);
+					end = outputFormat.format(dateTo);
+
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",null);
+					logger.info("************************ getInventoriesReport ENDED ***************************");
+					return  ResponseEntity.badRequest().body(getObjectResponse);
+				}
+
+			}
+
+
+
+
+			Date today=new Date();
+
+			if(dateFrom.getTime() > dateTo.getTime()) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date should be Earlier than End Date",null);
+				logger.info("************************ getInventoriesReport ENDED ***************************");
+				return  ResponseEntity.badRequest().body(getObjectResponse);
+			}
+			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+				logger.info("************************ getInventoriesReport ENDED ***************************");
+				return  ResponseEntity.badRequest().body(getObjectResponse);
+			}
+
+		}
+
+
+
+		List<InventoryNotification> data = new ArrayList<InventoryNotification>();
+		Integer size=0;
+
+
+		if(exportData.equals("exportData")) {
+			data = mongoInventoryNotificationRepo.getNotificationsReportSchedule(allInventories, dateFrom, dateTo);
+			if(data.size()>0) {
+				for(int i=0;i<data.size();i++) {
+					Inventory inventory = inventoryRepository.findOne(data.get(i).getInventory_id());
+					if(inventory != null) {
+						data.get(i).setInventoryName(inventory.getName());
+						Warehouse war = warehousesRepository.findOne(inventory.getWarehouseId());
+						data.get(i).setWarehouseId(war.getId());
+						data.get(i).setWarehouseName(war.getName());
+					}
+				}
+			}
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",data,size);
+			logger.info("************************ getInventoriesReport ENDED ***************************");
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+		if(!TOKEN.equals("Schedule")) {
+			data = mongoInventoryNotificationRepo.getNotificationsReport(allInventories, offset, dateFrom, dateTo);
+			if(data.size()>0) {
+				size= mongoInventoryNotificationRepo.getNotificationsReportSize(allInventories,dateFrom, dateTo);
+				for(int i=0;i<data.size();i++) {
+
+					Inventory inventory = inventoryRepository.findOne(data.get(i).getInventory_id());
+					if(inventory != null) {
+						data.get(i).setInventoryName(inventory.getName());
+						Warehouse war = warehousesRepository.findOne(inventory.getWarehouseId());
+						data.get(i).setWarehouseId(war.getId());
+						data.get(i).setWarehouseName(war.getName());
+					}
+				}
+
+			}
+
+		}
+		else {
+			data = mongoInventoryNotificationRepo.getNotificationsReportSchedule(allInventories, dateFrom, dateTo);
+			if(data.size()>0) {
+				for(int i=0;i<data.size();i++) {
+
+					Inventory inventory = inventoryRepository.findOne(data.get(i).getInventory_id());
+					if(inventory != null) {
+						data.get(i).setInventoryName(inventory.getName());
+						Warehouse war = warehousesRepository.findOne(inventory.getWarehouseId());
+						data.get(i).setWarehouseId(war.getId());
+						data.get(i).setWarehouseName(war.getName());
+					}
+				}
+
+			}
+
+		}
+
 		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",data,size);
 		logger.info("************************ getInventoriesReport ENDED ***************************");
 		return  ResponseEntity.ok().body(getObjectResponse);
@@ -1572,10 +1912,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 
 			for(long id : allDevices){
-				System.out.println("block 1");
 				positionsList.addAll(
 						positionMongoSFDARepository.
 								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize)));
+
 				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
 
@@ -1592,10 +1932,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			search = "%"+search+"%";
 			// Second Attack
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
-			System.out.println("block 2");
 
 			for(long id : allDevices){
-				System.out.println("block 2");
 				positionsList.addAll(
 						positionMongoSFDARepository.
 								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize)));
@@ -1611,9 +1949,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		else {
 			// Third Attack
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
-			System.out.println("block 3");
 			for(long id : allDevices){
-				System.out.println("block 3");
 				positionsList.addAll(
 						positionMongoSFDARepository.
 								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo,new PageRequest(page, pageSize)));

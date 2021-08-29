@@ -2,6 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
+import com.example.food_drugs.responses.InventoriesAndWarehousesWrapper;
 import com.example.food_drugs.responses.InventorySummaryDataWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -111,7 +112,14 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	@Query(value = "SELECT tc_inventories.id FROM tc_inventories"
 			+ " WHERE tc_inventories.warehouseId IN(:warehouseIds) and tc_inventories.delete_date is null", nativeQuery = true)
 	public List<Long> getAllInventoriesOfWarehouse(@Param("warehouseIds")List<Long> warehouseIds);
-	
+
+
+	@Query(value = "SELECT tc_inventories.id AS id ,tc_inventories.name AS inventoryName , tc_warehouses.name AS warehouseName " +
+			"FROM tc_inventories " +
+			"LEFT JOIN tc_warehouses " +
+			"ON tc_inventories.warehouseId = tc_warehouses.id " +
+			"WHERE tc_inventories.id IN (:inventoriesIds)" , nativeQuery = true)
+	List<InventoriesAndWarehousesWrapper> getAllInventoriesAndWarehouses(@Param("inventoriesIds") Long[] inventoriesIds);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.warehouseId IN(:warehouseId) and tc_inventories.delete_date is null", nativeQuery = true)

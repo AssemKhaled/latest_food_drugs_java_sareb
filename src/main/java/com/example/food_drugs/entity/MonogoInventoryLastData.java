@@ -6,6 +6,7 @@ import javax.persistence.Id;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "tc_inventory_last_data")
 public class MonogoInventoryLastData {
@@ -14,8 +15,10 @@ public class MonogoInventoryLastData {
 	private ObjectId _id;
 	private Double temperature;
 	private Double humidity;
-	private Long inventory_id;
-	private Date create_date;
+	@Field("inventory_id")
+	private Long inventoryId;
+	@Field("create_date")
+	private Date createDate;
 	
 	public ObjectId get_id() {
 		return _id;
@@ -35,17 +38,17 @@ public class MonogoInventoryLastData {
 	public void setHumidity(Double humidity) {
 		this.humidity = humidity;
 	}
-	public Long getInventory_id() {
-		return inventory_id;
+	public Long getInventoryId() {
+		return inventoryId;
 	}
-	public void setInventory_id(Long inventory_id) {
-		this.inventory_id = inventory_id;
+	public void setInventoryId(Long inventoryId) {
+		this.inventoryId = inventoryId;
 	}
-	public Date getCreate_date() {
-		return create_date;
+	public Date getCreateDate() {
+		return createDate;
 	}
-	public void setCreate_date(Date create_date) {
-		this.create_date = create_date;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 	
 	
@@ -54,13 +57,13 @@ public class MonogoInventoryLastData {
 	public MonogoInventoryLastData() {
 
 	}
-	public MonogoInventoryLastData(ObjectId _id, Double temperature, Double humidity, Long inventory_id, Date create_date) {
+	public MonogoInventoryLastData(ObjectId _id, Double temperature, Double humidity, Long inventoryId, Date createDate) {
 		super();
 		this._id = _id;
 		this.temperature = temperature;
 		this.humidity = humidity;
-		this.inventory_id = inventory_id;
-		this.create_date = create_date;
+		this.inventoryId = inventoryId;
+		this.createDate = createDate;
 	}
 	
 	

@@ -103,7 +103,16 @@ public class WarehouseRestController {
     	return warehouseServiceImpl.getListWarehouseMap(TOKEN,userId);
 
 	}
-	
+
+	@RequestMapping(value = "/getListWarehouseInventoryGraph", method = RequestMethod.GET)
+	public ResponseEntity<?> getListWarehouseInventoryGraph(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+															   @RequestParam (value = "userId", defaultValue = "0") Long  userId) {
+
+		return warehouseServiceImpl.getListWarehouseDataGraph(TOKEN,userId);
+
+	}
+
+
 	@RequestMapping(value = "/getInventoryListOfWarehouseMap", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getInventoryListOfWarehouseMap(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 			                                                   @RequestParam (value = "userId", defaultValue = "0") Long  userId,

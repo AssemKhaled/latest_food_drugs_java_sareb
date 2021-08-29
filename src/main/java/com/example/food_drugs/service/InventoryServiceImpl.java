@@ -1355,9 +1355,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 											.builder()
 											._id(mongoInv.get_id())
 											.temperature(mongoInv.getTemperature())
-											.inventoryId(mongoInv.getInventory_id())
+											.inventoryId(mongoInv.getInventoryId())
 											.inventoryName(inventorySummaryWrapper.getLastDataId())
-											.createDate(mongoInv.getCreate_date())
+											.createDate(mongoInv.getCreateDate())
 											.humidity(mongoInv.getHumidity())
 											.build());
 						}
@@ -2777,8 +2777,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		
 		monogoInventoryLastData.setTemperature(AvgTemp);
 		monogoInventoryLastData.setHumidity(AvgHum);
-		monogoInventoryLastData.setInventory_id(inventory.getId());
-		monogoInventoryLastData.setCreate_date(dateTime);
+		monogoInventoryLastData.setInventoryId(inventory.getId());
+		monogoInventoryLastData.setCreateDate(dateTime);
 		
 		mongoInventoryLastDataRepository.save(monogoInventoryLastData);
 
@@ -2811,8 +2811,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		MonogInventoryNotification monogInventoryNotification =new MonogInventoryNotification();
 		
 		monogInventoryNotification.setType("temperature alarm");
-		monogInventoryNotification.setInventory_id(inventory.getId());
-		monogInventoryNotification.setCreate_date(dateTime);
+		monogInventoryNotification.setInventoryId(inventory.getId());
+		monogInventoryNotification.setCreatedDate(dateTime);
 		
 		NotificationAttributes notificationAttributes = new NotificationAttributes();
 		notificationAttributes.setKey("temperature");
@@ -3031,8 +3031,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		MonogInventoryNotification monogInventoryNotification =new MonogInventoryNotification();
 		
 		monogInventoryNotification.setType("humidity alarm");
-		monogInventoryNotification.setInventory_id(inventory.getId());
-		monogInventoryNotification.setCreate_date(dateTime);
+		monogInventoryNotification.setInventoryId(inventory.getId());
+		monogInventoryNotification.setCreatedDate(dateTime);
 		
 		NotificationAttributes notificationAttributes = new NotificationAttributes();
 		notificationAttributes.setKey("humidity");

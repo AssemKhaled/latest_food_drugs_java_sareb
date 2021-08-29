@@ -4,8 +4,10 @@ import java.util.Date;
 
 import javax.persistence.Id;
 
+import com.example.food_drugs.responses.KeyAndValueObject;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "tc_inventory_notifications")
 public class MonogInventoryNotification {
@@ -13,22 +15,24 @@ public class MonogInventoryNotification {
 	@Id
 	private ObjectId _id;
 	private String type;
-	private Long inventory_id;
-	private Date create_date;
-	private Object attributes;
+	@Field("inventory_id")
+	private Long inventoryId;
+	@Field("create_date")
+	private Date createdDate;
+	private NotificationAttributes attributes;
 	
 	public MonogInventoryNotification() {
 		super();
 
 	}
 
-	public MonogInventoryNotification(ObjectId _id, String type, Long inventory_id, Date create_date,
-			Object attributes) {
+	public MonogInventoryNotification(ObjectId _id, String type, Long inventoryId, Date createdDate,
+									  NotificationAttributes attributes) {
 		super();
 		this._id = _id;
 		this.type = type;
-		this.inventory_id = inventory_id;
-		this.create_date = create_date;
+		this.inventoryId = inventoryId;
+		this.createdDate = createdDate;
 		this.attributes = attributes;
 	}
 
@@ -50,27 +54,27 @@ public class MonogInventoryNotification {
 		this.type = type;
 	}
 
-	public Long getInventory_id() {
-		return inventory_id;
+	public Long getInventoryId() {
+		return inventoryId;
 	}
 
-	public void setInventory_id(Long inventory_id) {
-		this.inventory_id = inventory_id;
+	public void setInventoryId(Long inventoryId) {
+		this.inventoryId = inventoryId;
 	}
 
-	public Date getCreate_date() {
-		return create_date;
+	public Date getCreatedDate() {
+		return createdDate;
 	}
 
-	public void setCreate_date(Date create_date) {
-		this.create_date = create_date;
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
 
-	public Object getAttributes() {
+	public NotificationAttributes getAttributes() {
 		return attributes;
 	}
 
-	public void setAttributes(Object attributes) {
+	public void setAttributes(NotificationAttributes attributes) {
 		this.attributes = attributes;
 	}
 	

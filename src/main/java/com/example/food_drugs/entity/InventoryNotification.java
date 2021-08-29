@@ -1,6 +1,8 @@
 package com.example.food_drugs.entity;
 
+import lombok.Builder;
 
+@Builder
 public class InventoryNotification {
 
 	private String _id;

@@ -2,6 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
+import com.example.food_drugs.responses.InventoryWarehouseDataByUserIdsDataWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -79,6 +80,16 @@ public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, Qu
 	@Query(value = "SELECT tc_warehouses.* FROM tc_warehouses"
 			+ " WHERE tc_warehouses.id IN(:warehouseIds) and tc_warehouses.delete_date is null ", nativeQuery = true)
 	public List<Warehouse> getAllWarehousesSelectByIds(@Param("warehouseIds")List<Long> warehouseIds);
+
+
+	@Query(value = " SELECT tc_warehouses.userId as userId ,tc_inventories.id as inventoryId ,tc_warehouses.name as wareHouseName , tc_inventories.name as inventoryName , "
+			+ " tc_inventories.storingCategory as storingCategory , tc_inventories.lastUpdate as lastUpdate , tc_inventories.lastDataId as lastDataId  FROM tc_inventories "
+			+ " JOIN tc_warehouses "
+			+ " ON tc_inventories.warehouseId = tc_warehouses.id "
+			+ " WHERE tc_warehouses.userId in (:usersIds) "
+			+ " AND tc_warehouses.delete_date IS NULL "
+			+ " AND tc_inventories.lastDataId IS NOT NULL " , nativeQuery = true)
+	List<Object[]> getInventoryWarehouseDataByUserIds (@Param("usersIds")List<Long> usersIds);
 	
 	@Query(value = " SELECT tc_warehouses.id FROM tc_warehouses " + 
 			" where tc_warehouses.userId IN (:userId) and tc_warehouses.delete_date is null "

@@ -1,5 +1,7 @@
 package com.example.food_drugs.repository;
 
+import com.example.food_drugs.entity.MonogInventoryNotification;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import java.util.*;
@@ -10,4 +12,8 @@ public interface MongoInventoryLastDataRepository extends MongoRepository<Monogo
 	@Query("{ '_id' : ?0 }")
 	MonogoInventoryLastData findById(String lastId);
 //	List<MonogoInventoryLastData> findAllByInventory(Long i);
+	List<MonogoInventoryLastData> findAllByInventoryIdAndCreateDateBetween(int inventoryId , Date start, Date end);
+	List <MonogoInventoryLastData> findFirst20ByInventoryIdOrderByCreateDateDesc(int inventoryId);
+	List <MonogoInventoryLastData> findAllByInventoryId(int inventoryId, Pageable topTen);
+
 }
