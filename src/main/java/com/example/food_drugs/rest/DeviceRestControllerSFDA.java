@@ -2,6 +2,8 @@ package com.example.food_drugs.rest;
 
 import java.util.List;
 import java.util.Map;
+
+import com.example.food_drugs.responses.GraphDataWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.food_drugs.entity.DeviceSFDA;
-import com.example.food_drugs.service.DeviceServiceImplSFDA;
+import com.example.food_drugs.service.impl.DeviceServiceImplSFDA;
 
 /**
  * Services of Device SFDA Component
@@ -279,5 +280,24 @@ public class DeviceRestControllerSFDA {
 	@GetMapping("/updatePositionData")
 	public ResponseEntity<?> updatePositionData() {
 		return deviceServiceImpl.updatePositionData();
+	}
+
+	@GetMapping(value = "/getDeviceGraphData")
+	public ResponseEntity<?> getDeviceGraphData( @RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+									  @RequestParam (value = "userId", defaultValue = "0") Long userId){
+		return deviceServiceImplSFDA.getDeviceGraphData(TOKEN,userId);
+	}
+
+	@GetMapping(value = "/getDeviceData/v2.0")
+	public ResponseEntity<?> getDeviceGraphDataDashboard( @RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+												 @RequestParam (value = "userId", defaultValue = "0") Long userId,
+														  @RequestParam(value = "offset") int offset ,
+														  @RequestParam(value = "limit") int limit){
+		return deviceServiceImplSFDA.getDeviceGraphDataDashboard(TOKEN,userId,offset,limit);
+	}
+
+	@GetMapping(value = "/getGraphData/v2.0")
+	public ResponseEntity<GetObjectResponse<GraphDataWrapper>> getDeviceGraphDataDashboard(@RequestParam (value = "deviceId", defaultValue = "0") Integer deviceId) {
+		return deviceServiceImplSFDA.getDataForGraphByDeviceID(deviceId);
 	}
 }

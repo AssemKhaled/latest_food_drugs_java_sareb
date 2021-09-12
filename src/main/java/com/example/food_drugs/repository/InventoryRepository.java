@@ -33,7 +33,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 	
 	
 	@Query(value = "SELECT count(*) FROM tc_inventories " + 
-			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.lastDataId is Not null" , nativeQuery = true)
+			"  WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null " , nativeQuery = true)
 	Integer getInventoriesSize(@Param("userIds")List<Long> userIds);
 	
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"

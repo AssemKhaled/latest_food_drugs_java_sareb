@@ -2,6 +2,7 @@ package com.example.examplequerydslspringdatajpamaven.repository;
 
 import java.util.List;
 
+import com.example.food_drugs.entity.MonogoInventoryLastData;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -28,9 +29,16 @@ public interface MongoPositionsRepository extends MongoRepository<MongoPositions
 	
 	@Query("{ 'deviceid' : { $in: ?0 } , 'deviceName' : { $exists : false }}")
 	public List<MongoPositions> findByDeviceIdIn(List<Long> deviceIds,Pageable pageable);
-	
 
-	
+//	List <MongoPositions> findFirst20ByDeviceidOrderByCreateDateDesc(int deviceId);
 
+//	List <MongoPositions> findFirstBy20ByDeviceidOrderByServertimeDesc(Long deviceId);
+
+
+	List <MongoPositions> findFirst10ByDeviceidOrderByServertimeDesc( int deviceId);
+
+	List <MongoPositions> findFirst15ByDeviceidOrderByServertimeDesc( int deviceId);
+
+	List <MongoPositions> findFirst20ByDeviceidOrderByServertimeDesc( int deviceId);
 }
 

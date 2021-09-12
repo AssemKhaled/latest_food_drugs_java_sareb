@@ -1655,19 +1655,19 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
          String activity = "DEFAULT";
 		 JSONObject obj = new JSONObject();
 		 if(device.getAttributes() != null) {
-			if(device.getAttributes().toString().startsWith("{")) {
-				obj = new JSONObject(device.getAttributes().toString());
+			if(!device.getAttributes().equals("{}")) {
+				obj = new JSONObject(device.getAttributes());
 	          	if(obj.has("activity")) {
 	          		activity = obj.getString("activity");
-
 	        	}
 			}
 		}
+//		if(!activity.equals("SFDA")){
+//			activity = "SFDA";
+//		}
 		 
 		 
-		  String url = elm+"/operationCompany/"+parent.getReference_key()+"/vehicle/"+device.getReference_key();
-
-		  url = url + "&activity=" + activity;
+		  String url = elm+"/operationCompany/"+parent.getReference_key()+"/vehicle/"+device.getReference_key()+"?activity="+activity;
 		  
 		  Map bodyToMiddleWare = new HashMap();
 		  

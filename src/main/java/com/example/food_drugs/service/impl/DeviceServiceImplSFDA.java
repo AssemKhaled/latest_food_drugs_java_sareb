@@ -1,16 +1,13 @@
-package com.example.food_drugs.service;
+package com.example.food_drugs.service.impl;
 
-import java.text.ParseException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
+import com.example.food_drugs.responses.*;
+import com.example.food_drugs.service.DeviceServiceSFDA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.example.examplequerydslspringdatajpamaven.entity.CustomDeviceList;
-import com.example.examplequerydslspringdatajpamaven.entity.CustomDeviceLiveData;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.MongoPositions;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
@@ -31,7 +27,6 @@ import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
 import com.example.food_drugs.repository.DeviceRepositorySFDA;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -41,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Component
 @Service
-public class DeviceServiceImplSFDA extends RestServiceController implements DeviceServiceSFDA{
+public class DeviceServiceImplSFDA extends RestServiceController implements DeviceServiceSFDA {
 
 	private static final Log logger = LogFactory.getLog(DeviceServiceImplSFDA.class);
 	
@@ -319,7 +314,231 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 		 return  ResponseEntity.ok().body(getObjectResponse);
 	}
 
+	@Override
+	public ResponseEntity<?> getDeviceGraphData(String TOKEN, Long userId) {
+		logger.info("************************ getDeviceGraphData STARTED ***************************");
+		List<Object[]> sqlData = new ArrayList<>();
 
-	
+		if(TOKEN.equals("")) {
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",sqlData);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+
+		if(super.checkActive(TOKEN)!= null) {
+			return super.checkActive(TOKEN);
+		}
+		if(userId != 0) {
+			User user = userServiceImpl.findById(userId);
+			if(user == null ) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This User is not Found",sqlData);
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+			if(user.getDelete_date() != null){
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(),
+						"This User Was Delete at : "
+								+user.getDelete_date().toString(),sqlData);
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+
+
+			List<Long>usersIds= new ArrayList<>();
+
+			userServiceImpl.resetChildernArray();
+			if(user.getAccountType().equals(4)) {
+				usersIds.add(userId);
+				sqlData = deviceRepositorySFDA.getDeviceByUserIds(usersIds);
+			}
+			else {
+				List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
+				if(childernUsers.isEmpty()) {
+					usersIds.add(userId);
+				}
+				else {
+					usersIds.add(userId);
+					for(User object : childernUsers) {
+						usersIds.add(object.getId());
+					}
+				}
+				sqlData = deviceRepositorySFDA.getDeviceByUserIds(usersIds);
+			}
+
+
+
+			List<DeviceResponseDataWrapper> mappedSQLData = new ArrayList<>();
+			String pattern = "HH:mm";
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+			ObjectMapper oMapper = new ObjectMapper();
+
+			for( Object[] datas : sqlData){
+
+				List<MongoPositions> lastDataList = mongoPositionsRepository
+						.findFirst20ByDeviceidOrderByServertimeDesc((Integer) datas[1]);
+				List<GraphObject> series = new ArrayList<>();
+
+				for(MongoPositions data:lastDataList){
+					series.add(GraphObject.builder()
+							.name(simpleDateFormat.format(data.getServertime()))
+							.value(findTemperature(oMapper.convertValue(data.getAttributes(), Map.class)))
+							.build());
+				}
+
+				mappedSQLData.add(DeviceResponseDataWrapper
+						.builder()
+						.deviceName((String) datas[0])
+						.lastTemp((Double) datas[3])
+						.lastHum((Double) datas[4])
+						.storingCategory((String) datas[5])
+						.id((Integer) datas[1])
+						.lastUpdate(datas[2].toString())
+						.graphData(GraphDataWrapper.builder()
+								.name("Temperature")
+								.series(series)
+								.build())
+						.build());
+			}
+
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",mappedSQLData);
+			logger.info("************************ getDeviceGraphData ENDED ***************************");
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+
+		else{
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",sqlData);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+
+		}
+	}
+
+
+	private static int devicesSize = 0 ;
+	@Override
+	public ResponseEntity<?> getDeviceGraphDataDashboard(String TOKEN, Long userId,int offset,int size) {
+		logger.info("************************ getDeviceGraphData STARTED ***************************");
+		List<Object[]> sqlData = new ArrayList<>();
+
+		if(TOKEN.equals("")) {
+			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",sqlData);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+		}
+
+		if(super.checkActive(TOKEN)!= null) {
+			return super.checkActive(TOKEN);
+		}
+		if(userId != 0) {
+			User user = userServiceImpl.findById(userId);
+			if(user == null ) {
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This User is not Found",sqlData);
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+			if(user.getDelete_date() != null){
+				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(),
+						"This User Was Delete at : "
+								+user.getDelete_date().toString(),sqlData);
+				return  ResponseEntity.status(404).body(getObjectResponse);
+			}
+
+
+			List<Long>usersIds= new ArrayList<>();
+					userServiceImpl.resetChildernArray();
+			if(user.getAccountType().equals(4)) {
+				usersIds.add(userId);
+				sqlData = deviceRepositorySFDA.getDeviceByUserIdsForDashboard(usersIds, offset, size);
+				if(offset==0)
+					devicesSize = deviceRepositorySFDA.getDevicesSizeByUserIds(usersIds);
+			}
+			else {
+				List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
+				if(childernUsers.isEmpty()) {
+					usersIds.add(userId);
+				}
+				else {
+					usersIds.add(userId);
+					for(User object : childernUsers) {
+						usersIds.add(object.getId());
+					}
+				}
+				sqlData = deviceRepositorySFDA.getDeviceByUserIdsForDashboard(usersIds,offset,size);
+				;
+				if(offset == 0)
+					devicesSize = deviceRepositorySFDA.getDevicesSizeByUserIds(usersIds);
+			}
+
+
+
+			List<DeviceResponseDataWrapper> mappedSQLData = new ArrayList<>();
+			for( Object[] datas : sqlData){
+				mappedSQLData.add(DeviceResponseDataWrapper
+						.builder()
+						.deviceName((String) datas[0])
+						.lastTemp((Double) datas[3])
+						.lastHum((Double) datas[4])
+						.storingCategory((String) datas[5])
+						.id((Integer) datas[1])
+						.lastUpdate(datas[2].toString())
+						.build());
+			}
+
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",mappedSQLData,devicesSize);
+			logger.info("************************ getDeviceGraphData ENDED ***************************");
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+
+		else{
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",sqlData);
+			return  ResponseEntity.badRequest().body(getObjectResponse);
+
+		}
+	}
+
+
+	@Override
+	public ResponseEntity<GetObjectResponse<GraphDataWrapper>> getDataForGraphByDeviceID(int deviceID){
+
+		List<MongoPositions> lastDataList = mongoPositionsRepository
+				.findFirst15ByDeviceidOrderByServertimeDesc(deviceID);
+		List<GraphObject> series = new ArrayList<>();
+		String pattern = "HH:mm";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+		ObjectMapper oMapper = new ObjectMapper();
+		for(MongoPositions data:lastDataList){
+			series.add(GraphObject.builder()
+					.name(simpleDateFormat.format(data.getServertime()))
+					.value(findTemperature(oMapper.convertValue(data.getAttributes(), Map.class)))
+					.build());
+		}
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",
+				Arrays.asList(GraphDataWrapper.builder()
+				.name("Temperature")
+				.series(series)
+				.build()));
+		logger.info("************************ getDeviceGraphData ENDED ***************************");
+		return  ResponseEntity.ok().body(getObjectResponse);
+	}
+
+	double findTemperature(Map<String,Object> attributes){
+		double temparature  = 0.0;
+		for (Map.Entry<String, Object> set:attributes.entrySet()) {
+			String key  = set.getKey() ;
+			Object value = set.getValue() ;
+			if(key.contains("temp")){
+				if(Double.parseDouble(value.toString())>0.0
+						&&Double.parseDouble(value.toString())<300.0){
+					 temparature=Double.parseDouble(value.toString());
+					return Math.round(temparature * 100.0) / 100.0;
+				}
+			}
+		}
+		return temparature;
+	}
+
+
 
 }

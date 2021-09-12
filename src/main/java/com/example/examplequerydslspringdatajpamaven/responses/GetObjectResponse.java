@@ -8,36 +8,36 @@ import java.util.Map;
  * @author fuinco
  *
  */
-public class GetObjectResponse {
+public class GetObjectResponse<T> {
 	
 	private Integer responseCode;
 	private String  message;
-	private List<?> entity;
+	private List<T> entity;
 	private Map<Object, Object>  sensorSettings;
 	private Integer size;
 	
 	
-   public GetObjectResponse(Integer responseCode, String message,List<?> entity) {
+   public GetObjectResponse(Integer responseCode, String message,List<T> entity) {
 	   this.responseCode = responseCode;
 	   this.message = message;
 	   this.entity = entity;
 	  
    }
-   public GetObjectResponse(Integer responseCode, String message,List<?> entity, Map<Object, Object>  sensorSettings) {
+   public GetObjectResponse(Integer responseCode, String message,List<T> entity, Map<Object, Object>  sensorSettings) {
 	   this.responseCode = responseCode;
 	   this.message = message;
 	   this.entity = entity;
 	   this.sensorSettings = sensorSettings;
 
    }
-   public GetObjectResponse(Integer responseCode, String message,List<?> entity,Integer size) {
+   public GetObjectResponse(Integer responseCode, String message,List<T> entity,Integer size) {
 	   this.responseCode = responseCode;
 	   this.message = message;
 	   this.entity = entity;
 	   this.size = size;
 
    }
-   public GetObjectResponse(Integer responseCode, String message,List<?> entity, Map<Object, Object>  sensorSettings,Integer size) {
+   public GetObjectResponse(Integer responseCode, String message,List<T> entity, Map<Object, Object>  sensorSettings,Integer size) {
 	   this.responseCode = responseCode;
 	   this.message = message;
 	   this.entity = entity;
@@ -66,7 +66,7 @@ public class GetObjectResponse {
 		return entity;
 	}
 	
-	public void setEntity(List<?> entity) {
+	public void setEntity(List<T> entity) {
 		this.entity = entity;
 	}
 	public Integer getSize() {

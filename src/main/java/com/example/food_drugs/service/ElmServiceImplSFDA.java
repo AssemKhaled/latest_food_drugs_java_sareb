@@ -2497,13 +2497,14 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 			  JSONObject obj = new JSONObject();
 			  if(user.getAttributes() != null) {
 				  if(user.getAttributes().toString().startsWith("{")) {
-					  obj = new JSONObject(user.getAttributes().toString());
+					  obj = new JSONObject(user.getAttributes());
 		          	  if(obj.has("sfdaCompanyActivity")) {
 		              	  companyElmData.setSfdaCompanyActivity(obj.getString("sfdaCompanyActivity"));
 
 		          	  }
 		          	  if(obj.has("activity")) {
 		              	  companyElmData.setActivity(obj.getString("activity"));
+						  System.out.println(obj.getString("activity"));
 
 		        	  }
 				  }
@@ -2676,7 +2677,9 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 				  user.setRegestration_to_elm_date(dateReg);
 				  user.setUpdate_date_in_elm(dateReg);
 				  user.setDelete_from_elm_date(null);
-					  
+
+				  userRepository.save(user);
+
 					  getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"success",data);
 					  logger.info("************************ companyRegistrtaion ENDED ***************************");
 					  return  ResponseEntity.ok().body(getObjectResponse);

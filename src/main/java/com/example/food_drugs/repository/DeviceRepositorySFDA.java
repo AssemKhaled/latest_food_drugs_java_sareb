@@ -1,8 +1,10 @@
 package com.example.food_drugs.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import com.example.food_drugs.responses.DeviceResponseDataWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -106,5 +108,17 @@ public interface DeviceRepositorySFDA extends  JpaRepository<DeviceSFDA, Long>, 
      		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
      		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id ) Y " ,nativeQuery = true )
 	public Integer getDevicesListSizeByIdsAll(@Param("deviceIds")List<Long> deviceIds,@Param("search") String search);
-	
+
+	@Query(value = " SELECT name , id ,lastupdate , lastTemp , lastHum , storingCategory FROM `tc_devices` " +
+			" WHERE tc_devices.lastupdate is not NULL AND tc_devices.user_id in (:userIds)" , nativeQuery = true)
+	List<Object[]> getDeviceByUserIds(@Param("userIds")List<Long> userIds);
+
+	@Query(value = " SELECT name , id ,lastupdate , lastTemp , lastHum , storingCategory FROM `tc_devices` " +
+			" WHERE tc_devices.lastupdate is not NULL AND tc_devices.user_id in (:userIds) LIMIT :offset,:size" , nativeQuery = true)
+	List<Object[]> getDeviceByUserIdsForDashboard(@Param("userIds")List<Long> userIds ,@Param("offset")int offset ,@Param("size")int size);
+
+	@Query(value = " SELECT COUNT(id) FROM `tc_devices` " +
+			" WHERE tc_devices.lastupdate is not NULL AND tc_devices.user_id in (:userIds) " , nativeQuery = true)
+	int getDevicesSizeByUserIds(@Param("userIds")List<Long> userIds );
+
 }

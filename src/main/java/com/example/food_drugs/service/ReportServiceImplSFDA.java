@@ -9,8 +9,10 @@ import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
 import com.example.food_drugs.entity.*;
+import com.example.food_drugs.mappers.PositionMapper;
 import com.example.food_drugs.repository.*;
 import com.example.food_drugs.responses.*;
+import com.example.food_drugs.service.impl.DeviceServiceImplSFDA;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -50,8 +52,6 @@ import com.example.food_drugs.repository.MongoPositionRepoSFDA;
 import com.example.food_drugs.repository.PositionMongoSFDARepository;
 import com.example.food_drugs.repository.WarehousesRepository;
 
-import static org.reflections.util.ConfigurationBuilder.build;
-
 
 /**
  * services functionality related to reports SFDA
@@ -65,7 +65,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
     private static final Log logger = LogFactory.getLog(DeviceServiceImplSFDA.class);
 	
 	private GetObjectResponse getObjectResponse;
-	
+
+//	@Autowired
+//	private PositionMapper positionMapper;
+
 	@Autowired
 	private UserClientDeviceRepository userClientDeviceRepository;
 	
@@ -1626,9 +1629,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	public ResponseEntity<?> getVehicleTempHumNew(String TOKEN, Long[] deviceIds, Long[] groupIds, int offset, String start,
 											   String end, String search, Long userId, String exportData) {
 		logger.info("************************ getSensorsReport STARTED ***************************");
+		PositionMapper positionMapper = new PositionMapper(deviceRepositorySFDA);
 		int pageSize = 10;
 		int page = offset;
 		List<Position> positionsList = new ArrayList<>();
+		List<PositionResponse> positionResponsesList = new ArrayList<>();
 		if(TOKEN.equals("")) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",positionsList);
 			logger.info("************************ getSensorsReport ENDED ***************************");
@@ -1912,17 +1917,20 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 
 			for(long id : allDevices){
-				positionsList.addAll(
-						positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize)));
+				List<Position> positions = positionMongoSFDARepository.
+								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize));
+				for(Position position : positions){
+					positionResponsesList.add(positionMapper.convertToResponse(position));
+				}
 
 				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
 
 
+
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),
 					"success",
-					positionsList,
+					positionResponsesList,
 					size);
 			logger.info("************************ getSensorsReport ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
@@ -1934,15 +1942,12 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
 
 			for(long id : allDevices){
-				positionsList.addAll(
-						positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize)));
+				List<Position> positions = positionMongoSFDARepository.
+						findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize));
+				for(Position position : positions){
+					positionResponsesList.add(positionMapper.convertToResponse(position));
+				}
 				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
-			}
-			if(positionsList.size()>0) {
-//				size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
-
-
 			}
 
 		}
@@ -1950,15 +1955,17 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			// Third Attack
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 			for(long id : allDevices){
-				positionsList.addAll(
-						positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo,new PageRequest(page, pageSize)));
+				List<Position> positions = positionMongoSFDARepository.
+								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo,new PageRequest(page, pageSize));
+				for(Position position : positions){
+					positionResponsesList.add(positionMapper.convertToResponse(position));
+				}
 				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
 
 		}
 
-		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,size);
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionResponsesList,size);
 		logger.info("************************ getSensorsReport ENDED ***************************");
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}

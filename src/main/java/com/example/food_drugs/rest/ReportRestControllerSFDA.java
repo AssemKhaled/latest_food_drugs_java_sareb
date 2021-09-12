@@ -397,7 +397,7 @@ public class ReportRestControllerSFDA {
 	}
 
 
-	@RequestMapping(value = "/getVehicleTempHumNew", method = RequestMethod.GET)
+	@RequestMapping(value = "/getVehicleTempHum/v2.0", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<?> getVehicleTempHumNew(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 															 @RequestParam (value = "deviceId", defaultValue = "0") Long [] deviceId,
 															 @RequestParam (value = "groupId", defaultValue = "0") Long [] groupId,

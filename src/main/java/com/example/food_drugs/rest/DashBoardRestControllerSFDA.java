@@ -2,7 +2,6 @@ package com.example.food_drugs.rest;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.ReportServiceImpl;
-import com.example.food_drugs.service.DeviceServiceImplSFDA;
+import com.example.food_drugs.service.impl.DeviceServiceImplSFDA;
 import com.example.food_drugs.service.InventoryServiceImpl;
 
 

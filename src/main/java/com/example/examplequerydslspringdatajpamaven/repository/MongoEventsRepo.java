@@ -755,6 +755,7 @@ public class MongoEventsRepo {
 	            	}
 	            	if(object.containsField("driverName") && object.get("driverName") != null) {
 	            		notification.setDriverName(object.get("driverName").toString());
+
 	            	}
 	            	if(object.containsField("deviceName") && object.get("deviceName") != null) {
 	            		notification.setDeviceName(object.get("deviceName").toString());

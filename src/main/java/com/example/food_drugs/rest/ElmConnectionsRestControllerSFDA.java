@@ -257,7 +257,7 @@ public class ElmConnectionsRestControllerSFDA {
 	}
 
 	@GetMapping(path ="/warehouseInquiry")
-	public ResponseEntity<?> deleteVehicleFromElm(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+	public ResponseEntity<?> warehouseInquiry(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 												  @RequestParam (value = "userId", defaultValue = "0") Long userId,
 												  @RequestParam (value = "loggerId", defaultValue = "0") Long loggedUserId){
 

@@ -5,6 +5,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -1345,7 +1346,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					allInventoriesSumDataFromMySQL = inventoryRepository.getAllInventoriesSummaryData(usersIds,offset);
 
 				}
-
+				DecimalFormat df = new DecimalFormat("#.##");
 				for (InventorySummaryDataWrapper inventorySummaryWrapper : allInventoriesSumDataFromMySQL){
 					if(inventorySummaryWrapper.getLastDataId()!=null){
 						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findById(inventorySummaryWrapper.getName());
@@ -1354,11 +1355,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 									MongoInventoryWrapper
 											.builder()
 											._id(mongoInv.get_id())
-											.temperature(mongoInv.getTemperature())
+											.temperature(Double.valueOf(df.format(mongoInv.getTemperature())))
 											.inventoryId(mongoInv.getInventoryId())
 											.inventoryName(inventorySummaryWrapper.getLastDataId())
 											.createDate(mongoInv.getCreateDate())
-											.humidity(mongoInv.getHumidity())
+											.humidity(Double.valueOf(df.format(mongoInv.getHumidity())))
 											.build());
 						}
 
