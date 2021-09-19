@@ -28,4 +28,12 @@ public class PdfSummaryData {
 	private Double maxHum;
 
 	private Double minHum;
+
+	private String deviceName;
+	private String driverName;
+	private String companyName;
+	private String duration;
+
+
+
 }

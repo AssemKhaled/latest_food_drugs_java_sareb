@@ -9,10 +9,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
+import com.example.examplequerydslspringdatajpamaven.entity.*;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
 import com.example.food_drugs.entity.*;
+import com.example.food_drugs.entity.DeviceTempHum;
 import com.example.food_drugs.mappers.PositionMapper;
 import com.example.food_drugs.repository.*;
 import com.example.food_drugs.responses.*;
@@ -36,9 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.example.examplequerydslspringdatajpamaven.entity.Device;
-import com.example.examplequerydslspringdatajpamaven.entity.Group;
-import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.GroupRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserClientGroupRepository;
@@ -2854,15 +2852,18 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 
 
 
 		ArrayList<Object> response = new ArrayList();
-
+		Object[][] deviceNames = deviceRepositorySFDA.deviceNamesData(Arrays.asList(request.getVehilceId()));
 		AlarmsReportResponseWrapper alarmsReport = new AlarmsReportResponseWrapper();
 		alarmsReport = getAlarmSection(request.getVehilceId(),request.getStartTime(),request.getEndTime());
 		alarmsReport.setReportDetailsData(reportDetails);
+		summaryData.setDeviceName((String) deviceNames[0][0]);
+		summaryData.setDriverName((String) deviceNames[0][1]);
+		summaryData.setCompanyName((String) deviceNames[0][2]);
 		alarmsReport.setSummaryData(summaryData);
 		response.add(alarmsReport);
 		
@@ -2870,6 +2871,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		return  ResponseEntity.ok().body(getObjectResponse);
 		
 	}
+
 
 	@Override
 	public ResponseEntity<?> getDeviceCFRReport(TripDetailsRequest request)  {
@@ -2897,7 +2899,6 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		Double sumAvg = 0.0;
 		int countHum = 0;
 		PdfSummaryData pdfSummary = new PdfSummaryData() ;
-
 		
 			for(Position position :positions) {
 

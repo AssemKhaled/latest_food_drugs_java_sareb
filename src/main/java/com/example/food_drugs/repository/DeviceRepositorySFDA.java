@@ -1,10 +1,8 @@
 package com.example.food_drugs.repository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import com.example.food_drugs.responses.DeviceResponseDataWrapper;
+import com.example.food_drugs.responses.DeviceNames;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -20,6 +18,28 @@ import com.example.food_drugs.entity.DeviceSFDA;
  */
 @Component
 public interface DeviceRepositorySFDA extends  JpaRepository<DeviceSFDA, Long>, QueryDslPredicateExecutor<DeviceSFDA> {
+
+
+	@Query(value = " SELECT tc_devices.name as deviceName , " +
+			" tc_drivers.name as driverName, " +
+			" tc_users.name as companyName " +
+			" FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid " +
+			" LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid " +
+			" INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id " +
+			" LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id " +
+			" where tc_devices.id IN(:userIds) and tc_devices.delete_date is null " , nativeQuery = true)
+	Object[][] deviceNamesData(@Param("userIds")List<Long> userIds);
+
+	@Query(value = " SELECT tc_devices.name as deviceName , " +
+			" tc_drivers.name as driverName, " +
+			" tc_users.name as companyName " +
+			" FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid " +
+			" LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid " +
+			" INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id " +
+			" LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id " +
+			" where tc_devices.id IN(:userIds) and tc_devices.delete_date is null " , nativeQuery = true)
+	List<DeviceNames> deviceNamesData2(@Param("userIds")List<Long> userIds);
+
 
 	@Query(nativeQuery = true, name = "getDevicesListDeactive")
 	List<CustomDeviceList> getDevicesListDeactive(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
