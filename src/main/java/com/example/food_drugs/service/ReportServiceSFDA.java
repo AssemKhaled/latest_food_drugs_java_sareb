@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.food_drugs.entity.TripDetailsRequest;
 
+import java.text.ParseException;
+
 @Service
 public interface ReportServiceSFDA {
 
@@ -22,5 +24,6 @@ public interface ReportServiceSFDA {
 
 	
 	public ResponseEntity<?> getVehicleTempHumPDF(String TOKEN,Long deviceId,int offset,String start,String end,String search,Long userId,String exportData);
-	public ResponseEntity<?>getTripPdfDetails(TripDetailsRequest request);
+	ResponseEntity<?>getTripPdfDetails(TripDetailsRequest request);
+	ResponseEntity<?>getDeviceCFRReport(TripDetailsRequest request) throws ParseException;
 }

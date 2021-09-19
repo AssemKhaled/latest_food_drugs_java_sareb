@@ -1,21 +1,18 @@
 package com.example.food_drugs.rest;
 
 
+import com.example.food_drugs.entity.PdfSummaryData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.example.examplequerydslspringdatajpamaven.service.ReportServiceImpl;
 import com.example.food_drugs.entity.DeviceSFDA;
 import com.example.food_drugs.entity.TripDetailsRequest;
 import com.example.food_drugs.service.ReportServiceImplSFDA;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Service of reports component
@@ -444,5 +441,13 @@ public class ReportRestControllerSFDA {
 		
 		return reportServiceImplSFDA.getTripPdfDetails(request);
 	}
-	
+
+	@PostMapping(value = "/device/cfr")
+	public @ResponseBody ResponseEntity<?>getDeviceCFRReport(@RequestHeader(value = "TOKEN", defaultValue = "") String TOKEN,
+													 @RequestBody(required = false) TripDetailsRequest request) {
+
+		return reportServiceImplSFDA.getDeviceCFRReport(request);
+	}
+
+
 }

@@ -3,6 +3,10 @@ package com.example.food_drugs.service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import com.example.examplequerydslspringdatajpamaven.entity.MongoEvents;
@@ -2867,7 +2871,21 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 	}
 
-	
+	@Override
+	public ResponseEntity<?> getDeviceCFRReport(TripDetailsRequest request)  {
+
+		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		LocalDateTime from = LocalDateTime.parse(request.getStartTime(), inputFormatter);
+		LocalDateTime to = LocalDateTime.parse(request.getEndTime(), inputFormatter);
+
+		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy, HH:mm:ss a");
+		request.setStartTime(from.format(outputFormatter));
+		request.setEndTime(to.format(outputFormatter));
+
+		return getTripPdfDetails(request);
+	}
+
+
 	public PdfSummaryData getSummaryData(List<Position> positions) {
 		int count = 0;
 		Double avg = 0.0;
