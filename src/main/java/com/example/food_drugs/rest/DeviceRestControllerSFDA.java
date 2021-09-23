@@ -1,5 +1,6 @@
 package com.example.food_drugs.rest;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -299,5 +300,9 @@ public class DeviceRestControllerSFDA {
 	@GetMapping(value = "/getGraphData/v2.0")
 	public ResponseEntity<GetObjectResponse<GraphDataWrapper>> getDeviceGraphDataDashboard(@RequestParam (value = "deviceId", defaultValue = "0") Integer deviceId) {
 		return deviceServiceImplSFDA.getDataForGraphByDeviceID(deviceId);
+	}
+	@GetMapping(value = "/startEndData")
+	public void startEndDateScript() throws ParseException {
+		deviceServiceImplSFDA.startAndEndDate();
 	}
 }

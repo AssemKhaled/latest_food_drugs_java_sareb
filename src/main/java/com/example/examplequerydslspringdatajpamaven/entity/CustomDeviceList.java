@@ -1,6 +1,7 @@
 package com.example.examplequerydslspringdatajpamaven.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -54,12 +55,84 @@ public class CustomDeviceList{
 	private String simcardNumber;
 	private String create_date;
 	private String update_date_elm;
+
+
 	private String delete_date_elm;
 	private Long leftDays;
 	private String servertime;
 	private String devicetime;
+	private Date startDate;
+	private Date endDate;
 
-	
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public CustomDeviceList(int id, String deviceName, String uniqueId, String sequenceNumber, String lastUpdate, String referenceKey, String driverName, String geofenceName, Long driverId, String driverPhoto, String driverUniqueId, String plateType, String plateNum, String rightLetter, String middleLetter, String leftLetter, String ownerName, String ownerId, String userName, String brand, String model, String madeYear, String color, String licenceExptDate, Double carWeight, Double car_weight, String vehiclePlate, String companyName, String positionId, Double latitude, Double longitude, Double speed, String address, Object attributes, String status, Boolean ignition, Integer sat, Double power, String driver_num, Long companyId, Boolean expired, String simcardNumber, String create_date, String update_date_elm, String delete_date_elm, Long leftDays, String servertime, String devicetime, Date startDate, Date endDate, ArrayList<Map<Object, Object>> lastPoints) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.uniqueId = uniqueId;
+		this.sequenceNumber = sequenceNumber;
+		this.lastUpdate = lastUpdate;
+		this.referenceKey = referenceKey;
+		this.driverName = driverName;
+		this.geofenceName = geofenceName;
+		this.driverId = driverId;
+		this.driverPhoto = driverPhoto;
+		this.driverUniqueId = driverUniqueId;
+		this.plateType = plateType;
+		this.plateNum = plateNum;
+		this.rightLetter = rightLetter;
+		this.middleLetter = middleLetter;
+		this.leftLetter = leftLetter;
+		this.ownerName = ownerName;
+		this.ownerId = ownerId;
+		this.userName = userName;
+		this.brand = brand;
+		this.model = model;
+		this.madeYear = madeYear;
+		this.color = color;
+		this.licenceExptDate = licenceExptDate;
+		this.carWeight = carWeight;
+		this.car_weight = car_weight;
+		this.vehiclePlate = vehiclePlate;
+		this.companyName = companyName;
+		this.positionId = positionId;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.speed = speed;
+		this.address = address;
+		this.attributes = attributes;
+		this.status = status;
+		this.ignition = ignition;
+		this.sat = sat;
+		this.power = power;
+		this.driver_num = driver_num;
+		this.companyId = companyId;
+		this.expired = expired;
+		this.simcardNumber = simcardNumber;
+		this.create_date = create_date;
+		this.update_date_elm = update_date_elm;
+		this.delete_date_elm = delete_date_elm;
+		this.leftDays = leftDays;
+		this.servertime = servertime;
+		this.devicetime = devicetime;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.lastPoints = lastPoints;
+	}
 
 	public String getDelete_date_elm() {
 		return delete_date_elm;
@@ -186,7 +259,8 @@ public class CustomDeviceList{
 	public CustomDeviceList() {
 		
 	}
-	
+
+
 	public CustomDeviceList(int id ,String deviceName,String simcardNumber,String uniqueId , String sequenceNumber,
 			String lastUpdate, String referenceKey , Boolean expired , String driverName ,
 			String companyName, Long companyId,String geofenceName ,String create_date,String delete_date_elm,String update_date_elm ,Long leftDays ) {
@@ -208,7 +282,34 @@ public class CustomDeviceList{
 	    this.leftDays = leftDays;
 		
 	}
-	
+
+	public CustomDeviceList(int id ,String deviceName,String simcardNumber,String uniqueId , String sequenceNumber,
+							String lastUpdate, String referenceKey , Boolean expired , String driverName ,
+							String companyName, Long companyId,String geofenceName ,String create_date,String delete_date_elm,String update_date_elm ,Long leftDays ,
+							Date startDate , Date endDate) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.uniqueId = uniqueId;
+		this.sequenceNumber = sequenceNumber;
+		this.geofenceName = geofenceName;
+		this.referenceKey = referenceKey;
+		this.expired = expired;
+		this.driverName = driverName;
+		this.lastUpdate = lastUpdate;
+		this.companyName = companyName;
+		this.companyId = companyId;
+		this.simcardNumber = simcardNumber;
+		this.create_date = create_date;
+		this.delete_date_elm = delete_date_elm;
+		this.update_date_elm = update_date_elm;
+		this.leftDays = leftDays;
+		this.startDate = startDate;
+		this.endDate = endDate;
+
+	}
+
+
+
 	public CustomDeviceList(int id ,String deviceName,String uniqueId , String sequenceNumber,String lastUpdate, String referenceKey , String driverName,String driver_num ,
 			String companyName, String geofenceName ,String positionId ) {
 		this.id = id;
@@ -312,9 +413,7 @@ public class CustomDeviceList{
 		this.attributes = attributes;
 	}
 
-	public int getId() {
-		return id;
-	}
+
 
 	public CustomDeviceList(int id, String deviceName, String uniqueId, String sequenceNumber, String lastUpdate,
 			String referenceKey, String driverName, String geofenceName, Long driverId, String driverPhoto,
@@ -364,6 +463,10 @@ public class CustomDeviceList{
 		this.power = power;
 		this.driver_num = driver_num;
 		this.lastPoints = lastPoints;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public void setId(int id) {

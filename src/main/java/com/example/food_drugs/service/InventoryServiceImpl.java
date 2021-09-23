@@ -3332,4 +3332,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 		
 	}
+
+	@Override
+	public ResponseEntity<?> inventoryMonthelyView(String endDate) {
+		return ResponseEntity.status(200).body(inventoryRepository.inventoryMonthelyView(endDate));
+	}
 }

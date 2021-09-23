@@ -249,4 +249,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 			+ " and tc_inventories.delete_date is null"
 			+ " limit 0,1 ", nativeQuery = true)
 	public Long getInventoryByNumber(@Param("inventoryNumber")String inventoryNumber,@Param("protocolType")String protocolType);
+
+
+	@Query(value = " select new_food_drugs_db.tc_users.name AS companyName,new_food_drugs_db.tc_users.email AS email,new_food_drugs_db.tc_users.identity_num AS identity_num,new_food_drugs_db.tc_users.commercial_num AS commercial_num,new_food_drugs_db.tc_users.manager_name AS manager_name,new_food_drugs_db.tc_users.manager_mobile AS manager_mobile,new_food_drugs_db.tc_users.commercial_reg AS commercial_reg,new_food_drugs_db.tc_inventories.name AS InventoryName,new_food_drugs_db.tc_inventories.inventoryNumber AS inventoryNumber,new_food_drugs_db.tc_inventories.create_date AS create_date,new_food_drugs_db.tc_inventories.delete_date AS delete_date from (new_food_drugs_db.tc_inventories join new_food_drugs_db.tc_users on((new_food_drugs_db.tc_inventories.userId = new_food_drugs_db.tc_users.id))) where ((new_food_drugs_db.tc_inventories.create_date > :endDate) and isnull(new_food_drugs_db.tc_inventories.delete_date)) order by new_food_drugs_db.tc_inventories.delete_date " ,nativeQuery = true)
+	List<Object[]> inventoryMonthelyView(@Param("endDate")String endDate);
 }

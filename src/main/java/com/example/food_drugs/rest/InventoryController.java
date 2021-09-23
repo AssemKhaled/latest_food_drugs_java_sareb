@@ -226,6 +226,12 @@ public class InventoryController {
 												 @RequestParam (value = "toUserId", defaultValue = "0") Long toUserId){
 		return inventoryServiceImpl.assignInventoryToUser(TOKEN,userId,inventoryId,toUserId);
 	}
+
+	@GetMapping(value = "/inventoryMonthelyView")
+	public ResponseEntity<?> inventoryMonthelyView(@RequestParam(value = "endDate") String endDate){
+		return inventoryServiceImpl.inventoryMonthelyView(endDate);
+	}
+
 	@GetMapping(value = "/assign")
 	public Date assign() throws ParseException{
 		Instant nowUtc = Instant.now();

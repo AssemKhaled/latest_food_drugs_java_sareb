@@ -80,7 +80,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
                      @ColumnResult(name="create_date",type=String.class),
                      @ColumnResult(name="delete_date_elm",type=String.class),
                      @ColumnResult(name="update_date_elm",type=String.class),
-                     @ColumnResult(name="leftDays",type=Long.class)
+                     @ColumnResult(name="leftDays",type=Long.class),
+						  @ColumnResult(name="startDate",type=Date.class),
+						  @ColumnResult(name="endDate",type=Date.class)
+
 
                      }
            )
@@ -344,6 +347,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	     query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 	     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
 	     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
+				+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 	     		+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
 	     		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
@@ -352,7 +356,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
 	     		+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 	     		+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
-	     		+ " where tc_user_device.userid IN(:userIds) and tc_devices.delete_date is null"
+	     		+ " where tc_user_device.userid IN(:userIds) and tc_devices.delete_date is null AND ((TIMESTAMPDIFF(day ,CURDATE(),tc_devices.end_date) >=0)  OR :isAdmin)"
 	     		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR  tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 	     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 	     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
@@ -363,6 +367,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
     query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
     		+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
     		+ " ,tc_devices.reference_key as referenceKey, tc_devices.expired as expired, "
+			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
     		+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm  "
     		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
@@ -371,7 +376,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
     		+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
     		+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
-    		+ " where tc_user_device.userid IN(:userIds) and tc_devices.delete_date is null"
+    		+ " where tc_user_device.userid IN(:userIds) and tc_devices.delete_date is null  AND ((TIMESTAMPDIFF(day ,CURDATE(),tc_devices.end_date) >=0)  OR :isAdmin) "
     		+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
     		+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
     		+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
@@ -382,6 +387,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName,tc_devices.simcardNumber as simcardNumber, tc_devices.uniqueid as uniqueId,"
 			+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
+			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
 			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
@@ -390,7 +396,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 			+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
-			+ " where tc_devices.id IN(:deviceIds) and tc_devices.delete_date is null "
+			+ " where tc_devices.id IN(:deviceIds) and tc_devices.delete_date is null AND ((TIMESTAMPDIFF(day ,CURDATE(),tc_devices.end_date) >=0)  OR :isAdmin) "
 			+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
@@ -401,6 +407,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.simcardNumber as simcardNumber,tc_devices.uniqueid as uniqueId,"
 			+ " tc_devices.sequence_number as sequenceNumber ,tc_devices.lastupdate as lastUpdate "
 			+ " ,tc_devices.reference_key as referenceKey , tc_devices.expired as expired , "
+			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm  "
 			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
@@ -409,7 +416,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
 			+ " LEFT JOIN tc_users ON tc_user_device.userid = tc_users.id" 
-			+ " where tc_devices.id IN(:deviceIds) and tc_devices.delete_date is null "
+			+ " where tc_devices.id IN(:deviceIds) and tc_devices.delete_date is null AND ((TIMESTAMPDIFF(day ,CURDATE(),tc_devices.end_date) >=0)  OR :isAdmin)"
 			+ " AND ( tc_devices.simcardNumber LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%')) "
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
@@ -753,7 +760,7 @@ public class Device extends Attributes{
 	
 	@Column(name = "regestration_to_elm_date")
 	private Date regestration_to_elm_date;
-	
+
 	@Column(name = "representative")
 	private String representative;
 	
@@ -777,9 +784,92 @@ public class Device extends Attributes{
 	
 	@Column(name = "lastTemp")
 	private Double lastTemp = 0.0;
-		
-	
-	@JsonIgnore 
+
+	@Column(name = "start_date")
+	private Date startDate;
+
+	@Column(name = "end_date")
+	private Date endDate;
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Device(Long id, String name, String uniqueid, String lastupdate, String positionid, String position_id, String phone, String model, String plate_num, String right_letter, String middle_letter, String left_letter, Integer plate_type, String reference_key, Integer is_deleted, String delete_date, Integer init_sensor, Integer init_sensor2, Integer car_weight, String reject_reason, String sequence_number, Integer is_valid, Integer expired, String calibrationData, String fuel, String sensorSettings, String lineData, String create_date, Integer lastWeight, String owner_name, String username, String owner_id, String brand, String made_year, String color, String license_exp, Integer date_type, String photo, String icon, String protocol, String port, String device_type, Date regestration_to_elm_date, String representative, String delete_from_elm, Date delete_from_elm_date, Date update_date_in_elm, String simcardNumber, Long user_id, Double lastHum, Double lastTemp, Date startDate, Date endDate, Set<User> user, Set<Driver> driver, Set<Geofence> geofence, Set<Group> groups, Set<Notification> notificationDevice, Set<Attribute> attributeDevice) {
+		this.id = id;
+		this.name = name;
+		this.uniqueid = uniqueid;
+		this.lastupdate = lastupdate;
+		this.positionid = positionid;
+		this.position_id = position_id;
+		this.phone = phone;
+		this.model = model;
+		this.plate_num = plate_num;
+		this.right_letter = right_letter;
+		this.middle_letter = middle_letter;
+		this.left_letter = left_letter;
+		this.plate_type = plate_type;
+		this.reference_key = reference_key;
+		this.is_deleted = is_deleted;
+		this.delete_date = delete_date;
+		this.init_sensor = init_sensor;
+		this.init_sensor2 = init_sensor2;
+		this.car_weight = car_weight;
+		this.reject_reason = reject_reason;
+		this.sequence_number = sequence_number;
+		this.is_valid = is_valid;
+		this.expired = expired;
+		this.calibrationData = calibrationData;
+		this.fuel = fuel;
+		this.sensorSettings = sensorSettings;
+		this.lineData = lineData;
+		this.create_date = create_date;
+		this.lastWeight = lastWeight;
+		this.owner_name = owner_name;
+		this.username = username;
+		this.owner_id = owner_id;
+		this.brand = brand;
+		this.made_year = made_year;
+		this.color = color;
+		this.license_exp = license_exp;
+		this.date_type = date_type;
+		this.photo = photo;
+		this.icon = icon;
+		this.protocol = protocol;
+		this.port = port;
+		this.device_type = device_type;
+		this.regestration_to_elm_date = regestration_to_elm_date;
+		this.representative = representative;
+		this.delete_from_elm = delete_from_elm;
+		this.delete_from_elm_date = delete_from_elm_date;
+		this.update_date_in_elm = update_date_in_elm;
+		this.simcardNumber = simcardNumber;
+		this.user_id = user_id;
+		this.lastHum = lastHum;
+		this.lastTemp = lastTemp;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.user = user;
+		this.driver = driver;
+		this.geofence = geofence;
+		this.groups = groups;
+		this.notificationDevice = notificationDevice;
+		this.attributeDevice = attributeDevice;
+	}
+
+	@JsonIgnore
 	@ManyToMany(
             fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}

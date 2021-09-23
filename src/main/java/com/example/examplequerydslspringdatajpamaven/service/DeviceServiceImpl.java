@@ -3,14 +3,18 @@ package com.example.examplequerydslspringdatajpamaven.service;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.DateUtils;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
@@ -163,12 +167,12 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			 if(deviceIds.size()>0) {
 				 
 				 if(exportData.equals("exportData")) {
-			    	 devices= deviceRepository.getDevicesListByIdsExport(deviceIds,search);
+			    	 devices= deviceRepository.getDevicesListByIdsExport(deviceIds,search,false);
 
 			     }
 			     else {
-			    	 devices= deviceRepository.getDevicesListByIds(deviceIds,offset,search);
-					 size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search);
+			    	 devices= deviceRepository.getDevicesListByIds(deviceIds,offset,search,false);
+					 size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search ,false);
 			     }
 			 }
 
@@ -187,14 +191,26 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			 }
 		 
 		 
-		     if(exportData.equals("exportData")) {
-		    	 devices= deviceRepository.getDevicesListExport(usersIds,search);
 
-		     }
-		     else {
-		    	 devices= deviceRepository.getDevicesList(usersIds,offset,search);
-				 size=  deviceRepository.getDevicesListSize(usersIds,search); 
-		     }
+
+				 if(loggedUser.getAccountType().equals(3)){
+					 if(exportData.equals("exportData")) {
+						 devices= deviceRepository.getDevicesListExport(usersIds,search,false);
+					 }else {
+						 devices = deviceRepository.getDevicesList(usersIds, offset, search, false);
+						 size = deviceRepository.getDevicesListSize(usersIds, search, false);
+					 }
+				 }
+				 else if(loggedUser.getAccountType().equals(2)){
+					 if(exportData.equals("exportData")) {
+						 devices= deviceRepository.getDevicesListExport(usersIds,search,true);
+					 }else {
+					 	devices= deviceRepository.getDevicesList(usersIds,offset,search,true);
+					 	size=  deviceRepository.getDevicesListSize(usersIds,search,true);
+					 }
+				 }
+
+
 		 
 			 
 
@@ -423,7 +439,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			|| device.getPlate_num() == null || device.getPlate_num().equals("")
 			|| device.getLeft_letter() == null || device.getLeft_letter() == null
 			|| device.getRight_letter() == null || device.getRight_letter().equals("")
-			|| device.getMiddle_letter() == null || device.getMiddle_letter().equals("")	) {
+			|| device.getMiddle_letter() == null || device.getMiddle_letter().equals("")) {
+
 			
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.BAD_REQUEST.value(), "Atrributes[id ,name, trackerImei , sequence" + 
@@ -4434,4 +4451,5 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 
 		return null;
 	}
+
 }

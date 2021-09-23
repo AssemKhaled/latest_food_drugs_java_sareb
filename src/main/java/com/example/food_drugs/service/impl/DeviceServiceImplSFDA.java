@@ -1,6 +1,7 @@
 package com.example.food_drugs.service.impl;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -9,6 +10,7 @@ import com.example.food_drugs.service.DeviceServiceSFDA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -214,12 +216,12 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 				 if(active == 0) {
 					if(exportData.equals("exportData")) {
 						
-						devices = deviceRepositorySFDA.getDevicesListByIdsDeactiveExport(deviceIds, search);
+						devices = deviceRepositorySFDA.getDevicesListByIdsDeactiveExport(deviceIds, search,false);
 
 					}
 					else {
-						devices = deviceRepositorySFDA.getDevicesListByIdsDeactive(deviceIds, offset, search);
-					    size = deviceRepositorySFDA.getDevicesListSizeByIdsDeactive(deviceIds, search);
+						devices = deviceRepositorySFDA.getDevicesListByIdsDeactive(deviceIds, offset, search ,false);
+					    size = deviceRepositorySFDA.getDevicesListSizeByIdsDeactive(deviceIds, search,false);
 					}
 
 
@@ -227,25 +229,25 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 				 
                  if(active == 2) {
  					if(exportData.equals("exportData")) {
-	                	 devices = deviceRepositorySFDA.getDevicesListByIdsAllExport(deviceIds, search);
+	                	 devices = deviceRepositorySFDA.getDevicesListByIdsAllExport(deviceIds, search,false);
 
  					}
  					else {
 
- 	                	 devices = deviceRepositorySFDA.getDevicesListByIdsAll(deviceIds, offset, search);
- 					     size = deviceRepositorySFDA.getDevicesListSizeByIdsAll(deviceIds, search);
+ 	                	 devices = deviceRepositorySFDA.getDevicesListByIdsAll(deviceIds, offset, search,false);
+ 					     size = deviceRepositorySFDA.getDevicesListSizeByIdsAll(deviceIds, search, false);
  					}
 
 				 }
                  
                  if(active == 1) {
   					if(exportData.equals("exportData")) {
-  						devices= deviceRepository.getDevicesListByIdsExport(deviceIds,search);
+  						devices= deviceRepository.getDevicesListByIdsExport(deviceIds,search,false);
 
   					}
   					else {
-  						devices= deviceRepository.getDevicesListByIds(deviceIds,offset,search);
-  	    				size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search);
+  						devices= deviceRepository.getDevicesListByIds(deviceIds,offset,search,false);
+  	    				size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search,false);
   					}
 
 
@@ -266,43 +268,75 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 					 usersIds.add(object.getId());
 				 }
 			 }
-		 
-		 
-			 if(active == 0) {
-				if(exportData.equals("exportData")) {
-					devices= deviceRepositorySFDA.getDevicesListDeactiveExport(usersIds,search);
 
-				}
-				else {
-					devices= deviceRepositorySFDA.getDevicesListDeactive(usersIds,offset,search);
-					size=  deviceRepositorySFDA.getDevicesListSizeDeactive(usersIds,search);
-				}
+			 if(active == 0) {
+
+
+					if(loggedUser.getAccountType().equals(2)||loggedUser.getAccountType().equals(1)) {
+						if(exportData.equals("exportData")) {
+							devices= deviceRepositorySFDA.getDevicesListDeactiveExport(usersIds,search,true);
+						}else {
+							devices = deviceRepositorySFDA.getDevicesListDeactive(usersIds, offset, search, true);
+							size = deviceRepositorySFDA.getDevicesListSizeDeactive(usersIds, search, true);
+						}
+					}else{
+						if(exportData.equals("exportData")) {
+							devices= deviceRepositorySFDA.getDevicesListDeactiveExport(usersIds,search,false);
+						}else {
+							devices = deviceRepositorySFDA.getDevicesListDeactive(usersIds, offset, search, false);
+							size = deviceRepositorySFDA.getDevicesListSizeDeactive(usersIds, search, false);
+						}
+					}
+
 
 
 			 }
 			 
              if(active == 2) {
- 				if(exportData.equals("exportData")) {
- 	            	devices= deviceRepositorySFDA.getDevicesListAllExport(usersIds,search);
 
- 				}
- 				else {
- 	            	devices= deviceRepositorySFDA.getDevicesListAll(usersIds,offset,search);
- 	    			size=  deviceRepositorySFDA.getDevicesListSizeAll(usersIds,search);
- 				}
+
+					 if(loggedUser.getAccountType().equals(2)||loggedUser.getAccountType().equals(1)){
+						 if(exportData.equals("exportData")) {
+							 devices= deviceRepositorySFDA.getDevicesListAllExport(usersIds,search,true);
+						 }else {
+							 devices = deviceRepositorySFDA.getDevicesListAll(usersIds, offset, search, true);
+							 size = deviceRepositorySFDA.getDevicesListSizeAll(usersIds, search, true);
+						 }
+					 }else {
+						 if(exportData.equals("exportData")) {
+							 devices= deviceRepositorySFDA.getDevicesListAllExport(usersIds,search,false);
+						 }else {
+							 devices = deviceRepositorySFDA.getDevicesListAll(usersIds, offset, search, false);
+							 size = deviceRepositorySFDA.getDevicesListSizeAll(usersIds, search, false);
+						 }
+					 }
+
+
 
 
 			 }
              
              if(active == 1) {
-  				if(exportData.equals("exportData")) {
-  	    			devices= deviceRepository.getDevicesListExport(usersIds,search);
 
-  				}
-  				else {
-  	    			devices= deviceRepository.getDevicesList(usersIds,offset,search);
-  	    			size=  deviceRepository.getDevicesListSize(usersIds,search);
-  				}
+
+					  if(loggedUser.getAccountType().equals(2)||loggedUser.getAccountType().equals(1)){
+						  if(exportData.equals("exportData")) {
+							  devices= deviceRepository.getDevicesListExport(usersIds,search,true);
+						  }else {
+							  devices= deviceRepository.getDevicesList(usersIds,offset,search,true);
+							  size=  deviceRepository.getDevicesListSize(usersIds,search ,true);
+						  }
+
+					  }else {
+						  if(exportData.equals("exportData")) {
+							  devices= deviceRepository.getDevicesListExport(usersIds,search,false);
+						  }else {
+						  		devices= deviceRepository.getDevicesList(usersIds,offset,search,false);
+						  		size=  deviceRepository.getDevicesListSize(usersIds,search ,false);
+						  }
+					  }
+
+
 
 
 			 }
@@ -539,6 +573,36 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 		return temparature;
 	}
 
+@Override
+public void startAndEndDate() throws ParseException {
+	List<Device> allDeviceList = deviceRepository.findAll();
+	logger.info("**********************Experation DAte STarted******************");
+	for(Device device : allDeviceList){
+		Date updateToELmDate  = device.getUpdate_date_in_elm();
+		if(updateToELmDate != null){
+			logger.info("**********************Experation DAte STarted****************** UPdate TO eldm Date" + updateToELmDate);
+			device.setStartDate(updateToELmDate);
+			Calendar c = Calendar.getInstance();
+			c.setTime(updateToELmDate);
+			c.add(Calendar.YEAR , 1);
+			device.setEndDate(c.getTime());
+			deviceRepository.save(device);
+		}else{
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			if(device.getCreate_date()!=null){
+				logger.info("**********************Experation DAte STarted******************  Creation Date" + device.getCreate_date());
+				Date startDate = formatter.parse(device.getCreate_date());
+				device.setStartDate(startDate);
+				Calendar c = Calendar.getInstance();
+				c.setTime(startDate);
+				c.add(Calendar.YEAR , 1);
+				device.setEndDate(c.getTime());
+				deviceRepository.save(device);
+			}
+
+		}
+	}
+}
 
 
 }

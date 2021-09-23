@@ -728,7 +728,7 @@ public class AppServiceImpl extends RestServiceController implements AppService{
 			 if(deviceIds.size()>0) {
 
 				 devices= deviceRepository.getDevicesListAppByIds(deviceIds,offset,search);
-				 size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search);
+				 size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search,false);
 			 }
 			 
 		 }
@@ -743,8 +743,14 @@ public class AppServiceImpl extends RestServiceController implements AppService{
 					 usersIds.add(object.getId());
 				 }
 			 }
-			 devices= deviceRepository.getDevicesListApp(usersIds,offset,search);
-			 size=  deviceRepository.getDevicesListSize(usersIds,search);
+			 if(loggedUser.getAccountType().equals(3)){
+				 devices= deviceRepository.getDevicesListApp(usersIds,offset,search);
+				 size=  deviceRepository.getDevicesListSize(usersIds,search,false);
+			 }else {
+				 devices= deviceRepository.getDevicesListApp(usersIds,offset,search);
+				 size=  deviceRepository.getDevicesListSize(usersIds,search,true);
+			 }
+
 		 }
 		 
 		

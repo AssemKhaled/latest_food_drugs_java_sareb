@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -2945,7 +2946,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				avg = sumAvg/count;
 				avgHum=sumAvg/countHum;
 			}
-			
+
+		SimpleDateFormat formatTime = new SimpleDateFormat("dd:hh:mm:ss");
+		String duration = "00:00:00:00" ;
+			if(positions.size()>1){
+				duration = formatTime.format(positions.get(positions.size()-1).getDevicetime().getTime()-positions.get(0).getDevicetime().getTime());
+			}
+
 
 			double mkt = calcMKT(positions);
 			pdfSummary = PdfSummaryData
@@ -2958,6 +2965,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					.maxHum(maxHum)
 					.minHum(minHum==1000.0?0.0:minHum)
 					.averageHum(avgHum==null?0.0:avgHum)
+					.duration(duration)
 					.build();
 
 		return pdfSummary;
@@ -3119,7 +3127,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			}
 
 
-			List<Position> positionList =positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(startDate,endDate,deviceID);
+			List<Position> positionList =positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceidOrderByDevicetime(startDate,endDate,deviceID);
 			List<GraphObject> temperatureGraph = new ArrayList<>();
 			List<GraphObject> humidityGraph = new ArrayList<>();
 
@@ -3337,7 +3345,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	}
 	
 	public List<Position> getDevicePositionsWithinDateRange(Date from , Date to , long deviceid){
-		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceid(from,to,deviceid);
+		List<Position> pos = positionMongoSFDARepository.findAllByDevicetimeBetweenAndDeviceidOrderByDevicetime(from,to,deviceid);
 		return pos;
 	}
 	

@@ -52,5 +52,7 @@ public interface InventoryService {
 	
 	public ResponseEntity<?> assignInventoryToUser(String TOKEN,Long userId,Long inventoryId , Long toUserId);
 
+	ResponseEntity<?> inventoryMonthelyView(String endDate);
+
 	
 }
