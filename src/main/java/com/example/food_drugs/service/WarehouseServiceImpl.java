@@ -12,15 +12,10 @@ import java.util.stream.Collectors;
 
 import com.example.food_drugs.entity.MonogoInventoryLastData;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepository;
-import com.example.food_drugs.responses.GraphDataWrapper;
-import com.example.food_drugs.responses.GraphObject;
-import com.example.food_drugs.responses.InventoryWarehouseDataByUserIdsDataWrapper;
-import com.example.food_drugs.responses.WarehouseWrapperGraphData;
+import com.example.food_drugs.responses.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -71,6 +66,9 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 	
 	@Autowired
 	private UserClientWarehouseRepository userClientWarehouseRepository;
+
+	@Autowired
+	private UserServiceImplSFDA userServiceImplSFDA;
 
 	private final MongoInventoryLastDataRepository mongoInventoryLastDataRepository;
 
@@ -1794,6 +1792,48 @@ public class WarehouseServiceImpl extends RestServiceController implements Wareh
 
 		}
 	}
+
+	@Override
+	public ResponseEntity<GetObjectResponse<WarehouseInventoriesListMobileWrapper>> getListWarehouseInventoriesListByWahrehouseId(String TOKEN, Long userId, Long warehouseId) {
+		logger.info("************************ getListWarehouseInventoriesListByWahrehouseId Started ***************************");
+		ResponseEntity responseEntity = userServiceImplSFDA.
+				userAndTokenErrorChecker(
+						TOKEN,
+						userId);
+		if (responseEntity.getStatusCode()!=HttpStatus.OK){
+			return  responseEntity;
+		}
+		Warehouse warehouse = warehousesRepository.findOne(warehouseId);
+		List<Inventory> warehouseInventories = inventoryRepository.findAllByWarehouseId(warehouseId);
+		List<InventoryWarehouseDataByUserIdsDataWrapper> warehouseInventoriesMappedData = new ArrayList<>();
+		for(Inventory inventory : warehouseInventories){
+			warehouseInventoriesMappedData.add(
+					InventoryWarehouseDataByUserIdsDataWrapper
+							.builder()
+							.userId(Math.toIntExact(userId))
+							.inventoryId(Math.toIntExact(inventory.getId()))
+							.inventoryName(inventory.getName())
+							.storingCategory(inventory.getStoringCategory())
+							.lastUpdate(inventory.getLastUpdate())
+							.lastDataId(inventory.getLastDataId())
+							.warehouseId(Math.toIntExact(inventory.getWarehouseId()))
+							.lastData(mongoInventoryLastDataRepository.findById(inventory.getLastDataId()))
+							.build());
+		}
+		List<WarehouseInventoriesListMobileWrapper> warehouseInventoriesListMobileWrappers = new ArrayList<>();
+		warehouseInventoriesListMobileWrappers.add(
+				WarehouseInventoriesListMobileWrapper
+						.builder()
+						.warehouse(warehouse)
+						.warehouseInventoiresList(warehouseInventoriesMappedData)
+						.build());
+
+		getObjectResponse= new GetObjectResponse<WarehouseInventoriesListMobileWrapper>(HttpStatus.OK.value(), "Success",warehouseInventoriesListMobileWrappers);
+		logger.info("************************ getListWarehouseInventoriesListByWahrehouseId ENDED ***************************");
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
+
 
 
 }

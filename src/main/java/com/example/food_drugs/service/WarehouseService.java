@@ -1,5 +1,7 @@
 package com.example.food_drugs.service;
 
+import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
+import com.example.food_drugs.responses.WarehouseInventoriesListMobileWrapper;
 import org.springframework.http.ResponseEntity;
 import com.example.food_drugs.entity.Warehouse;
 
@@ -21,5 +23,6 @@ public interface WarehouseService {
 	public ResponseEntity<?> assignWarehouseToUser(String TOKEN,Long userId,Long warehouseId , Long toUserId);
 
 	ResponseEntity<?> getListWarehouseDataGraph(String TOKEN,Long userId);
+	ResponseEntity<GetObjectResponse<WarehouseInventoriesListMobileWrapper>> getListWarehouseInventoriesListByWahrehouseId(String TOKEN, Long userId, Long warehouseId);
 
 }

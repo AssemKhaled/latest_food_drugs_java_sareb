@@ -14,6 +14,8 @@ import com.example.food_drugs.entity.Inventory;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long>, QueryDslPredicateExecutor<Inventory>{
 
+	List<Inventory> findAllByWarehouseId(Long warehouseId);
+
 	@Query(value = " SELECT tc_inventories.id FROM tc_inventories " + 
 			" where tc_inventories.userId IN (:userId) and tc_inventories.delete_date is null "
 			+ " and tc_inventories.name=:name and tc_inventories.inventoryNumber=:inventoryNumber " ,nativeQuery = true )

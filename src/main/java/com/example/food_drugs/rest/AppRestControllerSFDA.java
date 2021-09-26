@@ -1,9 +1,10 @@
 package com.example.food_drugs.rest;
 
 import java.util.Map;
+
+import com.example.food_drugs.service.WarehouseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -44,7 +45,13 @@ public class AppRestControllerSFDA {
 	
 	@Autowired
 	private DeviceServiceImpl deviceServiceImpl;
- 
+
+	private final WarehouseServiceImpl warehouseService;
+
+	public AppRestControllerSFDA(WarehouseServiceImpl warehouseService) {
+		this.warehouseService = warehouseService;
+	}
+
 	@GetMapping(path = "/loginApp")
 	public 	ResponseEntity<?> loginApp(@RequestHeader(value = "Authorization", defaultValue = "")String authtorization ){
 
@@ -933,6 +940,11 @@ public class AppRestControllerSFDA {
     	return  appServiceSFDA.getVehicleTempHumApp(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
 
 	}
-
+	@RequestMapping(value = "/warehouseInventories/list", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getVehicleTempHumApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																@RequestParam (value = "userId", defaultValue = "0") Long  userId,
+																@RequestParam (value = "warehouseId", defaultValue = "0") Long  warehouseId){
+		return warehouseService.getListWarehouseInventoriesListByWahrehouseId(TOKEN,userId,warehouseId);
+	}
 	
 }

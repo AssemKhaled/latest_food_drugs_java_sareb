@@ -2176,7 +2176,7 @@ public class ElmServiceImplSFDA  extends RestServiceController implements  ElmSe
 	@Override
 	public ResponseEntity<?> warehouseInquiry(String TOKEN, Long loggedUserId , Long userId) {
 		try {
-			ResponseEntity loggedUserResponse = userServiceImplSFDA.userAndTokenErrorChecker(TOKEN,loggedUserId);
+			ResponseEntity loggedUserResponse = userServiceImplSFDA.userAndTokenErrorCheckerForElm(TOKEN,loggedUserId);
 			if (loggedUserResponse.getStatusCode().value()!=HttpStatus.OK.value()){
 				return loggedUserResponse;
 			}

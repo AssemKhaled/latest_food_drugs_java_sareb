@@ -32,7 +32,7 @@ public class UserServiceImplSFDA extends RestServiceController implements UserSe
         this.userRoleService = userRoleService;
     }
 
-    public ResponseEntity<?> userAndTokenErrorChecker(String TOKEN , Long userId){
+    public ResponseEntity userAndTokenErrorCheckerForElm(String TOKEN , Long userId){
 
         if(TOKEN.equals("")) {
             getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
@@ -62,9 +62,36 @@ public class UserServiceImplSFDA extends RestServiceController implements UserSe
                 return  ResponseEntity.badRequest().body(getObjectResponse);
             }
         }
-        ;
         return ResponseEntity.ok(user);
     }
+
+    public ResponseEntity userAndTokenErrorChecker(String TOKEN , Long userId){
+
+        if(TOKEN.equals("")) {
+            getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
+            return  ResponseEntity.badRequest().body(getObjectResponse);
+        }
+
+        if(super.checkActive(TOKEN)!= null)
+        {
+            return super.checkActive(TOKEN);
+        }
+
+        if(userId == 0) {
+            getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "No loggedId",null);
+            return  ResponseEntity.badRequest().body(getObjectResponse);
+        }
+
+
+        User user = userServiceImpl.findById(userId);
+        if(user == null) {
+            getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this user not found",null);
+            return  ResponseEntity.status(404).body(getObjectResponse);
+        }
+
+        return ResponseEntity.ok(user);
+    }
+
 
     public ResponseEntity<?> userErrorChecker(Long userId){
 
