@@ -1,5 +1,6 @@
 package com.example.food_drugs.rest;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -285,13 +286,13 @@ public class DeviceRestControllerSFDA {
 
 	@GetMapping(value = "/getDeviceGraphData")
 	public ResponseEntity<?> getDeviceGraphData( @RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-									  @RequestParam (value = "userId", defaultValue = "0") Long userId){
+									  @RequestParam (value = "userId", defaultValue = "0") Long userId) throws IOException {
 		return deviceServiceImplSFDA.getDeviceGraphData(TOKEN,userId);
 	}
 
 	@GetMapping(value = "/getDeviceData/v2.0")
 	public ResponseEntity<?> getDeviceGraphDataDashboard( @RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-												 @RequestParam (value = "userId", defaultValue = "0") Long userId,
+														  @RequestParam (value = "userId", defaultValue = "0") Long userId,
 														  @RequestParam(value = "offset") int offset ,
 														  @RequestParam(value = "limit") int limit){
 		return deviceServiceImplSFDA.getDeviceGraphDataDashboard(TOKEN,userId,offset,limit);

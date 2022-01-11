@@ -15,4 +15,5 @@ public class PositionResponse {
     double temperature;
     double humidity;
     double speed;
+    Long ac ;
 }

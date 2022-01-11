@@ -17,7 +17,7 @@ public class MongoInventoryWrapper {
 
    private Long inventoryId ;
 
-   private Date createDate ;
+   private String createDate ;
 
    private String inventoryName ;
 

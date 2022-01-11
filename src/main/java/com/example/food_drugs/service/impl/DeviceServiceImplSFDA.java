@@ -1,10 +1,12 @@
 package com.example.food_drugs.service.impl;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.example.food_drugs.dto.AttributesWrapper;
 import com.example.food_drugs.responses.*;
 import com.example.food_drugs.service.DeviceServiceSFDA;
 import org.apache.commons.logging.Log;
@@ -181,7 +183,6 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 		{
 			return super.checkActive(TOKEN);
 		}
-		
 		if(userId.equals(0)) {
 			 List<CustomDeviceList> devices= null;
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",devices);
@@ -195,7 +196,6 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 			 logger.info("************************ getAllUserDevices ENDED ***************************");
 			return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-
 		if(!loggedUser.getAccountType().equals(1)) {
 			if(!userRoleServiceImpl.checkUserHasPermission(userId, "DEVICE", "list")) {
 				 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "this user doesnot has permission to get devices list",null);
@@ -203,59 +203,40 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
 		}
-		
 		 List<Long>usersIds= new ArrayList<>();
 		 Integer size=0;
 		 List<CustomDeviceList> devices = new ArrayList<CustomDeviceList>();
 		 if(loggedUser.getAccountType().equals(4)) {
-			 
 			 List<Long> deviceIds = userClientDeviceRepository.getDevicesIds(userId);
-			 
 			 if(deviceIds.size()>0) {
-
 				 if(active == 0) {
 					if(exportData.equals("exportData")) {
-						
 						devices = deviceRepositorySFDA.getDevicesListByIdsDeactiveExport(deviceIds, search,false);
-
 					}
 					else {
 						devices = deviceRepositorySFDA.getDevicesListByIdsDeactive(deviceIds, offset, search ,false);
 					    size = deviceRepositorySFDA.getDevicesListSizeByIdsDeactive(deviceIds, search,false);
 					}
-
-
 				 }
-				 
                  if(active == 2) {
  					if(exportData.equals("exportData")) {
 	                	 devices = deviceRepositorySFDA.getDevicesListByIdsAllExport(deviceIds, search,false);
-
  					}
  					else {
-
  	                	 devices = deviceRepositorySFDA.getDevicesListByIdsAll(deviceIds, offset, search,false);
  					     size = deviceRepositorySFDA.getDevicesListSizeByIdsAll(deviceIds, search, false);
  					}
-
 				 }
-                 
                  if(active == 1) {
   					if(exportData.equals("exportData")) {
   						devices= deviceRepository.getDevicesListByIdsExport(deviceIds,search,false);
-
   					}
   					else {
   						devices= deviceRepository.getDevicesListByIds(deviceIds,offset,search,false);
   	    				size=  deviceRepository.getDevicesListSizeByIds(deviceIds,search,false);
   					}
-
-
     			 }
-				 
 			 }
-
-			 
 		 }
 		 else {
 			 List<User>childernUsers = userServiceImpl.getAllChildernOfUser(userId);
@@ -293,8 +274,6 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 			 }
 			 
              if(active == 2) {
-
-
 					 if(loggedUser.getAccountType().equals(2)||loggedUser.getAccountType().equals(1)){
 						 if(exportData.equals("exportData")) {
 							 devices= deviceRepositorySFDA.getDevicesListAllExport(usersIds,search,true);
@@ -310,15 +289,9 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 							 size = deviceRepositorySFDA.getDevicesListSizeAll(usersIds, search, false);
 						 }
 					 }
-
-
-
-
 			 }
              
              if(active == 1) {
-
-
 					  if(loggedUser.getAccountType().equals(2)||loggedUser.getAccountType().equals(1)){
 						  if(exportData.equals("exportData")) {
 							  devices= deviceRepository.getDevicesListExport(usersIds,search,true);
@@ -335,13 +308,7 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 						  		size=  deviceRepository.getDevicesListSize(usersIds,search ,false);
 						  }
 					  }
-
-
-
-
 			 }
-		 
-
 		}
 		 getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",devices,size);
 		 logger.info("************************ getAllUserDevices ENDED ***************************");
@@ -349,7 +316,7 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 	}
 
 	@Override
-	public ResponseEntity<?> getDeviceGraphData(String TOKEN, Long userId) {
+	public ResponseEntity<?> getDeviceGraphData(String TOKEN, Long userId) throws IOException {
 		logger.info("************************ getDeviceGraphData STARTED ***************************");
 		List<Object[]> sqlData = new ArrayList<>();
 
@@ -416,13 +383,13 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 							.value(findTemperature(oMapper.convertValue(data.getAttributes(), Map.class)))
 							.build());
 				}
-
+				AttributesWrapper attributes = new ObjectMapper().readValue((String) datas[5],AttributesWrapper.class);
 				mappedSQLData.add(DeviceResponseDataWrapper
 						.builder()
 						.deviceName((String) datas[0])
 						.lastTemp((Double) datas[3])
 						.lastHum((Double) datas[4])
-						.storingCategory((String) datas[5])
+						.storingCategory(attributes.getStoringCategory())
 						.id((Integer) datas[1])
 						.lastUpdate(datas[2].toString())
 						.graphData(GraphDataWrapper.builder()

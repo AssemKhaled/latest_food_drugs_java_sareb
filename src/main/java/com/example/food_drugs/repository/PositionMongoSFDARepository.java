@@ -2,6 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.example.food_drugs.entity.DeviceTempHum;
 import org.bson.types.ObjectId;
@@ -23,9 +24,11 @@ public interface PositionMongoSFDARepository extends MongoRepository<Position, S
 	
 
 	List<Position> findAllByDevicetimeBetweenAndDeviceidOrderByDevicetime(Date from,Date to,long i);
-
+	List<Position> findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(long i , Date from, Date to ,Pageable pageable);
 	List<Position> findAllByDeviceidAndDevicetimeBetween(long i , Date from, Date to ,Pageable pageable);
 	Integer countAllByDeviceidAndDevicetimeBetween( long i ,Date from, Date to);
+
+	Optional<Position> findFirstByDeviceidOrderByServertimeDesc(Long deviceId);
 
 
 

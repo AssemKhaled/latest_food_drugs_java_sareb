@@ -2,10 +2,7 @@ package com.example.examplequerydslspringdatajpamaven.tokens;
 
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,21 +51,22 @@ public class TokenSecurity {
     }
     public Boolean removeActiveUser(String token) {
     	
-    	List<UserTokens> userTokens = userTokensRepository.getUserToken(token);
+    	Optional<List<UserTokens>> userTokens = userTokensRepository.getUserToken(token);
+		if(userTokens.isPresent()){
+			if(userTokens.get().size() > 0) {
+				for(UserTokens userToken:userTokens.get()) {
+					userTokensRepository.deleteTokenOfUser(userToken.getTokenid());
+				}
+				return true;
+			}
+			else {
 
-    	if(userTokens.size() > 0) {
-    		for(UserTokens userToken:userTokens) {
-        		userTokensRepository.deleteTokenOfUser(userToken.getTokenid());
-    		}
-			return true;
-    	}
-    	else {
-    		
-        	return false;
+				return false;
 
-    	}
-    	
-    	
+			}
+		}else {
+			return false;
+		}
     }
     public Boolean removeActiveUserById(Long userId) {
     	
@@ -89,14 +87,18 @@ public class TokenSecurity {
     }
     
     public Boolean checkToken(String token) {
-    	List<UserTokens> userTokens = userTokensRepository.getUserToken(token);
-
-    	if(userTokens.size() > 0) {
-        	return true;
-    	}
-    	else {
+    	Optional<List<UserTokens>> userTokens = userTokensRepository.getUserToken(token);
+		if(userTokens.isPresent()){
+			if(userTokens.get().size() > 0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}else {
 			return false;
-    	}
+		}
+
     }
     
     /** Provide a global point of access to the instance */

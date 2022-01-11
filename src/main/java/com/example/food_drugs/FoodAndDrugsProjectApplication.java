@@ -6,13 +6,17 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.example.examplequerydslspringdatajpamaven.CustomSarebController;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableScheduling
 @SpringBootApplication(scanBasePackages={
 		"com.example.food_drugs" ,"com.example.examplequerydslspringdatajpamaven"})
+@EnableSwagger2
+@Configuration
 public class FoodAndDrugsProjectApplication {
 
 	@Bean

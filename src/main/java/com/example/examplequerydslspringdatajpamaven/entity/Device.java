@@ -777,7 +777,7 @@ public class Device extends Attributes{
 	private String simcardNumber;
 	
 	@Column(name = "user_id")
-	private Long user_id;
+	private Long userId;
 	
 	@Column(name = "lastHum")
 	private Double lastHum = 0.0;
@@ -807,7 +807,7 @@ public class Device extends Attributes{
 		this.endDate = endDate;
 	}
 
-	public Device(Long id, String name, String uniqueid, String lastupdate, String positionid, String position_id, String phone, String model, String plate_num, String right_letter, String middle_letter, String left_letter, Integer plate_type, String reference_key, Integer is_deleted, String delete_date, Integer init_sensor, Integer init_sensor2, Integer car_weight, String reject_reason, String sequence_number, Integer is_valid, Integer expired, String calibrationData, String fuel, String sensorSettings, String lineData, String create_date, Integer lastWeight, String owner_name, String username, String owner_id, String brand, String made_year, String color, String license_exp, Integer date_type, String photo, String icon, String protocol, String port, String device_type, Date regestration_to_elm_date, String representative, String delete_from_elm, Date delete_from_elm_date, Date update_date_in_elm, String simcardNumber, Long user_id, Double lastHum, Double lastTemp, Date startDate, Date endDate, Set<User> user, Set<Driver> driver, Set<Geofence> geofence, Set<Group> groups, Set<Notification> notificationDevice, Set<Attribute> attributeDevice) {
+	public Device(Long id, String name, String uniqueid, String lastupdate, String positionid, String position_id, String phone, String model, String plate_num, String right_letter, String middle_letter, String left_letter, Integer plate_type, String reference_key, Integer is_deleted, String delete_date, Integer init_sensor, Integer init_sensor2, Integer car_weight, String reject_reason, String sequence_number, Integer is_valid, Integer expired, String calibrationData, String fuel, String sensorSettings, String lineData, String create_date, Integer lastWeight, String owner_name, String username, String owner_id, String brand, String made_year, String color, String license_exp, Integer date_type, String photo, String icon, String protocol, String port, String device_type, Date regestration_to_elm_date, String representative, String delete_from_elm, Date delete_from_elm_date, Date update_date_in_elm, String simcardNumber, Long userId, Double lastHum, Double lastTemp, Date startDate, Date endDate, Set<User> user, Set<Driver> driver, Set<Geofence> geofence, Set<Group> groups, Set<Notification> notificationDevice, Set<Attribute> attributeDevice) {
 		this.id = id;
 		this.name = name;
 		this.uniqueid = uniqueid;
@@ -856,7 +856,7 @@ public class Device extends Attributes{
 		this.delete_from_elm_date = delete_from_elm_date;
 		this.update_date_in_elm = update_date_in_elm;
 		this.simcardNumber = simcardNumber;
-		this.user_id = user_id;
+		this.userId = userId;
 		this.lastHum = lastHum;
 		this.lastTemp = lastTemp;
 		this.startDate = startDate;
@@ -1557,14 +1557,14 @@ public class Device extends Attributes{
 	}
 
 
-	public Long getUser_id() {
-		return user_id;
+	public Long getUserId() {
+		return userId;
 	}
 
 
 
-	public void setUser_id(Long user_id) {
-		this.user_id = user_id;
+	public void setUserId(Long user_id) {
+		this.userId = user_id;
 	}
 
 

@@ -1,13 +1,13 @@
-package com.example.food_drugs.responses;
+package com.example.food_drugs.dto;
 
 import lombok.*;
 
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class DeviceAttributes {
-    String activity;
+@Builder
+public class AttributesWrapper {
+    String activity ;
     String storingCategory;
 }

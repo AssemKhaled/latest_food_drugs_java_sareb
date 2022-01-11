@@ -343,7 +343,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 		  Map body = new HashMap();
 		  Map bodyToMiddleWare = new HashMap();
 		  
-		  String url = elmCompanies+"/"+user.getReference_key()+"&activity="+activity;
+		  String url = elmCompanies+"/"+user.getReference_key();
 		  bodyToMiddleWare.put("dataObject", null);
 		  bodyToMiddleWare.put("url",url);
 		  bodyToMiddleWare.put("methodType","DELETE");

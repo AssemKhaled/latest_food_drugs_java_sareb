@@ -1346,6 +1346,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					allInventoriesSumDataFromMySQL = inventoryRepository.getAllInventoriesSummaryData(usersIds,offset);
 
 				}
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				DecimalFormat df = new DecimalFormat("#.##");
 				for (InventorySummaryDataWrapper inventorySummaryWrapper : allInventoriesSumDataFromMySQL){
 					if(inventorySummaryWrapper.getLastDataId()!=null){
@@ -1358,7 +1359,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 											.temperature(Double.valueOf(df.format(mongoInv.getTemperature())))
 											.inventoryId(mongoInv.getInventoryId())
 											.inventoryName(inventorySummaryWrapper.getLastDataId())
-											.createDate(mongoInv.getCreateDate())
+											.createDate(simpleDateFormat.format(mongoInv.getCreateDate()))
 											.humidity(Double.valueOf(df.format(mongoInv.getHumidity())))
 											.build());
 						}
@@ -3201,7 +3202,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					e.printStackTrace();
 				}
 				create_date = output.format(dateTime);
-					
+
+				System.out.println(create_date);
+				System.out.println(create_date);
+				System.out.println(create_date);
+				System.out.println(create_date);
 
 				Double oldTemp = null;
 				Double oldTHum = null;

@@ -3,6 +3,7 @@ package com.example.food_drugs.repository;
 import java.util.List;
 
 import com.example.food_drugs.responses.DeviceNames;
+import com.example.food_drugs.responses.mobile.DeviceMonitoringResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -19,6 +20,7 @@ import com.example.food_drugs.entity.DeviceSFDA;
 @Component
 public interface DeviceRepositorySFDA extends  JpaRepository<DeviceSFDA, Long>, QueryDslPredicateExecutor<DeviceSFDA> {
 
+	List<DeviceMonitoringResponse> findAllByUserId(Long userId);
 
 	@Query(value = " SELECT tc_devices.name as deviceName , " +
 			" tc_drivers.name as driverName, " +
@@ -129,9 +131,20 @@ public interface DeviceRepositorySFDA extends  JpaRepository<DeviceSFDA, Long>, 
      		+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id ) Y " ,nativeQuery = true )
 	public Integer getDevicesListSizeByIdsAll(@Param("deviceIds")List<Long> deviceIds,@Param("search") String search , @Param("isAdmin") boolean isAdmin);
 
-	@Query(value = " SELECT name , id ,lastupdate , lastTemp , lastHum , storingCategory FROM `tc_devices` " +
-			" WHERE tc_devices.lastupdate is not NULL AND tc_devices.user_id in (:userIds)" , nativeQuery = true)
-	List<Object[]> getDeviceByUserIds(@Param("userIds")List<Long> userIds);
+	@Query(value = " SELECT name , id ,lastupdate , lastTemp , lastHum , attributes ,positionid FROM `tc_devices` " +
+			" WHERE tc_devices.positionid IS NOT NULL AND tc_devices.lastupdate IS NOT NULL AND tc_devices.user_id in (:userIds) AND attributes != '{}' ", nativeQuery = true)
+	List<Object[]> getDeviceByUserIds(@Param("userIds")List<Long> userIds );
+
+
+	@Query(value = " SELECT name , id ,lastupdate , lastTemp , lastHum , attributes ,positionid FROM `tc_devices` " +
+			" WHERE tc_devices.positionid IS NOT NULL AND tc_devices.lastupdate IS NOT NULL AND tc_devices.user_id in (:userIds) AND attributes != '{}' " +
+			" LIMIT :offset,:size " , nativeQuery = true)
+	List<Object[]> getDeviceByUserIdsWithLimitAndSize(@Param("userIds")List<Long> userIds,@Param("offset")int offset ,@Param("size")int size);
+
+	@Query(value = " SELECT COUNT(*) FROM `tc_devices` " +
+			" WHERE tc_devices.positionid IS NOT NULL AND tc_devices.lastupdate IS NOT NULL AND tc_devices.user_id in (:userIds) AND attributes != '{}' " , nativeQuery = true)
+	Integer countDeviceByUserIds(@Param("userIds")List<Long> userIds);
+
 
 	@Query(value = " SELECT name , id ,lastupdate , lastTemp , lastHum , storingCategory FROM `tc_devices` " +
 			" WHERE tc_devices.lastupdate is not NULL AND tc_devices.user_id in (:userIds) LIMIT :offset,:size" , nativeQuery = true)

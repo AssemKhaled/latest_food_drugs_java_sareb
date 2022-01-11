@@ -214,7 +214,7 @@ public class ElmConnectionsRestControllerSFDA {
 	}
 	
 	@GetMapping(path ="/statsInventories")
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
 	public ResponseEntity<?> statsInventories(){
 		
 		return elmServiceImplSFDA.statsInventories();

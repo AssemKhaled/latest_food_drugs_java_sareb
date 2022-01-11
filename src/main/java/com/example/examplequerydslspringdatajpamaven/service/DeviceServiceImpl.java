@@ -8,13 +8,10 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.cookie.DateUtils;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
@@ -227,7 +224,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	public ResponseEntity<?> createDevice(String TOKEN,Device device,Long userId) {
 		// TODO Auto-generated method stub
 		logger.info("************************ createDevice STARTED ***************************");
-		device.setUser_id(userId);
+		device.setUserId(userId);
 		Date now = new Date();
 		SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String nowTime = isoFormat.format(now);
@@ -1783,10 +1780,10 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 								e.printStackTrace();
 							}
 							
-							if(minutes < 3) {
+							if(minutes <= 3) {
 		                    	allDevicesLiveData.get(i).setVehicleStatus("online");
 							}
-							if(minutes > 8) {
+							if(minutes >= 8) {
 		                    	allDevicesLiveData.get(i).setVehicleStatus("offline");
 							}
 							if(minutes < 8 && minutes > 3) {
@@ -2012,9 +2009,6 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					}
 				}
 			}
-	    	
-		    
-		    
 		    
 		    getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",allDevicesLiveData,size);
 			
@@ -2732,7 +2726,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					    			 deviceOldUser.removeAll(temp);
 					    			 device.setUser(deviceOldUser);
 					    		     deviceOldUser.add(toUser);
-					    		     device.setUser_id(toUser.getId());
+					    		     device.setUserId(toUser.getId());
 					    		     device.setUser(deviceOldUser);
 					    		     deviceRepository.save(device);
 					    		     
@@ -3694,8 +3688,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			}
 		}
 	}
-	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) 
-    {
+	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
         long diffInMillies = date2.getTime() - date1.getTime();
          
         return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);

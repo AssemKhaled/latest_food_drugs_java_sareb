@@ -27,6 +27,7 @@ public class PositionMapper {
                 .speed(position.getSpeed())
                 .temperature(findTemperature(position.getAttributes()))
                 .humidity(findHumidity(position.getAttributes()))
+                .ac((Long) position.getAttributes().get("AC"))
                 .build();
     }
     double findTemperature(Map<String, Object> attributes){

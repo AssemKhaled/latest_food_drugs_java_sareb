@@ -1,6 +1,7 @@
 package com.example.examplequerydslspringdatajpamaven.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,7 +23,7 @@ public interface UserTokensRepository extends JpaRepository<UserTokens, Long>, Q
 	public void deleteTokenOfUser(@Param("token")String token);
 	
 	@Query(value = "SELECT * from tc_users_tokens where tc_users_tokens.tokenid =:token",nativeQuery = true)
-	public List<UserTokens> getUserToken(@Param("token")String token);
+	public Optional<List<UserTokens>> getUserToken(@Param("token")String token);
 	
 	@Query(value = "SELECT * from tc_users_tokens where tc_users_tokens.userid =:userId",nativeQuery = true)
 	public List<UserTokens> getUserTokenById(@Param("userId")Long userId);

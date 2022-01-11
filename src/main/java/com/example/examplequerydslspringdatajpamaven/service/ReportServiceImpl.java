@@ -6542,7 +6542,6 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		        
 
 		        for(String d:data) {
-
 		        	if(!allDevices.contains(Long.parseLong(d))) {
 			        	allDevices.add(Long.parseLong(d));
 		        	}

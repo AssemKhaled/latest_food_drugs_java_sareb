@@ -1723,26 +1723,15 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 							}
 							if(group.getType() != null) {
 								if(group.getType().equals("driver")) {
-
 									allDevices.addAll(groupRepository.getDevicesFromDriver(groupId));
-
-
 								}
 								else if(group.getType().equals("device")) {
-
 									allDevices.addAll(groupRepository.getDevicesFromGroup(groupId));
-
-
 								}
 								else if(group.getType().equals("geofence")) {
-
 									allDevices.addAll(groupRepository.getDevicesFromGeofence(groupId));
-
-
 								}
 							}
-
-
 						}
 					}
 
@@ -1793,11 +1782,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						logger.info("************************ getSensorsReport ENDED ***************************");
 						return ResponseEntity.badRequest().body(getObjectResponse);
 					}
-
 					allDevices.add(deviceId);
-
-
-
 				}
 			}
 		}
@@ -1843,25 +1828,18 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			try {
 				dateTo = inputFormat.parse(end);
 				end = outputFormat.format(dateTo);
-
-
 			} catch (ParseException e2) {
 				// TODO Auto-generated catch block
 				try {
 					dateTo = inputFormat1.parse(end);
 					end = outputFormat.format(dateTo);
-
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start and End Dates should be in the following format YYYY-MM-DD or yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",null);
 					logger.info("************************ getEventsReport ENDED ***************************");
 					return  ResponseEntity.badRequest().body(getObjectResponse);
 				}
-
 			}
-
-
-
 
 			Date today=new Date();
 
@@ -1900,7 +1878,6 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 
 			for(String d:data) {
-
 				if(!allDevices.contains(Long.parseLong(d))) {
 					allDevices.add(Long.parseLong(d));
 				}
@@ -1921,16 +1898,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 			for(long id : allDevices){
 				List<Position> positions = positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize));
+						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(id ,dateFrom,dateTo ,new PageRequest(page, pageSize));
 				for(Position position : positions){
 					positionResponsesList.add(positionMapper.convertToResponse(position));
 				}
 
 				size+=positionMongoSFDARepository.countAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo );
 			}
-
-
-
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),
 					"success",
 					positionResponsesList,
@@ -1943,10 +1917,9 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			search = "%"+search+"%";
 			// Second Attack
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
-
 			for(long id : allDevices){
 				List<Position> positions = positionMongoSFDARepository.
-						findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo ,new PageRequest(page, pageSize));
+						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(id ,dateFrom,dateTo ,new PageRequest(page, pageSize));
 				for(Position position : positions){
 					positionResponsesList.add(positionMapper.convertToResponse(position));
 				}
@@ -1959,7 +1932,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //			positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 			for(long id : allDevices){
 				List<Position> positions = positionMongoSFDARepository.
-								findAllByDeviceidAndDevicetimeBetween(id ,dateFrom,dateTo,new PageRequest(page, pageSize));
+						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(id ,dateFrom,dateTo,new PageRequest(page, pageSize));
 				for(Position position : positions){
 					positionResponsesList.add(positionMapper.convertToResponse(position));
 				}
@@ -3165,9 +3138,6 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		}
 
 	}
-
-
-
 
 	public Double getAvgTemp(Map attributesMap) {
 		int count = 0;
