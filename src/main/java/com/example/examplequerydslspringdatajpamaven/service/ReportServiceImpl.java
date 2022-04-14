@@ -13,12 +13,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import com.example.examplequerydslspringdatajpamaven.entity.*;
+import com.example.examplequerydslspringdatajpamaven.repository.*;
+import com.example.food_drugs.helpers.ReportsHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,28 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.example.examplequerydslspringdatajpamaven.entity.CustomPositions;
-import com.example.examplequerydslspringdatajpamaven.entity.Device;
-import com.example.examplequerydslspringdatajpamaven.entity.DeviceTempHum;
-import com.example.examplequerydslspringdatajpamaven.entity.DeviceWorkingHours;
-import com.example.examplequerydslspringdatajpamaven.entity.Driver;
-import com.example.examplequerydslspringdatajpamaven.entity.DriverWorkingHours;
-import com.example.examplequerydslspringdatajpamaven.entity.EventReport;
-import com.example.examplequerydslspringdatajpamaven.entity.EventReportByCurl;
-import com.example.examplequerydslspringdatajpamaven.entity.Group;
-import com.example.examplequerydslspringdatajpamaven.entity.StopReport;
-import com.example.examplequerydslspringdatajpamaven.entity.SummaryReport;
-import com.example.examplequerydslspringdatajpamaven.entity.TripPositions;
-import com.example.examplequerydslspringdatajpamaven.entity.TripReport;
-import com.example.examplequerydslspringdatajpamaven.entity.User;
-import com.example.examplequerydslspringdatajpamaven.repository.DeviceRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.DriverRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.GroupRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepo;
-import com.example.examplequerydslspringdatajpamaven.repository.MongoPositionRepo;
-import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.UserClientDriverRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.UserClientGroupRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -120,13 +104,23 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	
 	@Autowired
 	private MongoPositionRepo mongoPositionRepo;
-	
-	
+
+	private final ReportsHelper reportsHelper;
+
+	private final MongoEventsRepository mongoEventsRepository;
+
+	public ReportServiceImpl(ReportsHelper reportsHelper, MongoEventsRepository mongoEventsRepository) {
+		this.reportsHelper = reportsHelper;
+		this.mongoEventsRepository = mongoEventsRepository;
+	}
+
+
 	/**
 	 * get data of events of one or more device and group from mongo collection tc_events
 	 */
 	@Override
-	public ResponseEntity<?> getEventsReport(String TOKEN,Long [] deviceIds,Long [] groupIds,int offset,String start,String end,String type,String search,Long userId,String exportData) {
+	public ResponseEntity<?> getEventsReport(String TOKEN,Long [] deviceIds,Long [] groupIds,int offset,
+											 String start,String end,String type,String search,Long userId,String exportData, String timeOffset) {
 	{
 		
 		
@@ -367,11 +361,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				logger.info("************************ getEventsReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",eventReport);
-				logger.info("************************ getEventsReport ENDED ***************************");		
-				return  ResponseEntity.badRequest().body(getObjectResponse);
-			}
+//			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",eventReport);
+//				logger.info("************************ getEventsReport ENDED ***************************");
+//				return  ResponseEntity.badRequest().body(getObjectResponse);
+//			}
 
 
 			search = "%"+search+"%";
@@ -413,57 +407,82 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	        	return  ResponseEntity.badRequest().body(getObjectResponse);
 	        }
 			
-	        
+	        List<MongoEvents> mongoEventsList = new ArrayList<>();
+			List<EventReport> eventReportList = new ArrayList<>();
+			int limit = 10;
+			Pageable pageable = new PageRequest(offset,limit);
+			if(timeOffset.contains("%2B")){
+				timeOffset = "+" + timeOffset.substring(3);
+			}
 	        
 			if(type.equals("")) {
 				
 				if(exportData.equals("exportData")) {
-					eventReport = mongoEventsRepo.getEventsScheduled(allDevices, dateFrom, dateTo);
+					//eventReport = mongoEventsRepo.getEventsScheduled(allDevices, dateFrom, dateTo);
+					mongoEventsList = mongoEventsRepository.
+							findAllByDeviceidInAndServertimeBetweenOrderByServertimeDesc(allDevices, dateFrom, dateTo);
 
-					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",eventReport,size);
+					eventReportList = reportsHelper.eventsReportProcessHandler(mongoEventsList, timeOffset);
+
+					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",eventReportList,size);
 					logger.info("************************ getEventsReport ENDED ***************************");
 					return  ResponseEntity.ok().body(getObjectResponse);
 		        }
 				
 				if(!TOKEN.equals("Schedule")) {
-					eventReport = mongoEventsRepo.getEventsWithoutType(allDevices, offset, dateFrom, dateTo);
-					if(eventReport.size()>0) {
-						size = mongoEventsRepo.getEventsWithoutTypeSize(allDevices, dateFrom, dateTo);
-						
+					//eventReport = mongoEventsRepo.getEventsWithoutType(allDevices, offset, dateFrom, dateTo);
+					mongoEventsList = mongoEventsRepository.
+							findAllByDeviceidInAndServertimeBetweenOrderByServertimeDesc(
+									allDevices, dateFrom, dateTo, pageable);
+
+					eventReportList = reportsHelper.eventsReportProcessHandler(mongoEventsList, timeOffset);
+
+					if(mongoEventsList.size()>0) {
+						//size = mongoEventsRepo.getEventsWithoutTypeSize(allDevices, dateFrom, dateTo);
+						size = mongoEventsRepository.
+								countAllByDeviceidInAndServertimeBetween(allDevices, dateFrom, dateTo);
 						
 					}
 				}
 				else {
 					eventReport = mongoEventsRepo.getEventsScheduled(allDevices, dateFrom, dateTo);
-					
-
 				}
-				
 			}
 			else {
 				if(exportData.equals("exportData")) {
-					eventReport = mongoEventsRepo.getEventsScheduledWithType(allDevices, dateFrom, dateTo,type);
+					//eventReport = mongoEventsRepo.getEventsScheduledWithType(allDevices, dateFrom, dateTo,type);
+					mongoEventsList = mongoEventsRepository.
+							findAllByDeviceidInAndServertimeBetweenAndTypeOrderByServertimeDesc(
+									allDevices, dateFrom, dateTo, type);
 
-					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",eventReport,size);
+					eventReportList = reportsHelper.eventsReportProcessHandler(mongoEventsList, timeOffset);
+
+					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",eventReportList,size);
 					logger.info("************************ getEventsReport ENDED ***************************");
 					return  ResponseEntity.ok().body(getObjectResponse);
 		        }
 				
 				if(!TOKEN.equals("Schedule")) {
-					eventReport = mongoEventsRepo.getEventsWithType(allDevices, offset, dateFrom, dateTo, type);
-					if(eventReport.size()>0) {
-						size = mongoEventsRepo.getEventsWithTypeSize(allDevices, dateFrom, dateTo, type);
-						
+					//eventReport = mongoEventsRepo.getEventsWithType(allDevices, offset, dateFrom, dateTo, type);
+					mongoEventsList = mongoEventsRepository.
+							findAllByDeviceidInAndServertimeBetweenAndTypeOrderByServertimeDesc(
+									allDevices, dateFrom, dateTo, type, pageable);
+
+					eventReportList = reportsHelper.eventsReportProcessHandler(mongoEventsList, timeOffset);
+
+					if(mongoEventsList.size()>0) {
+						//size = mongoEventsRepo.getEventsWithTypeSize(allDevices, dateFrom, dateTo, type);
+						size = mongoEventsRepository.
+								countAllByDeviceidInAndServertimeBetweenAndType(allDevices, dateFrom, dateTo, type);
 						
 					}
 				}
 				else {
 					eventReport = mongoEventsRepo.getEventsScheduled(allDevices, dateFrom, dateTo);
-					
 				}
 				
 			}
-			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",eventReport,size);
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",eventReportList,size);
 			logger.info("************************ getEventsReport ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
 		}		  
@@ -718,11 +737,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				logger.info("************************ getEventsReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
-				logger.info("************************ getEventsReport ENDED ***************************");		
-				return  ResponseEntity.badRequest().body(getObjectResponse);
-			}
+//			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+//				logger.info("************************ getEventsReport ENDED ***************************");
+//				return  ResponseEntity.badRequest().body(getObjectResponse);
+//			}
 
 
 			search = "%"+search+"%";
@@ -1385,11 +1404,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				logger.info("************************ getEventsReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
-				logger.info("************************ getEventsReport ENDED ***************************");		
-				return  ResponseEntity.badRequest().body(getObjectResponse);
-			}
+//			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+//				logger.info("************************ getEventsReport ENDED ***************************");
+//				return  ResponseEntity.badRequest().body(getObjectResponse);
+//			}
 			
 			search = "%"+search+"%";
 			Integer size = 0;
@@ -1589,7 +1608,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	 */
 	@Override
 	public ResponseEntity<?> getStopsReport(String TOKEN, Long[] deviceIds, Long[] groupIds, String type, String from,
-			String to, int page, int start, int limit, Long userId) {
+			String to, int page, int start, int limit, Long userId, String timeOffset) {
 		logger.info("************************ getStopsReport STARTED ***************************");
 
 		List<StopReport> stopReport = new ArrayList<StopReport>();
@@ -1828,11 +1847,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				logger.info("************************ getEventsReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
-				logger.info("************************ getEventsReport ENDED ***************************");		
-				return  ResponseEntity.badRequest().body(getObjectResponse);
-			}
+//			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+//				logger.info("************************ getEventsReport ENDED ***************************");
+//				return  ResponseEntity.badRequest().body(getObjectResponse);
+//			}
 			
 			Integer size = 0;
 			
@@ -1877,92 +1896,94 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		 stopReport = (List<StopReport>) returnFromTraccar(stopsUrl,"stops",allDevices, from, to, type, page, start, limit).getBody();
 
 		  if(stopReport.size()>0) {
-
-			  
-			  Long timeDuration = (long) 0;
-			  Long timeEngine= (long) 0;
-			  String totalDuration = "00:00:00";
-			  String totalEngineHours = "00:00:00";
-			  
-
-
-			  for(StopReport stopReportOne : stopReport ) {
-				  Device device= deviceServiceImpl.findById(stopReportOne.getDeviceId());
-				  Set<Driver>  drivers = device.getDriver();
-
-				  for(Driver driver : drivers ) {
-
-					 stopReportOne.setDriverName(driver.getName());
-					 stopReportOne.setDriverUniqueId(driver.getUniqueid());
-				  }
-				  if(stopReportOne.getDuration() != null && stopReportOne.getDuration() != "") {
-
-					  timeDuration = Math.abs(  Long.parseLong(stopReportOne.getDuration())  );
-
-					  Long hoursDuration =   TimeUnit.MILLISECONDS.toHours(timeDuration) ;
-					  Long minutesDuration = TimeUnit.MILLISECONDS.toMinutes(timeDuration) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(timeDuration));
-					  Long secondsDuration = TimeUnit.MILLISECONDS.toSeconds(timeDuration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeDuration));
-					  
-					  totalDuration = String.valueOf(hoursDuration)+":"+String.valueOf(minutesDuration)+":"+String.valueOf(secondsDuration);
-					  stopReportOne.setDuration(totalDuration.toString());
-
-				  }
-				  
-				  if(stopReportOne.getEngineHours() != null && stopReportOne.getEngineHours() != "") {
-
-					  timeEngine = Math.abs(  Long.parseLong(stopReportOne.getEngineHours())  );
-
-					  Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(timeEngine) ;
-					  Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(timeEngine) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(timeEngine));
-					  Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(timeEngine) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeEngine));
-					  
-					  totalEngineHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
-					  stopReportOne.setEngineHours(totalEngineHours.toString());
-
-				  }
-				  
-				  if(stopReportOne.getStartTime() != null && stopReportOne.getStartTime() != "") {
-					    Date dateTime = null;
-						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
-						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
-
-						try {
-							dateTime = inputFormat.parse(stopReportOne.getStartTime());
-
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
-						
-						stopReportOne.setStartTime(outputFormat.format(dateTime));
-
-				  }
-				  if(stopReportOne.getEndTime() != null && stopReportOne.getEndTime() != "") {
-					    Date dateTime = null;
-						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
-						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
-
-						try {
-							dateTime = inputFormat.parse(stopReportOne.getEndTime());
-
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
-						
-						stopReportOne.setEndTime(outputFormat.format(dateTime));
-
-				  }
+			  if(timeOffset.contains("%2B")){
+				  timeOffset = "+" + timeOffset.substring(3);
 			  }
+			  stopReport = reportsHelper.stopReportProcessHandler(stopReport, timeOffset);
+//			  Long timeDuration = (long) 0;
+//			  Long timeEngine= (long) 0;
+//			  String totalDuration = "00:00:00";
+//			  String totalEngineHours = "00:00:00";
+//
+//
+//
+//			  for(StopReport stopReportOne : stopReport ) {
+//				  Device device= deviceServiceImpl.findById(stopReportOne.getDeviceId());
+//				  Set<Driver>  drivers = device.getDriver();
+//
+//				  for(Driver driver : drivers ) {
+//
+//					 stopReportOne.setDriverName(driver.getName());
+//					 stopReportOne.setDriverUniqueId(driver.getUniqueid());
+//				  }
+//				  if(stopReportOne.getDuration() != null && stopReportOne.getDuration() != "") {
+//
+//					  timeDuration = Math.abs(  Long.parseLong(stopReportOne.getDuration())  );
+//
+//					  Long hoursDuration =   TimeUnit.MILLISECONDS.toHours(timeDuration) ;
+//					  Long minutesDuration = TimeUnit.MILLISECONDS.toMinutes(timeDuration) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(timeDuration));
+//					  Long secondsDuration = TimeUnit.MILLISECONDS.toSeconds(timeDuration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeDuration));
+//
+//					  totalDuration = String.valueOf(hoursDuration)+":"+String.valueOf(minutesDuration)+":"+String.valueOf(secondsDuration);
+//					  stopReportOne.setDuration(totalDuration.toString());
+//
+//				  }
+//
+//				  if(stopReportOne.getEngineHours() != null && stopReportOne.getEngineHours() != "") {
+//
+//					  timeEngine = Math.abs(  Long.parseLong(stopReportOne.getEngineHours())  );
+//
+//					  Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(timeEngine) ;
+//					  Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(timeEngine) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(timeEngine));
+//					  Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(timeEngine) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeEngine));
+//
+//					  totalEngineHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
+//					  stopReportOne.setEngineHours(totalEngineHours.toString());
+//
+//				  }
+//
+//				  if(stopReportOne.getStartTime() != null && stopReportOne.getStartTime() != "") {
+//					    Date dateTime = null;
+//						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+//
+//						try {
+//							dateTime = inputFormat.parse(stopReportOne.getStartTime());
+//
+//						} catch (ParseException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//
+//						Calendar calendarTime = Calendar.getInstance();
+//						calendarTime.setTime(dateTime);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						dateTime = calendarTime.getTime();
+//
+//						stopReportOne.setStartTime(outputFormat.format(dateTime));
+//
+//				  }
+//				  if(stopReportOne.getEndTime() != null && stopReportOne.getEndTime() != "") {
+//					    Date dateTime = null;
+//						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+//
+//						try {
+//							dateTime = inputFormat.parse(stopReportOne.getEndTime());
+//
+//						} catch (ParseException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//						Calendar calendarTime = Calendar.getInstance();
+//						calendarTime.setTime(dateTime);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						dateTime = calendarTime.getTime();
+//
+//						stopReportOne.setEndTime(outputFormat.format(dateTime));
+//
+//				  }
+//			  }
 			  
 			  
 		  }
@@ -1978,7 +1999,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	 */
 	@Override
 	public ResponseEntity<?> getTripsReport(String TOKEN, Long[] deviceIds, Long[] groupIds, String type, String from,
-			String to, int page, int start, int limit, Long userId) {
+			String to, int page, int start, int limit, Long userId, String timeOffset) {
 		logger.info("************************ getTripsReport STARTED ***************************");
 
 		List<TripReport> tripReport = new ArrayList<>();
@@ -2217,11 +2238,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				logger.info("************************ getEventsReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
-				logger.info("************************ getEventsReport ENDED ***************************");		
-				return  ResponseEntity.badRequest().body(getObjectResponse);
-			}
+//			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+//				logger.info("************************ getEventsReport ENDED ***************************");
+//				return  ResponseEntity.badRequest().body(getObjectResponse);
+//			}
 			
 			Integer size = 0;
 			
@@ -2264,141 +2285,140 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		 tripReport = (List<TripReport>) returnFromTraccar(tripsUrl,"trips",allDevices, from, to, type, page, start, limit).getBody();
 
 		 if(tripReport.size()>0) {
-
-			  for(TripReport tripReportOne : tripReport ) {
-				  Device device= deviceServiceImpl.findById(tripReportOne.getDeviceId());
-				  Set<User>companies = device.getUser();
-				  User user = new User();
-				  for(User company : companies) {
-					  user = company;
-					  break;
-				  }
-				  String companyName = user.getName();
-				  tripReportOne.setCompanyName(companyName);
-
-				  Double totalDistance = 0.0 ;
-				  double roundOffDistance = 0.0;
-				  double roundOffFuel = 0.0;
-				  Double litres=10.0;
-				  Double Fuel =0.0;
-				  Double distance=0.0;
-				  
-				  Set<Driver>  drivers = device.getDriver();
-				  for(Driver driver : drivers ) {
-
-					 tripReportOne.setDriverName(driver.getName());
-					 tripReportOne.setDriverUniqueId(driver.getUniqueid());
-
-					
-					 
-				  }
-
-				  if(tripReportOne.getDistance() != null && tripReportOne.getDistance() != "") {
-					  totalDistance = Math.abs(  Double.parseDouble(tripReportOne.getDistance())/1000  );
-					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-					  tripReportOne.setDistance(Double.toString(roundOffDistance));
-
-
-				  }
-				  
-				  if(device.getFuel() != null) {
-						if(device.getFuel() != null && device.getFuel() != "" && device.getFuel().startsWith("{")) {
-							JSONObject obj = new JSONObject(device.getFuel());	
-							if(obj.has("fuelPerKM")) {
-								litres=obj.getDouble("fuelPerKM");
-								
-							}
-						}
-				   }
-					  
-				  distance = Double.parseDouble(tripReportOne.getDistance().toString());
-				  if(distance > 0) {
-					Fuel = (distance*litres)/100;
-				  }
-
-				  roundOffFuel = Math.round(Fuel * 100.0)/ 100.0;
-				  tripReportOne.setSpentFuel(Double.toString(roundOffFuel));
-
-				  
-				  if(tripReportOne.getDuration() != null && tripReportOne.getDuration() != "") {
-					  Long time=(long) 0;
-
-					  time = Math.abs( Long.parseLong(tripReportOne.getDuration().toString()) );
-
-					  Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(time) ;
-					  Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(time) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(time));
-					  Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-					  
-					  String totalHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
-					  tripReportOne.setDuration(totalHours);
-				  }
-				 
-				  if(tripReportOne.getAverageSpeed() != null && tripReportOne.getAverageSpeed() != "") {
-					  totalDistance = Math.abs(  Double.parseDouble(tripReportOne.getAverageSpeed())  * (1.852));
-					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-					  tripReportOne.setAverageSpeed(Double.toString(roundOffDistance));
-
-
-				  }
-				  if(tripReportOne.getMaxSpeed() != null && tripReportOne.getMaxSpeed() != "") {
-					  totalDistance = Math.abs(  Double.parseDouble(tripReportOne.getMaxSpeed())  * (1.852));
-					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-					  tripReportOne.setMaxSpeed(Double.toString(roundOffDistance));
-
-
-				  }
-				  
-				  if(tripReportOne.getStartTime() != null && tripReportOne.getStartTime() != "") {
-					    Date dateTime = null;
-						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
-						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
-
-						try {
-							dateTime = inputFormat.parse(tripReportOne.getStartTime());
-
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
-						
-						tripReportOne.setStartTime(outputFormat.format(dateTime));
-
-				  }
-				  if(tripReportOne.getEndTime() != null && tripReportOne.getEndTime() != "") {
-					    Date dateTime = null;
-						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
-						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
-
-						try {
-							dateTime = inputFormat.parse(tripReportOne.getEndTime());
-
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						Calendar calendarTime = Calendar.getInstance();
-						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-						dateTime = calendarTime.getTime();
-						
-						tripReportOne.setEndTime(outputFormat.format(dateTime));
-
-				  }
-				  
-				  
-
-			  }
+			if(timeOffset.contains("%2B")){
+				timeOffset = "+" + timeOffset.substring(3);
+			}
+			 tripReport = reportsHelper.tripReportProcessHandler(tripReport, timeOffset);
+//			  for(TripReport tripReportOne : tripReport ) {
+//				  Device device= deviceServiceImpl.findById(tripReportOne.getDeviceId());
+//				  Set<User>companies = device.getUser();
+//				  User user = new User();
+//				  for(User company : companies) {
+//					  user = company;
+//					  break;
+//				  }
+//				  String companyName = user.getName();
+//				  tripReportOne.setCompanyName(companyName);
+//
+//				  Double totalDistance = 0.0 ;
+//				  double roundOffDistance = 0.0;
+//				  double roundOffFuel = 0.0;
+//				  Double litres=10.0;
+//				  Double Fuel =0.0;
+//				  Double distance=0.0;
+//
+//				  Set<Driver>  drivers = device.getDriver();
+//				  for(Driver driver : drivers ) {
+//
+//					 tripReportOne.setDriverName(driver.getName());
+//					 tripReportOne.setDriverUniqueId(driver.getUniqueid());
+//
+//
+//
+//				  }
+//
+//				  if(tripReportOne.getDistance() != null && tripReportOne.getDistance() != "") {
+//					  totalDistance = Math.abs(  Double.parseDouble(tripReportOne.getDistance())/1000  );
+//					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
+//					  tripReportOne.setDistance(Double.toString(roundOffDistance));
+//
+//
+//				  }
+//
+//				  if(device.getFuel() != null) {
+//						if(device.getFuel() != null && device.getFuel() != "" && device.getFuel().startsWith("{")) {
+//							JSONObject obj = new JSONObject(device.getFuel());
+//							if(obj.has("fuelPerKM")) {
+//								litres=obj.getDouble("fuelPerKM");
+//
+//							}
+//						}
+//				   }
+//
+//				  distance = Double.parseDouble(tripReportOne.getDistance().toString());
+//				  if(distance > 0) {
+//					Fuel = (distance*litres)/100;
+//				  }
+//
+//				  roundOffFuel = Math.round(Fuel * 100.0)/ 100.0;
+//				  tripReportOne.setSpentFuel(Double.toString(roundOffFuel));
+//
+//
+//				  if(tripReportOne.getDuration() != null && tripReportOne.getDuration() != "") {
+//					  Long time=(long) 0;
+//
+//					  time = Math.abs( Long.parseLong(tripReportOne.getDuration().toString()) );
+//
+//					  Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(time) ;
+//					  Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(time) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(time));
+//					  Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
+//
+//					  String totalHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
+//					  tripReportOne.setDuration(totalHours);
+//				  }
+//
+//				  if(tripReportOne.getAverageSpeed() != null && tripReportOne.getAverageSpeed() != "") {
+//					  totalDistance = Math.abs(  Double.parseDouble(tripReportOne.getAverageSpeed())  * (1.852));
+//					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
+//					  tripReportOne.setAverageSpeed(Double.toString(roundOffDistance));
+//
+//
+//				  }
+//				  if(tripReportOne.getMaxSpeed() != null && tripReportOne.getMaxSpeed() != "") {
+//					  totalDistance = Math.abs(  Double.parseDouble(tripReportOne.getMaxSpeed())  * (1.852));
+//					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
+//					  tripReportOne.setMaxSpeed(Double.toString(roundOffDistance));
+//
+//
+//				  }
+//
+//				  if(tripReportOne.getStartTime() != null && tripReportOne.getStartTime() != "") {
+//					    Date dateTime = null;
+//						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+//
+//						try {
+//							dateTime = inputFormat.parse(tripReportOne.getStartTime());
+//
+//						} catch (ParseException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//
+//						Calendar calendarTime = Calendar.getInstance();
+//						calendarTime.setTime(dateTime);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						dateTime = calendarTime.getTime();
+//
+//						tripReportOne.setStartTime(outputFormat.format(dateTime));
+//
+//				  }
+//				  if(tripReportOne.getEndTime() != null && tripReportOne.getEndTime() != "") {
+//					    Date dateTime = null;
+//						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+//
+//						try {
+//							dateTime = inputFormat.parse(tripReportOne.getEndTime());
+//
+//						} catch (ParseException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//
+//						Calendar calendarTime = Calendar.getInstance();
+//						calendarTime.setTime(dateTime);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						dateTime = calendarTime.getTime();
+//
+//						tripReportOne.setEndTime(outputFormat.format(dateTime));
+//
+//				  }
+//			  }
 		  }
 		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",tripReport,tripReport.size());
 		logger.info("************************ getTripsReport ENDED ***************************");
 		return  ResponseEntity.ok().body(getObjectResponse);
-		
 	}
 	
 	/**
@@ -3255,7 +3275,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	 */
 	@Override
 	public ResponseEntity<?> getSummaryReport(String TOKEN, Long[] deviceIds, Long[] groupIds, String type, String from,
-			String to, int page, int start, int limit, Long userId) {
+			String to, int page, int start, int limit, Long userId, String timeOffset) {
 		logger.info("************************ getSummaryReport STARTED ***************************");
 		List<SummaryReport> summaryReport = new ArrayList<>();
 		if(TOKEN.equals("")) {
@@ -3491,11 +3511,11 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				logger.info("************************ getEventsReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
-				logger.info("************************ getEventsReport ENDED ***************************");		
-				return  ResponseEntity.badRequest().body(getObjectResponse);
-			}
+//			if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//				getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+//				logger.info("************************ getEventsReport ENDED ***************************");
+//				return  ResponseEntity.badRequest().body(getObjectResponse);
+//			}
 			Integer size = 0;
 			
 			String appendString="";
@@ -3536,79 +3556,83 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		
 		 summaryReport = (List<SummaryReport>) returnFromTraccar(summaryUrl,"summary",allDevices, from, to, type, page, start, limit).getBody();
 		 if(summaryReport.size()>0) {
-			  Double totalDistance = 0.0 ;
-			  double roundOffDistance = 0.0;
-			  double roundOffFuel = 0.0;
-			  Double litres=10.0;
-			  Double Fuel =0.0;
-			  Double distance=0.0;
-			  
-			  for(SummaryReport summaryReportOne : summaryReport ) {
-				  Device device= deviceServiceImpl.findById(summaryReportOne.getDeviceId());
-				  if(device != null) {
-				  Set<Driver>  drivers = device.getDriver();
-				  for(Driver driver : drivers ) {
-
-					 summaryReportOne.setDriverName(driver.getName());
-				  }
-				  if(summaryReportOne.getDistance() != null && summaryReportOne.getDistance() != "") {
-					  totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getDistance())/1000  );
-					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-					  summaryReportOne.setDistance(Double.toString(roundOffDistance));
-
-
-				  }
-				  
-				  if(device.getFuel() != null) {
-						if(device.getFuel() != null && device.getFuel() != "" && device.getFuel().startsWith("{")) {
-							JSONObject obj = new JSONObject(device.getFuel());	
-							if(obj.has("fuelPerKM")) {
-								litres=obj.getDouble("fuelPerKM");
-								
-							}
-						}
-				   }
-				  
-				  
-				  distance = Double.parseDouble(summaryReportOne.getDistance().toString());
-				  if(distance > 0) {
-					Fuel = (distance*litres)/100;
-				  }
-	
-				  roundOffFuel = Math.round(Fuel * 100.0 )/ 100.0;
-				  summaryReportOne.setSpentFuel(Double.toString(roundOffFuel));
-				  
-				
-			  }
-				  if(summaryReportOne.getEngineHours() != null && summaryReportOne.getEngineHours() != "") {
-					  Long time=(long) 0;
-
-					  time = Math.abs( Long.parseLong(summaryReportOne.getEngineHours().toString()) );
-
-					  Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(time) ;
-					  Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(time) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(time));
-					  Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-					  
-					  String totalHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
-					  summaryReportOne.setEngineHours(totalHours);
-				  }
-
-				  if(summaryReportOne.getAverageSpeed() != null && summaryReportOne.getAverageSpeed() != "") {
-					  totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getAverageSpeed()) * (1.852) );
-					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-					  summaryReportOne.setAverageSpeed(Double.toString(roundOffDistance));
-
-
-				  }
-				  if(summaryReportOne.getMaxSpeed() != null && summaryReportOne.getMaxSpeed() != "") {
-					  totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getMaxSpeed()) * (1.852) );
-					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-					  summaryReportOne.setMaxSpeed(Double.toString(roundOffDistance));
-
-
-				  }
-				  
-			}
+			 if(timeOffset.contains("%2B")){
+				 timeOffset = "+" + timeOffset.substring(3);
+			 }
+			 summaryReport = reportsHelper.summaryReportProcessHandler(summaryReport, timeOffset);
+//			  Double totalDistance = 0.0 ;
+//			  double roundOffDistance = 0.0;
+//			  double roundOffFuel = 0.0;
+//			  Double litres=10.0;
+//			  Double Fuel =0.0;
+//			  Double distance=0.0;
+//
+//			  for(SummaryReport summaryReportOne : summaryReport ) {
+//				  Device device= deviceServiceImpl.findById(summaryReportOne.getDeviceId());
+//				  if(device != null) {
+//				  Set<Driver>  drivers = device.getDriver();
+//				  for(Driver driver : drivers ) {
+//
+//					 summaryReportOne.setDriverName(driver.getName());
+//				  }
+//				  if(summaryReportOne.getDistance() != null && summaryReportOne.getDistance() != "") {
+//					  totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getDistance())/1000  );
+//					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
+//					  summaryReportOne.setDistance(Double.toString(roundOffDistance));
+//
+//
+//				  }
+//
+//				  if(device.getFuel() != null) {
+//						if(device.getFuel() != null && device.getFuel() != "" && device.getFuel().startsWith("{")) {
+//							JSONObject obj = new JSONObject(device.getFuel());
+//							if(obj.has("fuelPerKM")) {
+//								litres=obj.getDouble("fuelPerKM");
+//
+//							}
+//						}
+//				   }
+//
+//
+//				  distance = Double.parseDouble(summaryReportOne.getDistance().toString());
+//				  if(distance > 0) {
+//					Fuel = (distance*litres)/100;
+//				  }
+//
+//				  roundOffFuel = Math.round(Fuel * 100.0 )/ 100.0;
+//				  summaryReportOne.setSpentFuel(Double.toString(roundOffFuel));
+//
+//
+//			  }
+//				  if(summaryReportOne.getEngineHours() != null && summaryReportOne.getEngineHours() != "") {
+//					  Long time=(long) 0;
+//
+//					  time = Math.abs( Long.parseLong(summaryReportOne.getEngineHours().toString()) );
+//
+//					  Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(time) ;
+//					  Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(time) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(time));
+//					  Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
+//
+//					  String totalHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
+//					  summaryReportOne.setEngineHours(totalHours);
+//				  }
+//
+//				  if(summaryReportOne.getAverageSpeed() != null && summaryReportOne.getAverageSpeed() != "") {
+//					  totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getAverageSpeed()) * (1.852) );
+//					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
+//					  summaryReportOne.setAverageSpeed(Double.toString(roundOffDistance));
+//
+//
+//				  }
+//				  if(summaryReportOne.getMaxSpeed() != null && summaryReportOne.getMaxSpeed() != "") {
+//					  totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getMaxSpeed()) * (1.852) );
+//					  roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
+//					  summaryReportOne.setMaxSpeed(Double.toString(roundOffDistance));
+//
+//
+//				  }
+//
+//			}
 		  }
 		  
 		  
@@ -3953,7 +3977,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			
 			Calendar calendarFrom = Calendar.getInstance();
 			calendarFrom.setTime(dateFrom);
-			calendarFrom.add(Calendar.HOUR_OF_DAY, -3);
+//			calendarFrom.add(Calendar.HOUR_OF_DAY, -3);
 			dateFrom = calendarFrom.getTime();
 			
 			from = outputFormat.format(dateFrom);
@@ -3968,7 +3992,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			
 			Calendar calendarFrom = Calendar.getInstance();
 			calendarFrom.setTime(dateTo);
-			calendarFrom.add(Calendar.HOUR_OF_DAY, -3);
+//			calendarFrom.add(Calendar.HOUR_OF_DAY, -3);
 			dateTo = calendarFrom.getTime();
 			
 			to = outputFormat.format(dateTo);
