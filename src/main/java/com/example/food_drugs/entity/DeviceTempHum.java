@@ -1,5 +1,12 @@
 package com.example.food_drugs.entity;
 
+import lombok.*;
+
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class DeviceTempHum {
 
 	private String id;
@@ -21,44 +28,44 @@ public class DeviceTempHum {
 
 	
 	
-	public DeviceTempHum(String id, Long deviceId, String deviceName, String driverName, Long driverId,
-			String servertime, String fixTime, String deviceTime, Object attributes, Double speed, Double weight,
-			Double temperature, Double humidity, Double latitude, Double longitude, String address) {
-		super();
-		this.id = id;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.driverName = driverName;
-		this.driverId = driverId;
-		this.servertime = servertime;
-		this.fixTime = fixTime;
-		this.deviceTime = deviceTime;
-		this.attributes = attributes;
-		this.speed = speed;
-		this.weight = weight;
-		this.temperature = temperature;
-		this.humidity = humidity;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.address = address;
-	}
-	public DeviceTempHum() {
-		super();
-	}
-	public DeviceTempHum(String id, Long deviceId, String deviceName, String driverName, String servertime,
-			Object attributes, Double speed, Double weight, Double temperature, Double humidity) {
-		super();
-		this.id = id;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.driverName = driverName;
-		this.servertime = servertime;
-		this.attributes = attributes;
-		this.speed = speed;
-		this.weight = weight;
-		this.temperature = temperature;
-		this.humidity = humidity;
-	}
+//	public DeviceTempHum(String id, Long deviceId, String deviceName, String driverName, Long driverId,
+//			String servertime, String fixTime, String deviceTime, Object attributes, Double speed, Double weight,
+//			Double temperature, Double humidity, Double latitude, Double longitude, String address) {
+//		super();
+//		this.id = id;
+//		this.deviceId = deviceId;
+//		this.deviceName = deviceName;
+//		this.driverName = driverName;
+//		this.driverId = driverId;
+//		this.servertime = servertime;
+//		this.fixTime = fixTime;
+//		this.deviceTime = deviceTime;
+//		this.attributes = attributes;
+//		this.speed = speed;
+//		this.weight = weight;
+//		this.temperature = temperature;
+//		this.humidity = humidity;
+//		this.latitude = latitude;
+//		this.longitude = longitude;
+//		this.address = address;
+//	}
+//	public DeviceTempHum() {
+//		super();
+//	}
+//	public DeviceTempHum(String id, Long deviceId, String deviceName, String driverName, String servertime,
+//			Object attributes, Double speed, Double weight, Double temperature, Double humidity) {
+//		super();
+//		this.id = id;
+//		this.deviceId = deviceId;
+//		this.deviceName = deviceName;
+//		this.driverName = driverName;
+//		this.servertime = servertime;
+//		this.attributes = attributes;
+//		this.speed = speed;
+//		this.weight = weight;
+//		this.temperature = temperature;
+//		this.humidity = humidity;
+//	}
 	
 	public String getId() {
 		return id;
