@@ -242,8 +242,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
                      @ColumnResult(name="positionId",type=String.class),
                      @ColumnResult(name="photo",type=String.class),
                      @ColumnResult(name="create_date",type=String.class),
+						  @ColumnResult(name="temperature",type=Double.class),
                      @ColumnResult(name="leftDays",type=Long.class),
-                     @ColumnResult(name="temperature",type=Double.class),
                      @ColumnResult(name="humidity",type=Double.class),
 					 @ColumnResult(name="attributesSTR",type=String.class)
 

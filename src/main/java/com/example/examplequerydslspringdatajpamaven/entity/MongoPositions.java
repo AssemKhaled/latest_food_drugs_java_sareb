@@ -2,7 +2,11 @@ package com.example.examplequerydslspringdatajpamaven.entity;
 
 import java.util.Date;
 import javax.persistence.Id;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bson.types.ObjectId;
+import org.json.JSONObject;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -15,6 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class MongoPositions {
 	
 	@Id
+	@JsonIgnore
 	private ObjectId _id;
 	
 	private String protocol;
@@ -22,7 +27,8 @@ public class MongoPositions {
 	private Long deviceid;
 
 	private Date servertime;
-	
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date devicetime;
 	
 	private Date fixtime;
@@ -58,10 +64,10 @@ public class MongoPositions {
 	private Long driverid;
 
 	private Double weight;
-	
-	
+
+
 	public MongoPositions() {
-		
+
 	}
 
 
@@ -231,6 +237,8 @@ public class MongoPositions {
 
 
 	public void setAttributes(Object attributes) {
+//		JSONObject obj = new JSONObject(attributes.toString());
+//		this.attributes = obj;
 		this.attributes = attributes;
 	}
 

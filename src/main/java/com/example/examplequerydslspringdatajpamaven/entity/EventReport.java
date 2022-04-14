@@ -1,10 +1,17 @@
 package com.example.examplequerydslspringdatajpamaven.entity;
 
+import lombok.*;
+
 /**
  * Bind data of events or notifications from mongo on this model
  * @author fuinco
  *
  */
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class EventReport {
 
 	private String eventId;
@@ -22,92 +29,92 @@ public class EventReport {
 	private Double longitude;
 	private Long userId;
 	
-	public EventReport() {
-		
-	}
-
-	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,
-			String deviceName, Long driverId, String driverName, Long geofenceId, String geofenceName, String positionId,
-			Double latitude, Double longitude) {
-		super();
-		this.eventId = eventId;
-		this.eventType = eventType;
-		this.serverTime = serverTime;
-		this.attributes = attributes;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.driverId = driverId;
-		this.driverName = driverName;
-		this.geofenceId = geofenceId;
-		this.geofenceName = geofenceName;
-		this.positionId = positionId;
-		this.latitude = latitude;
-		this.longitude = longitude;
-	}
-	
-	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,String deviceName,
-			 Long driverId, String driverName, Long geofenceId, String geofenceName, String positionId	) {
-		this.eventId = eventId;
-		this.eventType = eventType;
-		this.serverTime = serverTime;
-		this.attributes = attributes;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.driverId = driverId;
-		this.driverName = driverName;
-		this.geofenceId = geofenceId;
-		this.geofenceName = geofenceName;
-		this.positionId = positionId;
-	}
-	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,
-			String deviceName, Long driverId, String driverName) {
-		super();
-		this.eventId = eventId;
-		this.eventType = eventType;
-		this.serverTime = serverTime;
-		this.attributes = attributes;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.driverId = driverId;
-		this.driverName = driverName;
-	}
-	public EventReport(String eventId,String eventType, String serverTime, Object attributes,Long deviceId) {
-		super();
-		this.eventId = eventId;
-		this.eventType = eventType;
-		this.serverTime = serverTime;
-		this.attributes = attributes;
-		this.deviceId = deviceId;
-
-	}
-	public EventReport(String eventId,String eventType, String serverTime, Object attributes) {
-		super();
-		this.eventId = eventId;
-		this.eventType = eventType;
-		this.serverTime = serverTime;
-		this.attributes = attributes;
-
-	}
-	
-	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,
-			String deviceName, Long driverId, String driverName, Long geofenceId, String geofenceName,
-			String positionId, Double latitude, Double longitude, Long userId) {
-		super();
-		this.eventId = eventId;
-		this.eventType = eventType;
-		this.serverTime = serverTime;
-		this.attributes = attributes;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.driverId = driverId;
-		this.driverName = driverName;
-		this.geofenceId = geofenceId;
-		this.geofenceName = geofenceName;
-		this.positionId = positionId;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.userId = userId;
-	}
+//	public EventReport() {
+//
+//	}
+//
+//	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,
+//			String deviceName, Long driverId, String driverName, Long geofenceId, String geofenceName, String positionId,
+//			Double latitude, Double longitude) {
+//		super();
+//		this.eventId = eventId;
+//		this.eventType = eventType;
+//		this.serverTime = serverTime;
+//		this.attributes = attributes;
+//		this.deviceId = deviceId;
+//		this.deviceName = deviceName;
+//		this.driverId = driverId;
+//		this.driverName = driverName;
+//		this.geofenceId = geofenceId;
+//		this.geofenceName = geofenceName;
+//		this.positionId = positionId;
+//		this.latitude = latitude;
+//		this.longitude = longitude;
+//	}
+//
+//	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,String deviceName,
+//			 Long driverId, String driverName, Long geofenceId, String geofenceName, String positionId	) {
+//		this.eventId = eventId;
+//		this.eventType = eventType;
+//		this.serverTime = serverTime;
+//		this.attributes = attributes;
+//		this.deviceId = deviceId;
+//		this.deviceName = deviceName;
+//		this.driverId = driverId;
+//		this.driverName = driverName;
+//		this.geofenceId = geofenceId;
+//		this.geofenceName = geofenceName;
+//		this.positionId = positionId;
+//	}
+//	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,
+//			String deviceName, Long driverId, String driverName) {
+//		super();
+//		this.eventId = eventId;
+//		this.eventType = eventType;
+//		this.serverTime = serverTime;
+//		this.attributes = attributes;
+//		this.deviceId = deviceId;
+//		this.deviceName = deviceName;
+//		this.driverId = driverId;
+//		this.driverName = driverName;
+//	}
+//	public EventReport(String eventId,String eventType, String serverTime, Object attributes,Long deviceId) {
+//		super();
+//		this.eventId = eventId;
+//		this.eventType = eventType;
+//		this.serverTime = serverTime;
+//		this.attributes = attributes;
+//		this.deviceId = deviceId;
+//
+//	}
+//	public EventReport(String eventId,String eventType, String serverTime, Object attributes) {
+//		super();
+//		this.eventId = eventId;
+//		this.eventType = eventType;
+//		this.serverTime = serverTime;
+//		this.attributes = attributes;
+//
+//	}
+//
+//	public EventReport(String eventId, String eventType, String serverTime, Object attributes, Long deviceId,
+//			String deviceName, Long driverId, String driverName, Long geofenceId, String geofenceName,
+//			String positionId, Double latitude, Double longitude, Long userId) {
+//		super();
+//		this.eventId = eventId;
+//		this.eventType = eventType;
+//		this.serverTime = serverTime;
+//		this.attributes = attributes;
+//		this.deviceId = deviceId;
+//		this.deviceName = deviceName;
+//		this.driverId = driverId;
+//		this.driverName = driverName;
+//		this.geofenceId = geofenceId;
+//		this.geofenceName = geofenceName;
+//		this.positionId = positionId;
+//		this.latitude = latitude;
+//		this.longitude = longitude;
+//		this.userId = userId;
+//	}
 
 	public String getEventId() {
 		return eventId;
