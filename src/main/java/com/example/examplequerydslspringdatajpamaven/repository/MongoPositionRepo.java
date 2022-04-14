@@ -992,8 +992,10 @@ public class MongoPositionRepo {
 		            	JSONArray array = new JSONArray(object.get("data").toString());
 		            	int len = array.length();
 		            	if(array.length() > 0) {
-		            		JSONObject obj = new JSONObject(array.get(0).toString());
-		            		JSONObject objFinial = new JSONObject(array.get(len-1).toString());
+//		            		JSONObject obj = new JSONObject(array.get(0).toString());
+		            		JSONObject obj = new JSONObject(array.get(len-1).toString());
+//		            		JSONObject objFinial = new JSONObject(array.get(len-1).toString());
+		            		JSONObject objFinial = new JSONObject(array.get(0).toString());
 
 		            		device.setDeviceId(obj.getLong("deviceid"));
 		            		device.setDeviceName(obj.getString("deviceName"));
@@ -1022,8 +1024,10 @@ public class MongoPositionRepo {
 		            	}
 		            	
 		            	for(int i =0;i< array.length()-1;i++) {
-		            		JSONObject obj1 = new JSONObject(array.get(i).toString());
-		            		JSONObject obj2 = new JSONObject(array.get(i+1).toString());
+//		            		JSONObject obj1 = new JSONObject(array.get(i).toString());
+		            		JSONObject obj1 = new JSONObject(array.get(i+1).toString());
+//		            		JSONObject obj2 = new JSONObject(array.get(i+1).toString());
+		            		JSONObject obj2 = new JSONObject(array.get(i).toString());
 
 		            		
 		            		

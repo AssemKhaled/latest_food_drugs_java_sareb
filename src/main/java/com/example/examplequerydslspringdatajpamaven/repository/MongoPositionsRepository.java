@@ -1,5 +1,6 @@
 package com.example.examplequerydslspringdatajpamaven.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import com.example.food_drugs.entity.MonogoInventoryLastData;
@@ -40,5 +41,11 @@ public interface MongoPositionsRepository extends MongoRepository<MongoPositions
 	List <MongoPositions> findFirst15ByDeviceidOrderByServertimeDesc( int deviceId);
 
 	List <MongoPositions> findFirst20ByDeviceidOrderByServertimeDesc( int deviceId);
+
+	List<MongoPositions> findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(Long deviceId, Date start, Date end);
+
+	List<MongoPositions> findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(Long deviceId, Date start, Date end, Pageable pageable);
+
+	Integer countAllByDeviceidAndDevicetimeBetween(Long deviceId, Date start, Date end);
 }
 
