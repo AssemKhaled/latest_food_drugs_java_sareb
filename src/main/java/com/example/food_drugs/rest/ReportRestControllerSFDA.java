@@ -41,8 +41,9 @@ public class ReportRestControllerSFDA {
 													 @RequestParam (value = "end", defaultValue = "0") String end,
 													 @RequestParam (value = "type", defaultValue = "") String type,
 													 @RequestParam (value = "search", defaultValue = "") String search,
-													 @RequestParam (value = "userId",defaultValue = "0")Long userId) {	
-    	return  reportServiceImpl.getEventsReport(TOKEN, deviceId,groupId, offset, start, end, type, search, userId ,exportData);
+													 @RequestParam (value = "userId",defaultValue = "0")Long userId,
+													 @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
+    	return  reportServiceImpl.getEventsReport(TOKEN, deviceId,groupId, offset, start, end, type, search, userId ,exportData, timeOffset);
 
 	}
 	
@@ -112,11 +113,12 @@ public class ReportRestControllerSFDA {
 													@RequestParam (value = "page", defaultValue = "1") int page,
 													@RequestParam (value = "start", defaultValue = "0") int start,
 													@RequestParam (value = "limit", defaultValue = "25") int limit,
-													@RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													@RequestParam (value = "userId",defaultValue = "0")Long userId,
+													@RequestParam (value = "timeOffset", defaultValue = "") String timeOffset ) {
 		
 
 		
-    	return reportServiceImpl.getStopsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId);
+    	return reportServiceImpl.getStopsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId, timeOffset);
 		
 		
 	}
@@ -132,10 +134,11 @@ public class ReportRestControllerSFDA {
 													@RequestParam (value = "page", defaultValue = "1") int page,
 													@RequestParam (value = "start", defaultValue = "0") int start,
 													@RequestParam (value = "limit", defaultValue = "25") int limit,
-													@RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													@RequestParam (value = "userId",defaultValue = "0")Long userId,
+													@RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
 												
 
-    	return  reportServiceImpl.getTripsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId);
+    	return  reportServiceImpl.getTripsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId, timeOffset);
 		 
 	}
 	
@@ -190,10 +193,11 @@ public class ReportRestControllerSFDA {
 													@RequestParam (value = "page", defaultValue = "1") int page,
 													@RequestParam (value = "start", defaultValue = "0") int start,
 													@RequestParam (value = "limit", defaultValue = "25") int limit,
-													@RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													@RequestParam (value = "userId",defaultValue = "0")Long userId,
+												    @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
 												
 
-    	return  reportServiceImpl.getSummaryReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId);
+    	return  reportServiceImpl.getSummaryReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId, timeOffset);
 		 
 		
 	}
@@ -387,9 +391,10 @@ public class ReportRestControllerSFDA {
 													  @RequestParam (value = "start", defaultValue = "0") String start,
 													  @RequestParam (value = "end", defaultValue = "0") String end,
 													  @RequestParam (value = "search", defaultValue = "") String search,
-													  @RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													  @RequestParam (value = "userId",defaultValue = "0")Long userId,
+													  @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
 	
-    	return  reportServiceImplSFDA.getVehicleTempHum(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData);
+    	return  reportServiceImplSFDA.getVehicleTempHum(TOKEN,deviceId,groupId, offset, start, end,search,userId,exportData,timeOffset);
 
 	}
 
@@ -430,8 +435,9 @@ public class ReportRestControllerSFDA {
 													       @RequestParam (value = "exportData", defaultValue = "") String exportData,
 													       @RequestParam (value = "offset", defaultValue = "0") int offset,
 													       @RequestParam (value = "startTime", defaultValue = "0") String startTime,
-													       @RequestParam (value = "endTime", defaultValue = "0") String endTime) {	
-    	return  reportServiceImplSFDA.getviewTripDetails(TOKEN, deviceId,startTime, endTime,exportData,offset);
+													       @RequestParam (value = "endTime", defaultValue = "0") String endTime,
+														   @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
+    	return  reportServiceImplSFDA.getviewTripDetails(TOKEN, deviceId,startTime, endTime,exportData,offset, timeOffset);
 
 	}
 	
