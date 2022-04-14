@@ -35,8 +35,9 @@ public class ReportRestController {
 													 @RequestParam (value = "end", defaultValue = "0") String end,
 													 @RequestParam (value = "type", defaultValue = "") String type,
 													 @RequestParam (value = "search", defaultValue = "") String search,
-													 @RequestParam (value = "userId",defaultValue = "0")Long userId) {	
-    	return  reportServiceImpl.getEventsReport(TOKEN, deviceId,groupId, offset, start, end, type, search, userId ,exportData);
+													 @RequestParam (value = "userId",defaultValue = "0")Long userId,
+													 @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
+    	return  reportServiceImpl.getEventsReport(TOKEN, deviceId,groupId, offset, start, end, type, search, userId ,exportData, timeOffset);
 
 	}
 	
@@ -106,11 +107,12 @@ public class ReportRestController {
 													@RequestParam (value = "page", defaultValue = "1") int page,
 													@RequestParam (value = "start", defaultValue = "0") int start,
 													@RequestParam (value = "limit", defaultValue = "25") int limit,
-													@RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													@RequestParam (value = "userId",defaultValue = "0")Long userId,
+													@RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
 		
 
 		
-    	return reportServiceImpl.getStopsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId);
+    	return reportServiceImpl.getStopsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId, timeOffset);
 		
 		
 	}
@@ -126,10 +128,11 @@ public class ReportRestController {
 													@RequestParam (value = "page", defaultValue = "1") int page,
 													@RequestParam (value = "start", defaultValue = "0") int start,
 													@RequestParam (value = "limit", defaultValue = "25") int limit,
-													@RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													@RequestParam (value = "userId",defaultValue = "0")Long userId,
+													@RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
 												
 
-    	return  reportServiceImpl.getTripsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId);
+    	return  reportServiceImpl.getTripsReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId,timeOffset);
 		 
 	}
 	
@@ -184,10 +187,11 @@ public class ReportRestController {
 													@RequestParam (value = "page", defaultValue = "1") int page,
 													@RequestParam (value = "start", defaultValue = "0") int start,
 													@RequestParam (value = "limit", defaultValue = "25") int limit,
-													@RequestParam (value = "userId",defaultValue = "0")Long userId) {
+													@RequestParam (value = "userId",defaultValue = "0")Long userId,
+													  @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset) {
 												
 
-    	return  reportServiceImpl.getSummaryReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId);
+    	return  reportServiceImpl.getSummaryReport(TOKEN,deviceId,groupId, type, from, to, page, start, limit,userId, timeOffset);
 		 
 		
 	}
