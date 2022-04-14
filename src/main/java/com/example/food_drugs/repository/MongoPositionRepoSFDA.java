@@ -38,7 +38,7 @@ public class MongoPositionRepoSFDA {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
-	
+
 	public List<MonitorStaticstics> getVehicleTempHumListDigram(List<Long> allDevices,Date start,Date end){
 
 		Calendar calendarFrom = Calendar.getInstance();
@@ -495,12 +495,12 @@ public class MongoPositionRepoSFDA {
 
 		Calendar calendarFrom = Calendar.getInstance();
 		calendarFrom.setTime(start);
-		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+//		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
 		start = calendarFrom.getTime();
 	    
 		Calendar calendarTo = Calendar.getInstance();
 		calendarTo.setTime(end);
-		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+//		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
 		end = calendarTo.getTime();
 		
 		List<DeviceTempHum> positions = new ArrayList<DeviceTempHum>();
@@ -672,13 +672,14 @@ public class MongoPositionRepoSFDA {
 	
 	            	}
 	            	if(object.containsField("speed") && object.get("speed") != null) {
-		            	device.setSpeed(object.getDouble("speed") * (1.852) );    		
+		            	device.setSpeed(object.getDouble("speed") * (1.852) );
+						device.setSpeed(Math.round(device.getSpeed()*100.0)/100.0);
 	                }
 					if(object.containsField("devicetime") && object.get("devicetime") != null) {
 						
 						Date dateTime = null;
 						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss ");
 
 						try {
 							dateTime = inputFormat.parse(object.getString("devicetime"));
@@ -691,7 +692,7 @@ public class MongoPositionRepoSFDA {
 
 						Calendar calendarTime = Calendar.getInstance();
 						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 2);
 						dateTime = calendarTime.getTime();
 
 						
@@ -722,12 +723,12 @@ public class MongoPositionRepoSFDA {
 
 		Calendar calendarFrom = Calendar.getInstance();
 		calendarFrom.setTime(start);
-		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+//		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
 		start = calendarFrom.getTime();
 	    
 		Calendar calendarTo = Calendar.getInstance();
 		calendarTo.setTime(end);
-		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+//		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
 		end = calendarTo.getTime();
 		
 		Integer size = 0;
@@ -761,16 +762,15 @@ public class MongoPositionRepoSFDA {
 	
 
 	public List<DeviceTempHum> getTripPositionsDetails(Long deviceId,Date start,Date end,int offset){
-	
-		
+
 		Calendar calendarFrom = Calendar.getInstance();
 		calendarFrom.setTime(start);
-		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+//		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
 		start = calendarFrom.getTime();
 	    
 		Calendar calendarTo = Calendar.getInstance();
 		calendarTo.setTime(end);
-		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+//		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
 		end = calendarTo.getTime();
 		
 		
@@ -983,7 +983,7 @@ public class MongoPositionRepoSFDA {
 
 						Calendar calendarTime = Calendar.getInstance();
 						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
 						dateTime = calendarTime.getTime();
 
 						
@@ -1010,7 +1010,7 @@ public class MongoPositionRepoSFDA {
 
 						Calendar calendarTime = Calendar.getInstance();
 						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
 						dateTime = calendarTime.getTime();
 
 						
@@ -1037,7 +1037,7 @@ public class MongoPositionRepoSFDA {
 
 						Calendar calendarTime = Calendar.getInstance();
 						calendarTime.setTime(dateTime);
-						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+//						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
 						dateTime = calendarTime.getTime();
 
 						

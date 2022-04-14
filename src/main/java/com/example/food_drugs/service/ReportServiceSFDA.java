@@ -14,13 +14,13 @@ public interface ReportServiceSFDA {
 	public ResponseEntity<?> getInventoriesReport(String TOKEN,Long [] inventoryId,int offset,String start,String end,String search,Long userId,String exportData);
 	public ResponseEntity<?> getWarehousesReport(String TOKEN,Long [] warehouseId,int offset,String start,String end,String search,Long userId,String exportData);
 	public ResponseEntity<?> getNotificationReport(String TOKEN,Long [] inventoryId,Long [] warehouseId,int offset,String start,String end,String search,Long userId,String exportData);
-	public ResponseEntity<?> getVehicleTempHum(String TOKEN,Long [] deviceId,Long [] groupId,int offset,String start,String end,String search,Long userId,String exportData);
+	public ResponseEntity<?> getVehicleTempHum(String TOKEN,Long [] deviceId,Long [] groupId,int offset,String start,String end,String search,Long userId,String exportData, String timeOffset);
 
 	ResponseEntity<?> getNotificationReportNew(String TOKEN,Long [] inventoryId,Long [] warehouseId,int offset,String start,String end,String search,Long userId,String exportData);
 
 	public ResponseEntity<?> getVehicleTempHumNew(String TOKEN,Long [] deviceId,Long [] groupId,int offset,String start,String end,String search,Long userId,String exportData);
 
-	public ResponseEntity<?> getviewTripDetails(String TOKEN,Long deviceId,String startTime,String endTime,String exportData,int offset);
+	public ResponseEntity<?> getviewTripDetails(String TOKEN,Long deviceId,String startTime,String endTime,String exportData,int offset, String timeOffset);
 
 	
 	public ResponseEntity<?> getVehicleTempHumPDF(String TOKEN,Long deviceId,int offset,String start,String end,String search,Long userId,String exportData);

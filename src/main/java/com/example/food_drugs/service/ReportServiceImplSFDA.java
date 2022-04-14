@@ -1,19 +1,19 @@
 package com.example.food_drugs.service;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import com.example.examplequerydslspringdatajpamaven.entity.*;
-import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepository;
+import com.example.examplequerydslspringdatajpamaven.repository.*;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
 import com.example.food_drugs.entity.*;
 import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.helpers.ReportsHelper;
 import com.example.food_drugs.mappers.PositionMapper;
 import com.example.food_drugs.repository.*;
 import com.example.food_drugs.responses.*;
@@ -26,21 +26,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.example.examplequerydslspringdatajpamaven.repository.GroupRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.UserClientGroupRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
@@ -116,13 +113,19 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 	private final MongoEventsRepository mongoEventsRepository;
 
+	private final MongoPositionsRepository mongoPositionsRepository;
+
+	private final ReportsHelper reportsHelper;
+
 	public ReportServiceImplSFDA(MongoInventoryNotificationRepository mongoInventoryNotificationRepository, PositionMongoSFDARepository positionMongoSFDARepository,
 								 DeviceRepositorySFDA deviceRepositorySFDA,
-								 MongoEventsRepository mongoEventsRepository) {
+								 MongoEventsRepository mongoEventsRepository, MongoPositionsRepository mongoPositionsRepository, ReportsHelper reportsHelper) {
 		this.mongoInventoryNotificationRepository = mongoInventoryNotificationRepository;
 		this.positionMongoSFDARepository = positionMongoSFDARepository;
 		this.deviceRepositorySFDA = deviceRepositorySFDA;
 		this.mongoEventsRepository = mongoEventsRepository;
+		this.mongoPositionsRepository = mongoPositionsRepository;
+		this.reportsHelper = reportsHelper;
 	}
 
 	@Override
@@ -1314,7 +1317,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 	@Override
 	public ResponseEntity<?> getVehicleTempHum(String TOKEN, Long[] deviceIds, Long[] groupIds, int offset, String start,
-			String end, String search, Long userId, String exportData) {
+			String end, String search, Long userId, String exportData, String timeOffset) {
 		 logger.info("************************ getSensorsReport STARTED ***************************");
 
 			List<DeviceTempHum> positionsList = new ArrayList<DeviceTempHum>();
@@ -1551,11 +1554,11 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					logger.info("************************ getEventsReport ENDED ***************************");		
 					return  ResponseEntity.badRequest().body(getObjectResponse);
 				}
-				if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
-					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
-					logger.info("************************ getEventsReport ENDED ***************************");		
-					return  ResponseEntity.badRequest().body(getObjectResponse);
-				}
+//				if(today.getTime()<dateFrom.getTime() || today.getTime()<dateTo.getTime() ){
+//					getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Start Date and End Date should be Earlier than Today",null);
+//					logger.info("************************ getEventsReport ENDED ***************************");
+//					return  ResponseEntity.badRequest().body(getObjectResponse);
+//				}
 				
 				search = "%"+search+"%";				
 				
@@ -1595,32 +1598,40 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		        }
 			}
 			Integer size = 0;
+			List<MongoPositions> mongoPositionsList = new ArrayList<>();
+			List<DeviceTempHum> deviceTempHumList = new ArrayList<>();
+			if(timeOffset.contains("%2B")){
+				timeOffset = "+" + timeOffset.substring(3);
+			}
 
 			if(exportData.equals("exportData")) {
-				
 				positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
-				
-
-				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,size);
+				mongoPositionsList = mongoPositionsRepository.
+						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(deviceIds[0],dateFrom, dateTo);
+				deviceTempHumList = reportsHelper.deviceTempAndHumProcessHandler(mongoPositionsList, timeOffset);
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",deviceTempHumList,size);
 				logger.info("************************ getSensorsReport ENDED ***************************");
 				return  ResponseEntity.ok().body(getObjectResponse);
 				
 			}
 			if(!TOKEN.equals("Schedule")) {
 				search = "%"+search+"%";
-				positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
-				if(positionsList.size()>0) {
-					    size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
-				
+				int limit = 10;
+				Pageable pageable = new PageRequest(offset, limit);
+//				positionsList = mongoPositionRepoSFDA.getVehicleTempHumList(allDevices, offset, dateFrom, dateTo);
+				mongoPositionsList = mongoPositionsRepository.
+						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(deviceIds[0],dateFrom, dateTo, pageable);
+				deviceTempHumList = reportsHelper.deviceTempAndHumProcessHandler(mongoPositionsList, timeOffset);
+				if(mongoPositionsList.size()>0) {
+					size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
+					size = mongoPositionsRepository.countAllByDeviceidAndDevicetimeBetween(deviceIds[0],dateFrom, dateTo);
 				}
-				
 			}
 			else {
 				positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
-
 			}
 			
-			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positionsList,size);
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",deviceTempHumList,size);
 			logger.info("************************ getSensorsReport ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
 	}
@@ -1947,13 +1958,14 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	}
 
 	@Override
-	public ResponseEntity<?> getviewTripDetails(String TOKEN, Long deviceId, String from, String to,String exportData,int offset) {
+	public ResponseEntity<?> getviewTripDetails(String TOKEN, Long deviceId, String from, String to,String exportData,int offset, String timeOffset) {
 		// TODO Auto-generated method stub
 		
 
 		logger.info("************************ getviewTrip STARTED ***************************");
 
 		List<DeviceTempHum> positions = new ArrayList<DeviceTempHum>();
+		List<MongoPositions> mongoPositions = new ArrayList<>();
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",positions);
 				logger.info("************************ getviewTrip ENDED ***************************");
@@ -1962,7 +1974,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 		if(super.checkActive(TOKEN)!= null)
 		{
-			return super.checkActive(TOKEN);
+//			return super.checkActive(TOKEN);
 		}
 		
 
@@ -2039,6 +2051,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		Device device = deviceServiceImpl.findById(deviceId);
 		
 		Integer size = 0;
+		List<DeviceTempHum> reportDetailsList;
 		
 		if(device != null) {
 			
@@ -2046,22 +2059,34 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			if(exportData.equals("exportData")) {
 				
 				
-				positions = mongoPositionRepoSFDA.getTripPositionsDetailsExport(deviceId, dateFrom, dateTo);
+//				positions = mongoPositionRepoSFDA.getTripPositionsDetailsExport(deviceId, dateFrom, dateTo);
+				mongoPositions = mongoPositionsRepository.
+						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(deviceId, dateFrom, dateTo);
+				reportDetailsList = reportsHelper.deviceTempAndHumProcessHandler(mongoPositions, "+0200");
 
-				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positions);
+				getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",reportDetailsList);
 				logger.info("************************ getviewTrip ENDED ***************************");
 				return  ResponseEntity.ok().body(getObjectResponse);
 			}
-			
-			positions = mongoPositionRepoSFDA.getTripPositionsDetails(deviceId, dateFrom, dateTo,offset);
+			int limit = 10;
+			Pageable pageable = new PageRequest(offset/limit, limit);
+//			positions = mongoPositionRepoSFDA.getTripPositionsDetails(deviceId, dateFrom, dateTo,offset);
 
-			if(positions.size() > 0) {
-				size = mongoPositionRepoSFDA.getTripPositionsDetailsSize(deviceId, dateFrom, dateTo);
+			mongoPositions = mongoPositionsRepository.
+					findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(deviceId, dateFrom, dateTo, pageable);
 
+			reportDetailsList = reportsHelper.deviceTempAndHumProcessHandler(mongoPositions, timeOffset);
+
+
+//			if(positions.size() > 0) {
+			if(mongoPositions.size() > 0) {
+//				size = mongoPositionRepoSFDA.getTripPositionsDetailsSize(deviceId, dateFrom, dateTo);
+				size = mongoPositionsRepository.countAllByDeviceidAndDevicetimeBetween(deviceId, dateFrom,
+						dateTo);
 			}
 			
 			
-			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",positions,size);
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",reportDetailsList,size);
 			logger.info("************************ getviewTrip ENDED ***************************");
 			return  ResponseEntity.ok().body(getObjectResponse);
 
@@ -2871,6 +2896,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		Double maxHum = 0.0;
 		Double minHum = 1000.0;
 		Double sumAvg = 0.0;
+		Double sumTemp = 0.0;
 		int countHum = 0;
 		PdfSummaryData pdfSummary = new PdfSummaryData() ;
 		
@@ -2896,7 +2922,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					if(count == 0) {
 						max = recordAvg;
 						min = recordAvg;
-						avg = recordAvg;
+//						avg = recordAvg;
+						sumTemp = recordAvg;
 						count ++;
 					}
 					else {
@@ -2906,7 +2933,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						if(recordAvg < min) {
 							min = recordAvg;
 						}
-						avg += recordAvg;
+//						avg += recordAvg;
+						sumTemp += recordAvg;
 						count ++;
 						
 					}
@@ -2916,14 +2944,38 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				
 			}
 			if(count >0) {
-				avg = sumAvg/count;
+//				avg = sumAvg/count;
+				avg = sumTemp/count;
 				avgHum=sumAvg/countHum;
 			}
 
-		SimpleDateFormat formatTime = new SimpleDateFormat("dd:hh:mm:ss");
+//		SimpleDateFormat formatTime = new SimpleDateFormat("dd:hh:mm:ss");
+		SimpleDateFormat formatTime = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		String duration = "00:00:00:00" ;
+		long date;
 			if(positions.size()>1){
-				duration = formatTime.format(positions.get(positions.size()-1).getDevicetime().getTime()-positions.get(0).getDevicetime().getTime());
+//				try{
+////					Date start = formatTime.parse(positions.get(0).getDevicetime().toString());
+////					Date end = formatTime.parse(positions.get(positions.size()-1).getDevicetime().toString());
+//
+//				}
+//				catch (ParseException e){
+//					e.printStackTrace();
+//				}
+				Date start = positions.get(0).getDevicetime();
+				Date end = positions.get(positions.size()-1).getDevicetime();
+				long difference_In_Time = end.getTime() - start.getTime();
+				long difference_In_Seconds = (difference_In_Time / 1000) % 60;
+
+				long difference_In_Minutes = (difference_In_Time / (1000 * 60)) % 60;
+
+				long difference_In_Hours = (difference_In_Time / (1000 * 60 * 60)) % 24;
+
+				long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
+
+				duration = + difference_In_Days + " days, " + difference_In_Hours + " hours, " + difference_In_Minutes + " minutes, "
+						+ difference_In_Seconds + " seconds";
+//				duration = formatTime.format(positions.get(positions.size()-1).getDevicetime().getTime()-positions.get(0).getDevicetime().getTime());
 			}
 
 
