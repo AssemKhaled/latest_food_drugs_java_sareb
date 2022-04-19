@@ -43,7 +43,7 @@ import com.example.examplequerydslspringdatajpamaven.service.GroupsServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
-import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.dto.DeviceTempHum;
 import com.example.food_drugs.entity.Inventory;
 import com.example.food_drugs.entity.InventoryLastData;
 import com.example.food_drugs.entity.InventoryNotification;
