@@ -4,11 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.food_drugs.entity.DeviceTempHum;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
