@@ -1,6 +1,5 @@
 package com.example.food_drugs.service;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -12,7 +11,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.*;
 import com.example.examplequerydslspringdatajpamaven.repository.*;
 import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapperResponse;
 import com.example.food_drugs.entity.*;
-import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.dto.DeviceTempHum;
 import com.example.food_drugs.helpers.ReportsHelper;
 import com.example.food_drugs.mappers.PositionMapper;
 import com.example.food_drugs.repository.*;
@@ -1600,12 +1599,9 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			Integer size = 0;
 			List<MongoPositions> mongoPositionsList = new ArrayList<>();
 			List<DeviceTempHum> deviceTempHumList = new ArrayList<>();
-			if(timeOffset.contains("%2B")){
-				timeOffset = "+" + timeOffset.substring(3);
-			}
 
 			if(exportData.equals("exportData")) {
-				positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
+//				positionsList = mongoPositionRepoSFDA.getVehicleTempHumListScheduled(allDevices,dateFrom, dateTo);
 				mongoPositionsList = mongoPositionsRepository.
 						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(deviceIds[0],dateFrom, dateTo);
 				deviceTempHumList = reportsHelper.deviceTempAndHumProcessHandler(mongoPositionsList, timeOffset);
@@ -1623,7 +1619,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(deviceIds[0],dateFrom, dateTo, pageable);
 				deviceTempHumList = reportsHelper.deviceTempAndHumProcessHandler(mongoPositionsList, timeOffset);
 				if(mongoPositionsList.size()>0) {
-					size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
+//					size=mongoPositionRepoSFDA.getVehicleTempHumListSize(allDevices,dateFrom, dateTo);
 					size = mongoPositionsRepository.countAllByDeviceidAndDevicetimeBetween(deviceIds[0],dateFrom, dateTo);
 				}
 			}
