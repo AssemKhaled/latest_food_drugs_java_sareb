@@ -31,7 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.examplequerydslspringdatajpamaven.entity.Driver;
 import com.example.examplequerydslspringdatajpamaven.entity.EventReport;
-import com.example.examplequerydslspringdatajpamaven.entity.SummaryReport;
+import com.example.food_drugs.dto.SummaryReport;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.DeviceRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoEventsRepo;
