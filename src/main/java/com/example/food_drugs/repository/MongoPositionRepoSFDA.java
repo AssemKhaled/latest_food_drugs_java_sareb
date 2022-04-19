@@ -27,7 +27,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 
-import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.dto.DeviceTempHum;
 import com.example.food_drugs.entity.MonitorStaticstics;
 import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.entity.Series;
