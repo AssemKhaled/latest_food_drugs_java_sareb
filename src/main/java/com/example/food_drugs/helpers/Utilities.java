@@ -18,9 +18,15 @@ public class Utilities {
     }
 
     public String timeZoneConverter(Date date, String timeOffset){
-        ZoneOffset zo = ZoneOffset.of(timeOffset);
-        OffsetDateTime odt = OffsetDateTime.ofInstant(date.toInstant(), zo);
-        return String.valueOf(odt).substring(0,19).replace("T", " ");
+        if(timeOffset.contains("%2B")){
+            timeOffset = "+" + timeOffset.substring(3);
+        }
+        if(date != null){
+            ZoneOffset zo = ZoneOffset.of(timeOffset);
+            OffsetDateTime odt = OffsetDateTime.ofInstant(date.toInstant(), zo);
+            return String.valueOf(odt).substring(0,19).replace("T", " ");
+        }
+        return null;
     }
 
     public Double humidityCalculations(Map<String,Object> obj){

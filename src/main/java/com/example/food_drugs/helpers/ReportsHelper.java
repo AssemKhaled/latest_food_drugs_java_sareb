@@ -3,17 +3,17 @@ package com.example.food_drugs.helpers;
 import com.example.examplequerydslspringdatajpamaven.entity.*;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoPositionsRepository;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
-import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.dto.StopReport;
+import com.example.food_drugs.dto.SummaryReport;
+import com.example.food_drugs.dto.TripReport;
+import com.example.food_drugs.dto.DeviceTempHum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Repository
 public class ReportsHelper {
@@ -83,18 +83,12 @@ public class ReportsHelper {
             }
 
             if(tripReport.getAverageSpeed() != null && tripReport.getAverageSpeed() != "") {
-//                totalDistance = Math.abs(  Double.parseDouble(tripReport.getAverageSpeed())  * (1.852));
-//                roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-//                tripReport.setAverageSpeed(Double.toString(roundOffDistance));
                 tripReport.setAverageSpeed(
                         String.valueOf(
                                 utilities.speedConverter(Double.parseDouble(tripReport.getAverageSpeed()))
                         ));
             }
             if(tripReport.getMaxSpeed() != null && tripReport.getMaxSpeed() != "") {
-//                totalDistance = Math.abs(  Double.parseDouble(tripReport.getMaxSpeed())  * (1.852));
-//                roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-//                tripReport.setMaxSpeed(Double.toString(roundOffDistance));
                 tripReport.setMaxSpeed(String.valueOf(
                         utilities.speedConverter(Double.parseDouble(tripReport.getMaxSpeed()))
                 ));
@@ -114,14 +108,6 @@ public class ReportsHelper {
                     e.printStackTrace();
                 }
 
-//                Calendar calendarTime = Calendar.getInstance();
-//                calendarTime.setTime(dateTime);
-//                calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-//                dateTime = calendarTime.getTime();
-//                ZoneOffset zo = ZoneOffset.of(timeOffset);
-//                OffsetDateTime odt = OffsetDateTime.ofInstant(dateTime.toInstant(), zo);
-//                tripReport.setStartTime(outputFormat.format(dateTime));
-//                tripReport.setStartTime(String.valueOf(odt));
                 if(dateTime != null){
                     tripReport.setStartTime(utilities.timeZoneConverter(dateTime, timeOffset));
                 }
@@ -143,15 +129,6 @@ public class ReportsHelper {
                     e.printStackTrace();
                 }
 
-//                Calendar calendarTime = Calendar.getInstance();
-//                calendarTime.setTime(dateTime);
-//                calendarTime.add(Calendar.HOUR_OF_DAY, 3);
-//                dateTime = calendarTime.getTime();
-
-//                ZoneOffset zo = ZoneOffset.of(timeOffset);
-//                OffsetDateTime odt = OffsetDateTime.ofInstant(dateTime.toInstant(), zo);
-//                tripReport.setEndTime(outputFormat.format(dateTime));
-//                tripReport.setEndTime(String.valueOf(odt));
                 if(dateTime != null){
                     tripReport.setEndTime(utilities.timeZoneConverter(dateTime, timeOffset));
                 }
@@ -164,9 +141,7 @@ public class ReportsHelper {
     }
 
     public List<StopReport> stopReportProcessHandler(List<StopReport> stopReports, String timeOffset){
-        //Long timeDuration = (long) 0;
         long timeEngine= 0;
-        //String totalDuration = "00:00:00";
         String totalEngineHours = "00:00:00";
 
         for(StopReport stopReportOne : stopReports ) {
@@ -271,32 +246,19 @@ public class ReportsHelper {
                 roundOffFuel = Math.round(Fuel * 100.0 )/ 100.0;
                 summaryReportOne.setSpentFuel(Double.toString(roundOffFuel));
             }
+
             if(summaryReportOne.getEngineHours() != null && summaryReportOne.getEngineHours() != "") {
-//                Long time=(long) 0;
-//
-//                time = Math.abs( Long.parseLong(summaryReportOne.getEngineHours().toString()) );
-//
-//                Long hoursEngine =   TimeUnit.MILLISECONDS.toHours(time) ;
-//                Long minutesEngine = TimeUnit.MILLISECONDS.toMinutes(time) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(time));
-//                Long secondsEngine = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
-//
-//                String totalHours = String.valueOf(hoursEngine)+":"+String.valueOf(minutesEngine)+":"+String.valueOf(secondsEngine);
-//                summaryReportOne.setEngineHours(totalHours);
 
                 summaryReportOne.setEngineHours(utilities.durationCalculation(summaryReportOne.getEngineHours()));
             }
+
             if(summaryReportOne.getAverageSpeed() != null && summaryReportOne.getAverageSpeed() != "") {
-//                totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getAverageSpeed()) * (1.852) );
-//                roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-//                summaryReportOne.setAverageSpeed(Double.toString(roundOffDistance));
                 summaryReportOne.setAverageSpeed(String.valueOf(
                         utilities.speedConverter(Double.parseDouble(String.valueOf(roundOffDistance)))
                 ));
             }
+
             if(summaryReportOne.getMaxSpeed() != null && summaryReportOne.getMaxSpeed() != "") {
-//                totalDistance = Math.abs(  Double.parseDouble(summaryReportOne.getMaxSpeed()) * (1.852) );
-//                roundOffDistance = Math.round(totalDistance * 100.0) / 100.0;
-//                summaryReportOne.setMaxSpeed(Double.toString(roundOffDistance));
                 summaryReportOne.setMaxSpeed(String.valueOf(
                         utilities.speedConverter(Double.parseDouble(summaryReportOne.getMaxSpeed()))
                 ));
