@@ -1,4 +1,4 @@
-package com.example.food_drugs.entity;
+package com.example.food_drugs.dto;
 
 import lombok.*;
 

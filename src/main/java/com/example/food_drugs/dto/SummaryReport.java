@@ -1,4 +1,4 @@
-package com.example.examplequerydslspringdatajpamaven.entity;
+package com.example.food_drugs.dto;
 
 /**
  * Bind data from summary report in this model
