@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 
 import com.example.examplequerydslspringdatajpamaven.entity.*;
 import com.example.examplequerydslspringdatajpamaven.repository.*;
+import com.example.examplequerydslspringdatajpamaven.entity.DeviceTempHum;
+import com.example.food_drugs.dto.StopReport;
+import com.example.food_drugs.dto.SummaryReport;
+import com.example.food_drugs.dto.TripReport;
 import com.example.food_drugs.helpers.ReportsHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -411,10 +415,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			List<EventReport> eventReportList = new ArrayList<>();
 			int limit = 10;
 			Pageable pageable = new PageRequest(offset,limit);
-			if(timeOffset.contains("%2B")){
-				timeOffset = "+" + timeOffset.substring(3);
-			}
-	        
+
 			if(type.equals("")) {
 				
 				if(exportData.equals("exportData")) {
@@ -1896,9 +1897,6 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		 stopReport = (List<StopReport>) returnFromTraccar(stopsUrl,"stops",allDevices, from, to, type, page, start, limit).getBody();
 
 		  if(stopReport.size()>0) {
-			  if(timeOffset.contains("%2B")){
-				  timeOffset = "+" + timeOffset.substring(3);
-			  }
 			  stopReport = reportsHelper.stopReportProcessHandler(stopReport, timeOffset);
 //			  Long timeDuration = (long) 0;
 //			  Long timeEngine= (long) 0;
@@ -2285,9 +2283,6 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		 tripReport = (List<TripReport>) returnFromTraccar(tripsUrl,"trips",allDevices, from, to, type, page, start, limit).getBody();
 
 		 if(tripReport.size()>0) {
-			if(timeOffset.contains("%2B")){
-				timeOffset = "+" + timeOffset.substring(3);
-			}
 			 tripReport = reportsHelper.tripReportProcessHandler(tripReport, timeOffset);
 //			  for(TripReport tripReportOne : tripReport ) {
 //				  Device device= deviceServiceImpl.findById(tripReportOne.getDeviceId());
@@ -3556,9 +3551,6 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 		
 		 summaryReport = (List<SummaryReport>) returnFromTraccar(summaryUrl,"summary",allDevices, from, to, type, page, start, limit).getBody();
 		 if(summaryReport.size()>0) {
-			 if(timeOffset.contains("%2B")){
-				 timeOffset = "+" + timeOffset.substring(3);
-			 }
 			 summaryReport = reportsHelper.summaryReportProcessHandler(summaryReport, timeOffset);
 //			  Double totalDistance = 0.0 ;
 //			  double roundOffDistance = 0.0;
