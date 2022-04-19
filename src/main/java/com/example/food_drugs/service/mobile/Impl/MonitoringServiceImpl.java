@@ -1,5 +1,6 @@
 package com.example.food_drugs.service.mobile.Impl;
 
+import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.food_drugs.dto.AttributesWrapper;
 
 import com.example.food_drugs.entity.MonogoInventoryLastData;
@@ -120,12 +121,18 @@ public class MonitoringServiceImpl implements MonitoringService {
         }
         try {
             DecimalFormat decimalFormat = new DecimalFormat(".###");
-            Optional<Position> lastPositionOptional = positionMongoSFDARepository.findFirstByDeviceidOrderByServertimeDesc(deviceId);
+//            Optional<Position> lastPositionOptional = positionMongoSFDARepository.findFirstByDeviceidOrderByServertimeDesc(deviceId);
+            Device device = deviceRepositorySFDA.findOne(deviceId);
 
-            if(!lastPositionOptional.isPresent()){
-                return responseHandler.reportError("Position Not Found With Id : "+deviceId);
+            if(device == null){
+                return responseHandler.reportError("Device Not Found With Id : "+deviceId);
             }
-            Position lastPosition = lastPositionOptional.get();
+
+//            if(!lastPositionOptional.isPresent()){
+//                return responseHandler.reportError("Position Not Found With Id : "+deviceId);
+//            }
+//            Position lastPosition = lastPositionOptional.get();
+            Position lastPosition = positionMongoSFDARepository.findOne(device.getPositionid());;
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             return responseHandler.reportSuccess("Success",
                     MonitoringDevicePositionResponse
