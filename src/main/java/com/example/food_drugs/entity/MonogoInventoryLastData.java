@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -12,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class MonogoInventoryLastData {
 	
 	@Id
+	@JsonIgnore
 	private ObjectId _id;
 	private Double temperature;
 	private Double humidity;
