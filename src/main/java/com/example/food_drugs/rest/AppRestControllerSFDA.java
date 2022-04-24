@@ -3,6 +3,7 @@ package com.example.food_drugs.rest;
 import java.util.Map;
 
 import com.example.food_drugs.service.WarehouseServiceImpl;
+import com.example.food_drugs.service.mobile.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
@@ -48,8 +49,11 @@ public class AppRestControllerSFDA {
 
 	private final WarehouseServiceImpl warehouseService;
 
-	public AppRestControllerSFDA(WarehouseServiceImpl warehouseService) {
+	private final DashboardService dashboardService;
+
+	public AppRestControllerSFDA(WarehouseServiceImpl warehouseService, DashboardService dashboardService) {
 		this.warehouseService = warehouseService;
+		this.dashboardService = dashboardService;
 	}
 
 	@GetMapping(path = "/loginApp")
@@ -69,6 +73,13 @@ public class AppRestControllerSFDA {
 			                                       @RequestParam (value = "userId", defaultValue = "0") Long userId
 			                                       ){		
 		return appService.getAllDeviceLiveDataMapApp(TOKEN,userId);
+	}
+
+	@GetMapping(path = "/getListWarehousesInventoriesApp")
+	public ResponseEntity<?> getListWarehousesInventoriesApp(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+															 @RequestParam(value = "offset", defaultValue = "0") int offset,
+															 @RequestParam (value = "userId", defaultValue = "0") Long  userId){
+		return dashboardService.getListWarehousesInventories(TOKEN, userId, offset);
 	}
 	
 	@RequestMapping(value = "/vehicleInfoApp", method = RequestMethod.GET)
