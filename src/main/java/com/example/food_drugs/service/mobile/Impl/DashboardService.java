@@ -80,7 +80,8 @@ public class DashboardService extends RestServiceController implements com.examp
         userServiceImpl.resetChildernArray();
         if(loggedUser.getAccountType().equals(4)) {
             usersIds.add(userId);
-            listOfWarehousesAndInventoriesData = warehousesRepository.getInventoryWarehouseDataByUserIdsOffset(usersIds, offset);
+//            listOfWarehousesAndInventoriesData = warehousesRepository.getInventoryWarehouseDataByUserIdsOffset(usersIds, offset);
+            listOfWarehousesAndInventoriesData = warehousesRepository.getInventoryWarehouseDataByUserIds(usersIds);
         }
         else {
             List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
@@ -93,7 +94,8 @@ public class DashboardService extends RestServiceController implements com.examp
                     usersIds.add(object.getId());
                 }
             }
-            listOfWarehousesAndInventoriesData = warehousesRepository.getInventoryWarehouseDataByUserIdsOffset(usersIds, offset);
+//            listOfWarehousesAndInventoriesData = warehousesRepository.getInventoryWarehouseDataByUserIdsOffset(usersIds, offset);
+            listOfWarehousesAndInventoriesData = warehousesRepository.getInventoryWarehouseDataByUserIds(usersIds);
         }
 
         List<InventoryWarehouseDataByUserIdsDataWrapper> mappedSQLData = new ArrayList<>();
