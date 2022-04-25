@@ -43,9 +43,9 @@ import com.example.examplequerydslspringdatajpamaven.entity.DriverSelect;
 import com.example.examplequerydslspringdatajpamaven.entity.DriverWorkingHours;
 import com.example.examplequerydslspringdatajpamaven.entity.EventReport;
 import com.example.examplequerydslspringdatajpamaven.entity.Schedule;
-import com.example.examplequerydslspringdatajpamaven.entity.StopReport;
-import com.example.examplequerydslspringdatajpamaven.entity.SummaryReport;
-import com.example.examplequerydslspringdatajpamaven.entity.TripReport;
+import com.example.food_drugs.dto.StopReport;
+import com.example.food_drugs.dto.SummaryReport;
+import com.example.food_drugs.dto.TripReport;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.ScheduledRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
@@ -977,7 +977,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 		    	
 		    	if(reports.get(i).equals("events")) {
 		    		
-		    		ResponseEntity<?> response = reportServiceImpl.getEventsReport("Schedule", deviIds, grouIds, 0, from, to, "", "", userId,"");
+		    		ResponseEntity<?> response = reportServiceImpl.getEventsReport("Schedule", deviIds, grouIds, 0, from, to, "", "", userId,"", "+0300");
 		    		
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		List<EventReport> eventReports = (List<EventReport>) getObjectResponse.getEntity();
@@ -991,7 +991,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 		    	}
                 if(reports.get(i).equals("geofenceEnter")) {
 		    		
-		    		ResponseEntity<?> response = reportServiceImpl.getEventsReport("Schedule", deviIds, grouIds, 0, from, to, "geofenceEnter", "", userId,"");
+		    		ResponseEntity<?> response = reportServiceImpl.getEventsReport("Schedule", deviIds, grouIds, 0, from, to, "geofenceEnter", "", userId,"","+0300");
 		    		
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		List<EventReport> geofenceEnterReports = (List<EventReport>) getObjectResponse.getEntity();
@@ -1005,7 +1005,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 		    	}
                 if(reports.get(i).equals("geofenceExit")) {
 		    		
-		    		ResponseEntity<?> response = reportServiceImpl.getEventsReport("Schedule", deviIds, grouIds, 0, from, to, "geofenceExit", "", userId,"");
+		    		ResponseEntity<?> response = reportServiceImpl.getEventsReport("Schedule", deviIds, grouIds, 0, from, to, "geofenceExit", "", userId,"","+0300");
 		    		
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		List<EventReport> geofenceExitReports = (List<EventReport>) getObjectResponse.getEntity();
@@ -1071,7 +1071,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 
 		    	}
 		    	if(reports.get(i).equals("trips")) {
-		    		ResponseEntity<?> response = reportServiceImpl.getTripsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+		    		ResponseEntity<?> response = reportServiceImpl.getTripsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<TripReport> tripReports = (List<TripReport>) getObjectResponse.getEntity();
@@ -1159,7 +1159,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 		    	}
 		    	
 		    	if(reports.get(i).equals("tripSpentFuel")) {
-		    		ResponseEntity<?> response = reportServiceImpl.getTripsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+		    		ResponseEntity<?> response = reportServiceImpl.getTripsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<TripReport> spentFuelTripReports = (List<TripReport>) getObjectResponse.getEntity();
@@ -1173,7 +1173,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 		    	}
 		    	
 		    	if(reports.get(i).equals("tripDistanceSpeed")) {
-		    		ResponseEntity<?> response = reportServiceImpl.getTripsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+		    		ResponseEntity<?> response = reportServiceImpl.getTripsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<TripReport> distanceSpeedtripReports = (List<TripReport>) getObjectResponse.getEntity();
@@ -1186,7 +1186,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
 
 		    	}
                 if(reports.get(i).equals("stops")) {
-                	ResponseEntity<?> response = reportServiceImpl.getStopsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+                	ResponseEntity<?> response = reportServiceImpl.getStopsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<StopReport> stopReports = (List<StopReport>) getObjectResponse.getEntity();
@@ -1199,7 +1199,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
                 
                 }
                 if(reports.get(i).equals("durationInStops")) {
-                	ResponseEntity<?> response = reportServiceImpl.getStopsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+                	ResponseEntity<?> response = reportServiceImpl.getStopsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<StopReport> durationStopReports = (List<StopReport>) getObjectResponse.getEntity();
@@ -1212,7 +1212,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
                 
                 }
                 if(reports.get(i).equals("engineInStops")) {
-                	ResponseEntity<?> response = reportServiceImpl.getStopsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+                	ResponseEntity<?> response = reportServiceImpl.getStopsReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<StopReport> engineStopReports = (List<StopReport>) getObjectResponse.getEntity();
@@ -1225,7 +1225,7 @@ public class ScheduledServiceImpl extends RestServiceController implements Sched
                 
                 }
                 if(reports.get(i).equals("summary")) {
-                	ResponseEntity<?> response = reportServiceImpl.getSummaryReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId);
+                	ResponseEntity<?> response = reportServiceImpl.getSummaryReport("Schedule", deviIds, grouIds, "allEvents", from, to, 1, 0, 25, userId,"+0300");
 		    		getObjectResponse = (GetObjectResponse) response.getBody();
 		    		
 		    		List<StopReport> summaryReports = (List<StopReport>) getObjectResponse.getEntity();

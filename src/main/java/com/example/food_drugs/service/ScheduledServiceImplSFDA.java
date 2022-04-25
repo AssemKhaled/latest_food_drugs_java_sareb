@@ -38,18 +38,16 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.example.examplequerydslspringdatajpamaven.entity.CustomPositions;
 import com.example.examplequerydslspringdatajpamaven.entity.Schedule;
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.repository.ScheduledRepository;
 import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;
-import com.example.examplequerydslspringdatajpamaven.service.ReportServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.ScheduledServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
-import com.example.food_drugs.entity.DeviceTempHum;
+import com.example.food_drugs.dto.DeviceTempHum;
 import com.example.food_drugs.entity.InventoryLastData;
 import com.example.food_drugs.entity.InventoryNotification;
 import com.example.food_drugs.repository.ScheduledRepositorySFDA;
@@ -535,7 +533,7 @@ public class ScheduledServiceImplSFDA extends RestServiceController implements S
 		    	
 		    	if(reports.get(i).equals("vehicleTempHum")) {
 		    		
-		    		ResponseEntity<?> response = reportServiceImplSFDA.getVehicleTempHum("Schedule", deviIds, grouIds, 0, from, to, "", userId,"");
+		    		ResponseEntity<?> response = reportServiceImplSFDA.getVehicleTempHum("Schedule", deviIds, grouIds, 0, from, to, "", userId,"", "+0300");
 
 
 //					ResponseEntity<?> response = reportServiceImplSFDA.getVehicleTempHumNew("Schedule", deviIds, grouIds, 0, from, to, "", userId,"");
