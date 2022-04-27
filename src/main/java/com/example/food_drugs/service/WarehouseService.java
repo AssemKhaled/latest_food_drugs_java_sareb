@@ -1,7 +1,7 @@
 package com.example.food_drugs.service;
 
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
-import com.example.food_drugs.responses.WarehouseInventoriesListMobileWrapper;
+import com.example.food_drugs.dto.responses.WarehouseInventoriesListMobileWrapper;
 import org.springframework.http.ResponseEntity;
 import com.example.food_drugs.entity.Warehouse;
 

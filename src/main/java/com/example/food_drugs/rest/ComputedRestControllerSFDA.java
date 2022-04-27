@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.examplequerydslspringdatajpamaven.entity.Attribute;
 import com.example.examplequerydslspringdatajpamaven.service.ComputedServiceImpl;
-import com.example.food_drugs.service.ComputedServiceImplSFDA;
+import com.example.food_drugs.service.impl.ComputedServiceImplSFDA;
 
 /**
  * Services of Computed attributes component 

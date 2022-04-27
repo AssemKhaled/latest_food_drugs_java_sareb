@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.examplequerydslspringdatajpamaven.entity.Schedule;
 import com.example.examplequerydslspringdatajpamaven.service.ScheduledServiceImpl;
-import com.example.food_drugs.service.ScheduledServiceImplSFDA;
+import com.example.food_drugs.service.impl.ScheduledServiceImplSFDA;
 
 /**
  * Service of schedule component

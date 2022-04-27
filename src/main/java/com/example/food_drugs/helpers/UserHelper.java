@@ -4,7 +4,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
 
-import com.example.food_drugs.responses.ResponseWrapper;
+import com.example.food_drugs.dto.responses.ResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

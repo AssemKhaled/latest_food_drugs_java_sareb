@@ -73,7 +73,7 @@ public class Warehouse {
 	private String reject_reason;
 	
 	@Column(name = "delete_date")
-	private String delete_date;
+	private String deleteDate;
 	
 	@Column(name = "create_date")
 	private String create_date;
@@ -230,12 +230,12 @@ public class Warehouse {
 		this.reject_reason = reject_reason;
 	}
 
-	public String getDelete_date() {
-		return delete_date;
+	public String getDeleteDate() {
+		return deleteDate;
 	}
 
-	public void setDelete_date(String delete_date) {
-		this.delete_date = delete_date;
+	public void setDeleteDate(String delete_date) {
+		this.deleteDate = delete_date;
 	}
 
 	public String getCreate_date() {

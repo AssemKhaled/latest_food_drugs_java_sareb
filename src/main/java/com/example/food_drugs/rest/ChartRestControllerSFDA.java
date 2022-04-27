@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.examplequerydslspringdatajpamaven.service.ChartServiceImpl;
-import com.example.food_drugs.service.InventoryServiceImpl;
+import com.example.food_drugs.service.impl.InventoryServiceImpl;
 
 /**
  * Services related to charts component

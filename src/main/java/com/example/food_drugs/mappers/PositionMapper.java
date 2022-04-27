@@ -2,7 +2,7 @@ package com.example.food_drugs.mappers;
 
 import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.repository.DeviceRepositorySFDA;
-import com.example.food_drugs.responses.PositionResponse;
+import com.example.food_drugs.dto.responses.PositionResponse;
 
 
 import java.util.Map;

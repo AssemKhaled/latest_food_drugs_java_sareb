@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.examplequerydslspringdatajpamaven.service.ReportServiceImpl;
 import com.example.food_drugs.service.impl.DeviceServiceImplSFDA;
-import com.example.food_drugs.service.InventoryServiceImpl;
+import com.example.food_drugs.service.impl.InventoryServiceImpl;
 
 
 /**

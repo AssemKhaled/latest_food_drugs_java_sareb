@@ -1,7 +1,7 @@
 package com.example.food_drugs.service;
 
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
-import com.example.food_drugs.responses.GraphDataWrapper;
+import com.example.food_drugs.dto.responses.GraphDataWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 

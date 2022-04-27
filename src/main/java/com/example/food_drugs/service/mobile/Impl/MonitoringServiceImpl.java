@@ -12,12 +12,12 @@ import com.example.food_drugs.repository.InventoryRepository;
 import com.example.food_drugs.repository.MongoInventoryLastDataRepository;
 import com.example.food_drugs.repository.PositionMongoSFDARepository;
 
-import com.example.food_drugs.responses.InventorySummaryDataWrapper;
-import com.example.food_drugs.responses.MongoInventoryWrapper;
-import com.example.food_drugs.responses.ResponseWrapper;
-import com.example.food_drugs.responses.mobile.DeviceMonitoringResponse;
+import com.example.food_drugs.dto.responses.InventorySummaryDataWrapper;
+import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
+import com.example.food_drugs.dto.responses.ResponseWrapper;
+import com.example.food_drugs.dto.responses.mobile.DeviceMonitoringResponse;
 import com.example.food_drugs.helpers.DeviceHelper;
-import com.example.food_drugs.responses.mobile.MonitoringDevicePositionResponse;
+import com.example.food_drugs.dto.responses.mobile.MonitoringDevicePositionResponse;
 import com.example.food_drugs.service.mobile.MonitoringService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
@@ -29,8 +29,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -61,7 +59,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
 
     @Override
-    public ResponseWrapper<List<DeviceMonitoringResponse>> monitoringDeviceList(String TOKEN,Long userId , int offset , int size) {
+    public ResponseWrapper<List<DeviceMonitoringResponse>> monitoringDeviceList(String TOKEN,Long userId , int offset , int size , String search) {
         logger.info("******************** monitoringDeviceList Service Started ********************");
         ResponseHandler<List<DeviceMonitoringResponse>> responseHandler = new ResponseHandler<>();
         ResponseWrapper<List<DeviceMonitoringResponse>> userResponseWrapper = userHelper.userErrorsChecker(TOKEN,userId);
@@ -101,6 +99,10 @@ public class MonitoringServiceImpl implements MonitoringService {
                     responseHandler.errorLogger("Fail To Map SQL Data To DeviceMonitoringResponse In case :  " + Arrays.toString(device)
                             +" \n Position : " + device[6].toString());
              }
+            }
+            if(deviceMonitoringResponses.size()>0 && Pattern.matches(".*\\S.*" , search)){
+                deviceMonitoringResponses = deviceMonitoringResponses.stream().filter(deviceMonitoringResponse ->
+                        deviceMonitoringResponse.getDeviceName().contains(search)).collect(Collectors.toList());
             }
             logger.info("******************** monitoringDeviceList Service Ended With Success ********************");
             return responseHandler.reportSuccess("Success", deviceMonitoringResponses,dataSize);

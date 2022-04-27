@@ -1,11 +1,10 @@
 package com.example.food_drugs.rest.mobileRestSFDA;
 
-import com.example.food_drugs.responses.MongoInventoryWrapper;
-import com.example.food_drugs.responses.ResponseWrapper;
-import com.example.food_drugs.responses.mobile.DeviceMonitoringResponse;
-import com.example.food_drugs.responses.mobile.MonitoringDevicePositionResponse;
+import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
+import com.example.food_drugs.dto.responses.ResponseWrapper;
+import com.example.food_drugs.dto.responses.mobile.DeviceMonitoringResponse;
+import com.example.food_drugs.dto.responses.mobile.MonitoringDevicePositionResponse;
 import com.example.food_drugs.service.mobile.Impl.MonitoringServiceImpl;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +21,8 @@ public class MobileMonitoringControllerSFDA {
     }
 
     @GetMapping(path = "/devices/list")
-    public ResponseWrapper<List<DeviceMonitoringResponse>> listDevices(@RequestHeader(value = "TOKEN") String TOKEN , @RequestParam(value = "userId") Long userId, @RequestParam(value = "offset") int offset, @RequestParam(value = "size") int size){
-        return monitoringService.monitoringDeviceList(TOKEN ,userId , offset , size);
+    public ResponseWrapper<List<DeviceMonitoringResponse>> listDevices(@RequestHeader(value = "TOKEN") String TOKEN , @RequestParam(value = "userId") Long userId, @RequestParam(value = "offset") int offset, @RequestParam(value = "size") int size ,@RequestParam(value = "search") String search){
+        return monitoringService.monitoringDeviceList(TOKEN ,userId , offset , size ,search);
     }
 
     @GetMapping(path = "/inventories/list")

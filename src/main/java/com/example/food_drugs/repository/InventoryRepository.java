@@ -1,9 +1,12 @@
 package com.example.food_drugs.repository;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-import com.example.food_drugs.responses.InventoriesAndWarehousesWrapper;
-import com.example.food_drugs.responses.InventorySummaryDataWrapper;
+import com.example.food_drugs.dto.responses.InventoriesAndWarehousesWrapper;
+import com.example.food_drugs.dto.responses.InventorySummaryDataWrapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -15,6 +18,10 @@ import com.example.food_drugs.entity.Inventory;
 public interface InventoryRepository extends JpaRepository<Inventory, Long>, QueryDslPredicateExecutor<Inventory>{
 
 	List<Inventory> findAllByWarehouseId(Long warehouseId);
+
+	Optional<List<Inventory>> findAllByWarehouseIdIn(List<Long> wareHouseIds , Pageable pageable);
+
+	Optional<List<Inventory>> findAllByWarehouseIdInAndDeleteDate(List<Long> wareHouseIds, Date deleteDate);
 
 	@Query(value = " SELECT tc_inventories.id FROM tc_inventories " + 
 			" where tc_inventories.userId IN (:userId) and tc_inventories.delete_date is null "

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.food_drugs.entity.Warehouse;
-import com.example.food_drugs.service.WarehouseServiceImpl;
+import com.example.food_drugs.service.impl.WarehouseServiceImpl;
 
 /**
  * Services of Warehouses component 
@@ -106,7 +106,7 @@ public class WarehouseRestController {
 
 	@RequestMapping(value = "/getListWarehouseInventoryGraph", method = RequestMethod.GET)
 	public ResponseEntity<?> getListWarehouseInventoryGraph(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-															   @RequestParam (value = "userId", defaultValue = "0") Long  userId) {
+															@RequestParam (value = "userId", defaultValue = "0") Long  userId) {
 
 		return warehouseServiceImpl.getListWarehouseDataGraph(TOKEN,userId);
 

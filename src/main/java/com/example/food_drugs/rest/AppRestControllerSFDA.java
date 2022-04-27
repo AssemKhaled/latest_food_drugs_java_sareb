@@ -1,8 +1,12 @@
 package com.example.food_drugs.rest;
 
+import java.util.List;
 import java.util.Map;
 
-import com.example.food_drugs.service.WarehouseServiceImpl;
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.ApiResponseBuilder;
+import com.example.food_drugs.dto.responses.mobile.WareHouseInvLastDataResponse;
+import com.example.food_drugs.service.impl.WarehouseServiceImpl;
 import com.example.food_drugs.service.mobile.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,7 +30,7 @@ import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
 import com.example.food_drugs.entity.DeviceSFDA;
 import com.example.food_drugs.entity.Inventory;
 import com.example.food_drugs.entity.Warehouse;
-import com.example.food_drugs.service.AppServiceImplSFDA;
+import com.example.food_drugs.service.mobile.Impl.AppServiceImplSFDA;
 
 /**
  * Services related to app
@@ -956,6 +960,29 @@ public class AppRestControllerSFDA {
 																@RequestParam (value = "userId", defaultValue = "0") Long  userId,
 																@RequestParam (value = "warehouseId", defaultValue = "0") Long  warehouseId){
 		return warehouseService.getListWarehouseInventoriesListByWahrehouseId(TOKEN,userId,warehouseId);
+	}
+
+	@GetMapping(value = "/wareHouseInvLastData")
+	public @ResponseBody ResponseEntity<ApiResponse<List<WareHouseInvLastDataResponse>>> getWareHouseInvLastData(@RequestHeader(value = "TOKEN")String TOKEN,
+																								 @RequestParam (value = "userId") Long userId,
+																								 @RequestParam (value = "size",defaultValue = "0") int whSize,
+																								 @RequestParam(value = "offset", defaultValue = "0") int offset,
+																								 @RequestParam(value = "search", defaultValue = "") String search){
+		try{
+			return ResponseEntity.ok(appServiceSFDA
+					.getWareHouseInvLastData(TOKEN,userId,whSize,offset,search));
+
+		}catch (Exception | Error e){
+			ApiResponseBuilder<List<WareHouseInvLastDataResponse>> builder = new ApiResponseBuilder<>();
+
+			builder.setMessage(e.getLocalizedMessage());
+			builder.setStatusCode(401);
+			builder.setBody(null);
+			builder.setSize(0);
+			builder.setSuccess(false);
+
+			return ResponseEntity.ok(builder.build());
+		}
 	}
 	
 }

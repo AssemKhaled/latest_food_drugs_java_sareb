@@ -18,7 +18,7 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronTrigger;
 import com.example.examplequerydslspringdatajpamaven.repository.ScheduledRepository;
 import com.example.examplequerydslspringdatajpamaven.service.DeviceServiceImpl;
-import com.example.food_drugs.service.ScheduledServiceImplSFDA;
+import com.example.food_drugs.service.impl.ScheduledServiceImplSFDA;
 
 /**
  * Handling of schedule timing

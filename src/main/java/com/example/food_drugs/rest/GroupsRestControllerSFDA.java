@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.examplequerydslspringdatajpamaven.entity.Group;
 import com.example.examplequerydslspringdatajpamaven.service.GroupsServiceImpl;
-import com.example.food_drugs.service.GroupServiceImplSFDA;
+import com.example.food_drugs.service.impl.GroupServiceImplSFDA;
 
 /**
  * Service of group component

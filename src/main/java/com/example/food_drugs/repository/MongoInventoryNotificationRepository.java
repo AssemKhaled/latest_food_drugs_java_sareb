@@ -1,7 +1,7 @@
 package com.example.food_drugs.repository;
 
 
-import com.example.food_drugs.responses.NotificationWrapper;
+import com.example.food_drugs.dto.responses.NotificationWrapper;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.example.food_drugs.entity.MonogInventoryNotification;

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.examplequerydslspringdatajpamaven.entity.Points;
 import com.example.examplequerydslspringdatajpamaven.service.PointsServiceImpl;
-import com.example.food_drugs.service.PointsServiceImplSFDA;
+import com.example.food_drugs.service.impl.PointsServiceImplSFDA;
 
 /**
  * service of point component

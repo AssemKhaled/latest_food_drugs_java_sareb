@@ -1,7 +1,7 @@
 package com.example.food_drugs.service;
 
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
-import com.example.food_drugs.responses.ReceiverDataWrapper;
+import com.example.food_drugs.dto.responses.ReceiverDataWrapper;
 import org.springframework.http.ResponseEntity;
 
 public interface ReceiverService {

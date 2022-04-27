@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.examplequerydslspringdatajpamaven.entity.Geofence;
 import com.example.examplequerydslspringdatajpamaven.service.GeofenceServiceImpl;
-import com.example.food_drugs.service.GeofenceServiceImplSFDA;
+import com.example.food_drugs.service.impl.GeofenceServiceImplSFDA;
 
 
 /**

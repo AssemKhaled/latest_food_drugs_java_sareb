@@ -2,8 +2,8 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
-import com.example.food_drugs.responses.DeviceNames;
-import com.example.food_drugs.responses.mobile.DeviceMonitoringResponse;
+import com.example.food_drugs.dto.responses.DeviceNames;
+import com.example.food_drugs.dto.responses.mobile.DeviceMonitoringResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;

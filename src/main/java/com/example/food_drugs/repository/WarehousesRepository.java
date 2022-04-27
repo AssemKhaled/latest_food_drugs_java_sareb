@@ -1,8 +1,10 @@
 package com.example.food_drugs.repository;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-import com.example.food_drugs.responses.InventoryWarehouseDataByUserIdsDataWrapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -15,6 +17,8 @@ public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, Qu
 
 
 	int countAllByUserId(Long userId);
+	Optional<List<Warehouse>> findAllByUserIdInAndDeleteDate(List<Long> userIds, Date deleteDate);
+	Optional<List<Warehouse>> findAllByUserIdInAndDeleteDate(List<Long> userIds, Date deleteDate,Pageable pageable);
 
 	@Query(value = "SELECT count(tc_warehouses.id) FROM tc_warehouses " + 
 			"where tc_warehouses.userId IN (:userIds) and tc_warehouses.delete_date is null ",nativeQuery = true )
@@ -106,7 +110,6 @@ public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, Qu
 	@Query(value = " SELECT tc_warehouses.id ,tc_warehouses.name FROM `tc_warehouses`"
 			+ " WHERE tc_warehouses.userId in (:usersIds)",  nativeQuery = true)
 	List<Object[]> getWarehouseForUser (@Param("usersIds")List<Long> usersIds);
-
 	@Query(value = " SELECT tc_warehouses.id ,tc_warehouses.name FROM `tc_warehouses`"
 			+ " WHERE tc_warehouses.userId in (:usersIds) LIMIT :offset,10",  nativeQuery = true)
 	List<Object[]> getWarehouseForUserOffset (@Param("usersIds")List<Long> usersIds, @Param("offset") int offset);

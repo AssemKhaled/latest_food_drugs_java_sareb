@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.examplequerydslspringdatajpamaven.entity.Driver;
 import com.example.examplequerydslspringdatajpamaven.service.DriverServiceImpl;
 import com.example.food_drugs.entity.DriverSFDA;
-import com.example.food_drugs.service.DriverServiceImplSFDA;
+import com.example.food_drugs.service.impl.DriverServiceImplSFDA;
 
 
 /**

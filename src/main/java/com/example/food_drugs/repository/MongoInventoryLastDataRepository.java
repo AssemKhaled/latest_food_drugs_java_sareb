@@ -16,4 +16,5 @@ public interface MongoInventoryLastDataRepository extends MongoRepository<Monogo
 	List <MonogoInventoryLastData> findFirst20ByInventoryIdOrderByCreateDateDesc(int inventoryId);
 	List <MonogoInventoryLastData> findAllByInventoryId(int inventoryId, Pageable topTen);
 
+	Optional<List<MonogoInventoryLastData>> findAllBy_idIn(List<String> ids);
 }

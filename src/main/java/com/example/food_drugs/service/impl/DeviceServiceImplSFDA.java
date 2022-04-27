@@ -1,18 +1,19 @@
 package com.example.food_drugs.service.impl;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.example.food_drugs.dto.AttributesWrapper;
-import com.example.food_drugs.responses.*;
+import com.example.food_drugs.dto.responses.DeviceResponseDataWrapper;
+import com.example.food_drugs.dto.responses.GraphDataWrapper;
+import com.example.food_drugs.dto.responses.GraphObject;
+import com.example.food_drugs.dto.responses.*;
 import com.example.food_drugs.service.DeviceServiceSFDA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

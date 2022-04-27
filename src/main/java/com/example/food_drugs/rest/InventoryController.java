@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.food_drugs.entity.Inventory;
 import com.example.food_drugs.entity.SensorsInventories;
-import com.example.food_drugs.service.InventoryServiceImpl;
+import com.example.food_drugs.service.impl.InventoryServiceImpl;
 
 @RestController
 @RequestMapping(path = "/inventoriesSFDA")

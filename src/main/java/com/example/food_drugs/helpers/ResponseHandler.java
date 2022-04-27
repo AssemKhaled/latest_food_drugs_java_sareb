@@ -1,6 +1,6 @@
 package com.example.food_drugs.helpers;
 
-import com.example.food_drugs.responses.ResponseWrapper;
+import com.example.food_drugs.dto.responses.ResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
