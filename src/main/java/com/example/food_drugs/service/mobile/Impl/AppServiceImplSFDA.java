@@ -4408,7 +4408,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 				return builder.build();
 			}
 
-
 			List<Long> userIds = new ArrayList<>();
 
 			userServiceImpl.resetChildernArray();
@@ -4432,7 +4431,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 			}else {
 				optionalWarehouseList = warehousesRepository.findAllByUserIdInAndDeleteDate(userIds,null);
 			}
-
 
 			if (optionalWarehouseList.isPresent()) {
 				List<Warehouse> warehouseList = optionalWarehouseList.get();
@@ -4460,6 +4458,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 					}
 
 					Optional<List<MonogoInventoryLastData>> optionalMongoInventoryLastDataList = mongoInventoryLastDataRepository.findAllBy_idIn(lastDataIds);
+
 					if(optionalMongoInventoryLastDataList.isPresent()) {
 						List<MonogoInventoryLastData> mongoInventoryLastDataList = optionalMongoInventoryLastDataList.get();
 //						for (Inventory inventory : inventoryList) {
@@ -4484,7 +4483,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 //
 //							}
 //
-
 						for(Warehouse warehouse : warehouseList){
 							List<Inventory> inventoriesForOneWareHouse = inventoryList
 									.stream()
@@ -4517,7 +4515,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 						builder.setSize(results.size());
 						builder.setSuccess(true);
 						return builder.build();
-
 
 					}else {
 						builder.setBody(results);
