@@ -4461,7 +4461,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 
 					if(optionalMongoInventoryLastDataList.isPresent()) {
 						List<MonogoInventoryLastData> mongoInventoryLastDataList = optionalMongoInventoryLastDataList.get();
-
 						for(Warehouse warehouse : warehouseList){
 							List<Inventory> inventoriesForOneWareHouse = inventoryList
 									.stream()
@@ -4512,6 +4511,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 				return builder.build();
 			}
 		}
+//		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
 		builder.setBody(results);
 		builder.setStatusCode(401);
 		builder.setMessage("No Data Found");

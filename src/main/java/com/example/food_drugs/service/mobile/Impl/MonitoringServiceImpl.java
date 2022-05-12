@@ -1,18 +1,28 @@
 package com.example.food_drugs.service.mobile.Impl;
 
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
+
 import com.example.food_drugs.dto.ApiResponse;
 import com.example.food_drugs.dto.AttributesWrapper;
 
 import com.example.food_drugs.dto.responses.mobile.WareHouseInvLastDataResponse;
+
+import com.example.examplequerydslspringdatajpamaven.entity.Driver;
+import com.example.examplequerydslspringdatajpamaven.entity.MongoPositions;
+import com.example.examplequerydslspringdatajpamaven.repository.DriverRepository;
+import com.example.examplequerydslspringdatajpamaven.repository.MongoPositionsRepository;
+import com.example.food_drugs.dto.AttributesWrapper;
+
+import com.example.food_drugs.dto.responses.mobile.InventoryDataResponse;
+import com.example.food_drugs.entity.Inventory;
+
 import com.example.food_drugs.entity.MonogoInventoryLastData;
 import com.example.food_drugs.entity.Position;
+import com.example.food_drugs.entity.Warehouse;
+import com.example.food_drugs.helpers.Dictionary;
 import com.example.food_drugs.helpers.ResponseHandler;
 import com.example.food_drugs.helpers.UserHelper;
-import com.example.food_drugs.repository.DeviceRepositorySFDA;
-import com.example.food_drugs.repository.InventoryRepository;
-import com.example.food_drugs.repository.MongoInventoryLastDataRepository;
-import com.example.food_drugs.repository.PositionMongoSFDARepository;
+import com.example.food_drugs.repository.*;
 
 import com.example.food_drugs.dto.responses.InventorySummaryDataWrapper;
 import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
@@ -25,12 +35,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -42,6 +54,12 @@ public class MonitoringServiceImpl implements MonitoringService {
 
     private final InventoryRepository inventoryRepository;
     private final MongoInventoryLastDataRepository mongoInventoryLastDataRepository;
+    private final WarehousesRepository warehousesRepository;
+
+    private  final MongoPositionsRepository mongoPositionsRepository;
+    private  final DriverRepository driverRepository;
+@Autowired
+    private  Dictionary dictionary;
 
     private final UserHelper userHelper;
     private final PositionMongoSFDARepository positionMongoSFDARepository;
@@ -49,10 +67,13 @@ public class MonitoringServiceImpl implements MonitoringService {
     private final DeviceRepositorySFDA deviceRepositorySFDA;
     private static final Log logger = LogFactory.getLog(MonitoringServiceImpl.class);
 
-    public MonitoringServiceImpl(InventoryRepository inventoryRepository, MongoInventoryLastDataRepository mongoInventoryLastDataRepository, UserHelper userHelper, PositionMongoSFDARepository positionMongoSFDARepository,
+    public MonitoringServiceImpl(InventoryRepository inventoryRepository, MongoInventoryLastDataRepository mongoInventoryLastDataRepository, WarehousesRepository warehousesRepository, MongoPositionsRepository mongoPositionsRepository, DriverRepository driverRepository, UserHelper userHelper, PositionMongoSFDARepository positionMongoSFDARepository,
                                  DeviceHelper deviceHelper, DeviceRepositorySFDA deviceRepositorySFDA){
         this.inventoryRepository = inventoryRepository;
         this.mongoInventoryLastDataRepository = mongoInventoryLastDataRepository;
+        this.warehousesRepository = warehousesRepository;
+        this.mongoPositionsRepository = mongoPositionsRepository;
+        this.driverRepository = driverRepository;
         this.userHelper = userHelper;
         this.positionMongoSFDARepository = positionMongoSFDARepository;
         this.deviceHelper = deviceHelper;
@@ -123,10 +144,14 @@ public class MonitoringServiceImpl implements MonitoringService {
         if(!userResponseWrapper.getSuccess()){
             return userResponseWrapper;
         }
+        MongoPositions mongoPositions ;
         try {
             DecimalFormat decimalFormat = new DecimalFormat(".###");
 //            Optional<Position> lastPositionOptional = positionMongoSFDARepository.findFirstByDeviceidOrderByServertimeDesc(deviceId);
             Device device = deviceRepositorySFDA.findOne(deviceId);
+            Optional<MongoPositions> optionalMongoPositions=mongoPositionsRepository.findAllByDeviceid(deviceId);
+
+
 
             if(device == null){
                 return responseHandler.reportError("Device Not Found With Id : "+deviceId);
@@ -137,28 +162,99 @@ public class MonitoringServiceImpl implements MonitoringService {
 //            }
 //            Position lastPosition = lastPositionOptional.get();
             Position lastPosition = positionMongoSFDARepository.findOne(device.getPositionid());;
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            return responseHandler.reportSuccess("Success",
-                    MonitoringDevicePositionResponse
-                            .builder()
-                            .speed(Double.parseDouble(decimalFormat.format(lastPosition.getSpeed())))
-                            .latitude(lastPosition.getLatitude())
-                            .longitude(lastPosition.getLongitude())
-                            .humidity(deviceHelper.findValueFromMap(lastPosition.getAttributes(),"hum"))
-                            .temperature(deviceHelper.findValueFromMap(lastPosition.getAttributes(),"temp"))
-                            .serverTime(simpleDateFormat.format(lastPosition.getServertime()))
-                            .status(deviceHelper.deviceStatuesDetector(lastPosition.getServertime()))
-                            .ignition(lastPosition.getAttributes().get("ignition") != null ? (Boolean) lastPosition.getAttributes().get("ignition") : false)
-                            .power(lastPosition.getAttributes().get("power")!=null?Double.parseDouble(decimalFormat.format(lastPosition.getAttributes().get("power"))):-1)
-                            .cooler(lastPosition.getAttributes().get("AC")!=null ? (Long) lastPosition.getAttributes().get("AC") : 300)
-                            .gpsStatus(deviceHelper.deviceGPSDetector(lastPosition))
-                            .build());
+            if (optionalMongoPositions.isPresent()) {
+                mongoPositions = optionalMongoPositions.get();
+//                System.out.println(mongoPositions.getDeviceName());
+                Driver driver = driverRepository.findById(mongoPositions.getDriverid());
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                return responseHandler.reportSuccess("Success",
+                        MonitoringDevicePositionResponse
+                                .builder()
+                                .deviceName(device.getName())
+                                .driverName(mongoPositions.getDriverName())
+                                .sequence_num(device.getSequence_number())
+                                .trackerimei(device.getUniqueid())
+                                .mobile_num(driver.getMobile_num())
+                                .lastupdate(device.getLastupdate())
+                                .lasttemp(device.getLastTemp())
+                                .lasthum(device.getLastHum())
+                                .speed(Double.parseDouble(decimalFormat.format(lastPosition.getSpeed())))
+                                .latitude(lastPosition.getLatitude())
+                                .longitude(lastPosition.getLongitude())
+                                .humidity(deviceHelper.findValueFromMap(lastPosition.getAttributes(), "hum"))
+                                .temperature(deviceHelper.findValueFromMap(lastPosition.getAttributes(), "temp"))
+                                .serverTime(simpleDateFormat.format(lastPosition.getServertime()))
+                                .status(deviceHelper.deviceStatuesDetector(lastPosition.getServertime()))
+                                .ignition(lastPosition.getAttributes().get("ignition") != null ? (Boolean) lastPosition.getAttributes().get("ignition") : false)
+                                .power(lastPosition.getAttributes().get("power") != null ? Double.parseDouble(decimalFormat.format(lastPosition.getAttributes().get("power"))) : -1)
+                                .cooler(lastPosition.getAttributes().get("AC") != null ? (Long) lastPosition.getAttributes().get("AC") : 300)
+                                .gpsStatus(deviceHelper.deviceGPSDetector(lastPosition))
+                                .build());
+            }else {
+                return null;
+            }
         }catch (Error | Exception e){
             logger.info("******************** monitoringGetDevicePosition Service Started With Error "+e.getMessage()+" ********************");
             return responseHandler.reportError(e.getMessage());
         }
     }
 
+
+
+
+    public ResponseWrapper<InventoryDataResponse> monitorringGetDetailsInventory(String TOKEN, Long inventoryId){
+
+        ResponseHandler<InventoryDataResponse> responseHandler = new ResponseHandler<>();
+//        logger.info("******************** monitoringGetDevicePosition Service Started ********************");
+        ResponseWrapper<MonitoringDevicePositionResponse> userResponseWrapper = userHelper.userTokenErrorsChecker(TOKEN);
+        if(!userResponseWrapper.getSuccess()){
+//            return userResponseWrapper;
+            return null;
+        }
+        MonogoInventoryLastData monogoInventoryLastData;
+        Warehouse warehouse;
+        try{
+            Inventory inventory=inventoryRepository.findById(inventoryId);
+
+            if (inventory==null){
+
+
+                return responseHandler.reportError("Inventory Not Found with Id"+inventoryId);
+            }
+            Optional<MonogoInventoryLastData> optionalMonogoInventoryLastData=mongoInventoryLastDataRepository.findBy_id(inventory.getLastDataId());
+            Optional<Warehouse>optionalWarehouse=warehousesRepository.findById(inventory.getWarehouseId());
+
+            if (optionalMonogoInventoryLastData.isPresent()){
+//
+
+                monogoInventoryLastData=optionalMonogoInventoryLastData.get();
+                warehouse=optionalWarehouse.get();
+
+//                String type=inventory.getStoringCategory();
+//              type=dictionary.Type(type);
+
+                return responseHandler.reportSuccess("Success",
+                        InventoryDataResponse.builder().
+                                inventoryName(inventory.getName()).
+                                inventoryNumber(inventory.getInventoryNumber()).
+                                inventoryStoringCategory(dictionary.Type(inventory.getStoringCategory())).
+                                lastTemp(monogoInventoryLastData.getTemperature()).lastHum(monogoInventoryLastData.getHumidity()).lastUpDate(inventory.getLastUpdate())
+                                .assignWarehouseName(warehouse.getName())
+                                .build()
+                );
+            }else {
+                return responseHandler.reportError("error");
+            }
+
+
+
+        }catch (Error|Exception e){
+            logger.info("******************** monitoringGetDevicePosition Service Started With Error "+e.getMessage()+" ********************");
+            return responseHandler.reportError(e.getMessage());
+        }
+
+    }
     @Override
     public ResponseWrapper<List<MongoInventoryWrapper>> monitoringGetAllInventoriesLastInfo(String TOKEN, Long userId, int offset, String search) {
         logger.info("************************ monitoringGetAllInventoriesLastInfo STARTED ***************************");
