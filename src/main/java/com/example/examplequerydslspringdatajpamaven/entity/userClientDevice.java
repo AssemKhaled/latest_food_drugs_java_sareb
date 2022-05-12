@@ -14,6 +14,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "tc_user_client_device")
+
 public class userClientDevice {
 
 	@Column(name = "userid")

@@ -54,5 +54,7 @@ public interface InventoryService {
 
 	ResponseEntity<?> inventoryMonthelyView(String endDate);
 
+
+
 	
 }

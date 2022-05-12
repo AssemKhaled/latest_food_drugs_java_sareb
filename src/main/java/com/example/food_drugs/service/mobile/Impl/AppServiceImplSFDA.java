@@ -4461,28 +4461,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 
 					if(optionalMongoInventoryLastDataList.isPresent()) {
 						List<MonogoInventoryLastData> mongoInventoryLastDataList = optionalMongoInventoryLastDataList.get();
-//						for (Inventory inventory : inventoryList) {
-//							Long checkId = warehouseList.stream().filter(warehouse -> warehouse.getId().equals(inventory.getWarehouseId())).findFirst().get().getId();
-//							List<Inventory> wareInvData =inventoryList.stream().filter(inventory1 -> inventory.getWarehouseId().equals(checkId)).collect(Collectors.toList());
-//							name = warehouseList.stream().filter(warehouse -> warehouse.getId().equals(inventory.getWarehouseId())).findFirst().get().getName();
-//							for (Inventory inventory1:wareInvData) {
-//								Optional<MonogoInventoryLastData> last = mongoInventoryLastDataList.stream().filter(mongoInventoryLastData -> mongoInventoryLastData.getInventoryId().equals(inventory1.getId())).findFirst();
-//								if (last.isPresent()) {
-//									mongoInventoryLastDataList.remove(last.get());
-//									lastInvData.add(InventoryLastDataResponse
-//											.builder()
-//											.inventoryName(inventory1.getName())
-//											.lastUpdated(inventory1.getLastUpdate())
-//											.lastTemperature(last.get().getTemperature())
-//											.lastHumidity(last.get().getHumidity())
-//											.build());
-//								}
-//
-//							}
-//
-//
-//							}
-//
 						for(Warehouse warehouse : warehouseList){
 							List<Inventory> inventoriesForOneWareHouse = inventoryList
 									.stream()
@@ -4515,7 +4493,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 						builder.setSize(results.size());
 						builder.setSuccess(true);
 						return builder.build();
-
 					}else {
 						builder.setBody(results);
 						builder.setStatusCode(401);
@@ -4534,12 +4511,14 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 				return builder.build();
 			}
 		}
+//		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
 		builder.setBody(results);
 		builder.setStatusCode(401);
 		builder.setMessage("No Data Found");
 		builder.setSize(results.size());
 		builder.setSuccess(false);
 		return builder.build();
+
 	}
 
 }

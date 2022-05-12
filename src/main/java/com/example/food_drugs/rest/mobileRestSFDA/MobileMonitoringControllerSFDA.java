@@ -3,6 +3,7 @@ package com.example.food_drugs.rest.mobileRestSFDA;
 import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
 import com.example.food_drugs.dto.responses.ResponseWrapper;
 import com.example.food_drugs.dto.responses.mobile.DeviceMonitoringResponse;
+import com.example.food_drugs.dto.responses.mobile.InventoryDataResponse;
 import com.example.food_drugs.dto.responses.mobile.MonitoringDevicePositionResponse;
 import com.example.food_drugs.service.mobile.Impl.MonitoringServiceImpl;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,11 @@ public class MobileMonitoringControllerSFDA {
     public ResponseWrapper<MonitoringDevicePositionResponse> getDevicePosition(@RequestHeader(value = "TOKEN") String TOKEN ,
                                                                                @RequestParam(value = "deviceId") Long deviceId){
         return monitoringService.monitoringGetDevicePosition(TOKEN ,deviceId);
+    }
+    @GetMapping(path = "/inventories/details")
+    public ResponseWrapper<InventoryDataResponse>getDetailsInventory(@RequestHeader(value = "TOKEN") String TOKEN ,
+                                                                     @RequestParam(value = "inventoryId") Long inventoryId){
+        return monitoringService.monitorringGetDetailsInventory(TOKEN,inventoryId);
     }
 
 }

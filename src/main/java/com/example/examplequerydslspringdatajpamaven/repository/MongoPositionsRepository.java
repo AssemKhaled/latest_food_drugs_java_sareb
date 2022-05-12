@@ -2,6 +2,7 @@ package com.example.examplequerydslspringdatajpamaven.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.example.food_drugs.entity.MonogoInventoryLastData;
 import org.springframework.data.domain.Pageable;
@@ -47,5 +48,6 @@ public interface MongoPositionsRepository extends MongoRepository<MongoPositions
 	List<MongoPositions> findAllByDeviceidAndDevicetimeBetweenOrderByDevicetimeDesc(Long deviceId, Date start, Date end, Pageable pageable);
 
 	Integer countAllByDeviceidAndDevicetimeBetween(Long deviceId, Date start, Date end);
+	Optional<MongoPositions> findAllByDeviceid(Long deviceId);
 }
 

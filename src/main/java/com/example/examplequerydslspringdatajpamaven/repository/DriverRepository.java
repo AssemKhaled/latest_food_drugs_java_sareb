@@ -144,4 +144,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long>, QueryDslP
 			+ " where tc_drivers.name=:name and tc_drivers.uniqueid=:uniqueid  "
 			+ " and tc_user_driver.userid=:userId and tc_drivers.delete_date IS NULL order by tc_drivers.id DESC limit 0,1 ", nativeQuery = true)
 	public Long getDriverIdByName(@Param("userId") Long id,@Param("name") String name,@Param("uniqueid") String uniqueid);
+
+	Driver findById(Long id);
 }

@@ -8,7 +8,15 @@ import lombok.*;
 @Getter
 @Builder
 public class MonitoringDevicePositionResponse {
-    Double speed ;
+    String deviceName;
+    String driverName;
+    String lastupdate;
+    String sequence_num;
+    String trackerimei;
+    String mobile_num;
+    Double lasttemp;
+    Double lasthum;
+    Double speed;
     Double temperature ;
     Double humidity ;
     Double latitude ;
