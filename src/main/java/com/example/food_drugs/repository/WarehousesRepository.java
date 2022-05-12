@@ -20,7 +20,7 @@ public interface WarehousesRepository extends JpaRepository<Warehouse, Long>, Qu
 	Optional<List<Warehouse>> findAllByUserIdInAndDeleteDate(List<Long> userIds, Date deleteDate);
 	Optional<List<Warehouse>> findAllByUserIdInAndDeleteDate(List<Long> userIds, Date deleteDate,Pageable pageable);
 
-	@Query(value = "SELECT count(tc_warehouses.id) FROM tc_warehouses " + 
+	@Query(value = "SELECT count(tc_warehouses.id) FROM tc_warehouses " +
 			"where tc_warehouses.userId IN (:userIds) and tc_warehouses.delete_date is null ",nativeQuery = true )
 	public Integer getTotalNumberOfUserWarehouse(@Param("userIds")List<Long> userIds);
 	

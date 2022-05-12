@@ -8,6 +8,7 @@ import lombok.*;
 @Getter
 @Builder
 public class AttributesWrapper {
+    //Km4eUL9Ug4tUH5pSj78c
     String activity ;
     String storingCategory;
 }

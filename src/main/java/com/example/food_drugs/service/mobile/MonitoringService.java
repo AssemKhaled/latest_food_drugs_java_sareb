@@ -2,10 +2,12 @@ package com.example.food_drugs.service.mobile;
 
 import java.util.*;
 
+import com.example.food_drugs.dto.ApiResponse;
 import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
 import com.example.food_drugs.dto.responses.ResponseWrapper;
 import com.example.food_drugs.dto.responses.mobile.DeviceMonitoringResponse;
 import com.example.food_drugs.dto.responses.mobile.MonitoringDevicePositionResponse;
+import com.example.food_drugs.dto.responses.mobile.WareHouseInvLastDataResponse;
 
 
 public interface MonitoringService {

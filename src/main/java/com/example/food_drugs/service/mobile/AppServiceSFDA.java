@@ -52,6 +52,4 @@ public interface AppServiceSFDA {
 	public ResponseEntity<?> getVehicleTempHumApp(String TOKEN,Long [] deviceId,Long [] groupId,int offset,String start,String end,String search,Long userId,String exportData);
 
 	ApiResponse<List<WareHouseInvLastDataResponse>>getWareHouseInvLastData(String TOKEN, Long userId, int whSize, int offset, String search);
-
-
 }

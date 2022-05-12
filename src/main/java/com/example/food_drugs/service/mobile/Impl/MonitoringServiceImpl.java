@@ -1,8 +1,10 @@
 package com.example.food_drugs.service.mobile.Impl;
 
 import com.example.examplequerydslspringdatajpamaven.entity.Device;
+import com.example.food_drugs.dto.ApiResponse;
 import com.example.food_drugs.dto.AttributesWrapper;
 
+import com.example.food_drugs.dto.responses.mobile.WareHouseInvLastDataResponse;
 import com.example.food_drugs.entity.MonogoInventoryLastData;
 import com.example.food_drugs.entity.Position;
 import com.example.food_drugs.helpers.ResponseHandler;
@@ -203,5 +205,6 @@ public class MonitoringServiceImpl implements MonitoringService {
 
 
     }
+
 
 }
