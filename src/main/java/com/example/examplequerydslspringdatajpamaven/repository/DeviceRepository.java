@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.transaction.Transactional;
+
+import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -91,33 +93,52 @@ public interface DeviceRepository extends  JpaRepository<Device, Long>, QueryDsl
 			+ "where tc_devices.lastupdate>date_sub(now(), interval 0 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 3 minute)=false "
 			+ " AND tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null and tc_devices.positionid is not null ", nativeQuery = true)
 	public List<String> getNumberOfOnlineDevicesList(@Param("userIds")List<Long> userIds);
-	
+	@Query(value = "SELECT * FROM tc_devices INNER JOIN tc_user_device ON tc_user_device.deviceid=tc_devices.id "
+			+ "where tc_devices.lastupdate>date_sub(now(), interval 0 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 3 minute)=false "
+			+ " AND tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null and tc_devices.positionid is not null ", nativeQuery = true)
+	List<Device> newGetNumberOfOnlineDevicesList(@Param("userIds")List<Long> userIds);
 	@Query(value = "SELECT tc_devices.positionid FROM tc_devices "
 			+ " where tc_devices.lastupdate>date_sub(now(), interval 0 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 3 minute)=false "
 			+ " AND tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
 	public List<String> getNumberOfOnlineDevicesListByIds(@Param("deviceIds")List<Long> deviceIds);
-	
+	@Query(value = "SELECT * FROM tc_devices "
+			+ " where tc_devices.lastupdate>date_sub(now(), interval 0 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 3 minute)=false "
+			+ " AND tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
+	List<Device> newGetNumberOfOnlineDevicesListByIds(@Param("deviceIds")List<Long> deviceIds);
 	
 	@Query(value = "SELECT tc_devices.positionid FROM tc_devices INNER JOIN tc_user_device ON tc_user_device.deviceid=tc_devices.id "
 			+ "where tc_devices.lastupdate>date_sub(now(), interval 3 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 8 minute)=false "
 			+ " AND tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
 	public List<String> getNumberOfOutOfNetworkDevicesList(@Param("userIds")List<Long> userIds);
+	@Query(value = "SELECT * FROM tc_devices INNER JOIN tc_user_device ON tc_user_device.deviceid=tc_devices.id "
+			+ "where tc_devices.lastupdate>date_sub(now(), interval 3 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
+	List<Device> newGetNumberOfOutOfNetworkDevicesList(@Param("userIds")List<Long> userIds);
 	
 	@Query(value = "SELECT tc_devices.positionid FROM tc_devices INNER JOIN tc_user_device ON tc_user_device.deviceid=tc_devices.id "
 			+ "where tc_devices.lastupdate>date_sub(now(), interval 8 minute)=false "
 			+ " AND tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
 	public List<String> getNumberOfOfflineDevicesList(@Param("userIds")List<Long> userIds);
-	
+	@Query(value = "SELECT * FROM tc_devices INNER JOIN tc_user_device ON tc_user_device.deviceid=tc_devices.id "
+			+ "where tc_devices.lastupdate>date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
+	List<Device> newGetNumberOfOfflineDevicesList(@Param("userIds")List<Long> userIds);
 	@Query(value = "SELECT tc_devices.positionid FROM tc_devices "
 			+ " where  tc_devices.lastupdate>date_sub(now(), interval 8 minute)=false "
 			+ " AND tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
 	public List<String> getNumberOfOfflineDevicesListByIds(@Param("deviceIds")List<Long> deviceIds);
-	
+	@Query(value = "SELECT * FROM tc_devices "
+			+ " where  tc_devices.lastupdate>date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
+	List<Device> newGetNumberOfOfflineDevicesListByIds(@Param("deviceIds")List<Long> deviceIds);
 	@Query(value = "SELECT tc_devices.positionid FROM tc_devices "
 			+ "where tc_devices.lastupdate>date_sub(now(), interval 3 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 8 minute)=false "
 			+ " AND tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
 	public List<String> getNumberOfOutOfNetworkDevicesListByIds(@Param("deviceIds")List<Long> deviceIds);
-	
+	@Query(value = "SELECT * FROM tc_devices "
+			+ "where tc_devices.lastupdate>date_sub(now(), interval 3 minute)=false  AND tc_devices.lastupdate<date_sub(now(), interval 8 minute)=false "
+			+ " AND tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null and tc_devices.positionid is not null", nativeQuery = true)
+	List<Device> newGetNumberOfOutOfNetworkDevicesListByIds(@Param("deviceIds")List<Long> deviceIds);
 	@Query(value = "SELECT count(tc_devices.id) FROM tc_devices INNER JOIN tc_user_device ON tc_devices.id = tc_user_device.deviceid " + 
 			"AND tc_user_device.userid IN (:userIds) WHERE tc_devices.delete_date is null ",nativeQuery = true )
 	public Integer getTotalNumberOfUserDevices(@Param("userIds")List<Long> userIds);
@@ -148,9 +169,12 @@ public interface DeviceRepository extends  JpaRepository<Device, Long>, QueryDsl
 
 	@Query(nativeQuery = true, name = "getDevicesData")
     List<CustomDeviceLiveData> getAllDevicesData(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
-
+	@Query(nativeQuery = true, name = "getNewDevicesData")
+	List<CustomDeviceLiveDataResponse> newGetAllDevicesData(@Param("userIds")List<Long> userIds, @Param("offset") int offset, @Param("search") String search);
 	@Query(nativeQuery = true, name = "getDevicesDataByIds")
     List<CustomDeviceLiveData> getAllDevicesDataByIds(@Param("deviceIds")List<Long> deviceIds,@Param("offset") int offset,@Param("search") String search);
+	@Query(nativeQuery = true, name = "getNewDevicesDataByIds")
+	List<CustomDeviceLiveDataResponse> newGetAllDevicesDataByIds(@Param("deviceIds")List<Long> deviceIds,@Param("offset") int offset,@Param("search") String search);
 
 	
 	@Query(value = " SELECT  count(tc_devices.id) FROM tc_devices " + 

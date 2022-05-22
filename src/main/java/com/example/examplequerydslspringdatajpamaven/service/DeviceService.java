@@ -4,6 +4,9 @@ import java.util.List;
 
 import java.util.Map;
 
+import com.example.examplequerydslspringdatajpamaven.entity.CustomDeviceLiveData;
+import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
+import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
 import org.json.JSONArray;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,7 +46,7 @@ public interface DeviceService {
 	
 	public ResponseEntity<?> getDeviceStatus(String TOKEN,Long userId);
 	
-	public ResponseEntity<?> getAllDeviceLiveData(String TOKEN,Long userId,int offset,String search);
+	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDeviceLiveData(String TOKEN, Long userId, int offset, String search);
 	
 	public ResponseEntity<?> vehicleInfo(String TOKEN,Long deviceId,Long userId);
 	

@@ -23,42 +23,6 @@ public class CustomDeviceLiveData {
 
 
 	private String attributesSTR;
-
-
-	public CustomDeviceLiveData(int id,
-								String deviceName,
-								String uniqueId,
-								String lastUpdate,
-								Boolean expired,
-								String positionId,
-								String photo,
-								String create_date,
-								Long leftDays,
-								Double temperature,
-								Double humidity,
-								String attributesSTR) {
-		this.id = id;
-		this.deviceName = deviceName;
-		this.uniqueId = uniqueId;
-		this.lastUpdate = lastUpdate;
-		this.expired = expired;
-		this.leftDays = leftDays;
-		this.temperature = temperature;
-		this.humidity = humidity;
-		this.create_date = create_date;
-		this.photo = photo;
-		this.positionId = positionId;
-		this.attributesSTR = attributesSTR;
-	}
-
-	public String getAttributesSTR() {
-		return attributesSTR;
-	}
-
-	public void setAttributesSTR(String attributesSTR) {
-		this.attributesSTR = attributesSTR;
-	}
-
 	private int id;
 	private String deviceName;
 	private String uniqueId;
@@ -102,6 +66,35 @@ public class CustomDeviceLiveData {
 	private Double temperature;
 	private Double humidity;
 	private String create_date;
+
+
+
+	public CustomDeviceLiveData(int id,
+								String deviceName,
+								String uniqueId,
+								String lastUpdate,
+								Boolean expired,
+								String positionId,
+								String photo,
+								String create_date,
+								Long leftDays,
+								Double temperature,
+								Double humidity,
+								String attributesSTR) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.uniqueId = uniqueId;
+		this.lastUpdate = lastUpdate;
+		this.expired = expired;
+		this.leftDays = leftDays;
+		this.temperature = temperature;
+		this.humidity = humidity;
+		this.create_date = create_date;
+		this.photo = photo;
+		this.positionId = positionId;
+		this.attributesSTR = attributesSTR;
+	}
+
 
 	public CustomDeviceLiveData(int id, String deviceName, String uniqueId, String lastUpdate, Double weight, Double latitude, Double operator, Double longitude, String address, ArrayList<Map<Object, Object>> lastPoints, Object attributes, String crash, String batteryUnpluged, String powerUnpluged, String todayHoursString, String deviceWorkingHoursPerDay, String driverWorkingHoursPerDay, Double power, String photo, Double speed, String status, String vehicleStatus, String positionId, JSONObject jsonAttributes, String hours, Boolean motion, Boolean valid, String totalDistance, Boolean ignition, String alarm, Double battery, String driverName, String leftLetter, String middleLetter, String rightLetter, String plate_num, String sequence_number, String owner_name, Boolean expired, Long leftDays, Double temperature, Double humidity, String create_date, String attributesSTR) {
 		this.id = id;
@@ -167,7 +160,8 @@ public class CustomDeviceLiveData {
 
 	public void setLeftDays(Long leftDays) {
 		this.leftDays = leftDays;
-	}
+}
+
 
 	public Double getTemperature() {
 		return temperature;
@@ -279,18 +273,18 @@ public class CustomDeviceLiveData {
 	    if(this.lastUpdate != null) {
 	    	SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd  HH:MM:ss");
 	    	TimeZone etTimeZone = TimeZone.getTimeZone("Asia/Riyadh"); //Target timezone
-	         
+
 	        Date currentDate = new Date();
 	        String deviceLastUpdate = FORMATTER.format(lastUpdate);
-	       	         
+
 	        FORMATTER.setTimeZone(etTimeZone);
 	        String now = FORMATTER.format(currentDate);
 	        try {
 				Date date1=new SimpleDateFormat("yyyy-MM-dd  HH:MM:ss").parse(now);
 				Date date2=new SimpleDateFormat("yyyy-MM-dd  HH:MM:ss").parse(deviceLastUpdate);
 				long diff = date1.getTime() - date2.getTime();
-				long diffMinutes = diff / (60 * 1000);  
-				 
+				long diffMinutes = diff / (60 * 1000);
+
                 if(diffMinutes <=3 && diffMinutes >=0)
                 {
                    this.status="online";
@@ -306,12 +300,12 @@ public class CustomDeviceLiveData {
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}  
- 
+			}
+
 	    }
 		if(attributes != null) {
-			
-			
+
+
 		   ObjectMapper mapper = new ObjectMapper();
      	   String json = null;
      	   try {
@@ -348,9 +342,9 @@ public class CustomDeviceLiveData {
 					this.crash = "No";
 					this.PowerUnpluged = "No";
 				}
-				
+
 			}
-			
+
 			if(jsonObject.has("weight")) {
 				this.weight = jsonObject.getDouble("weight");
 			}else
@@ -385,17 +379,17 @@ public class CustomDeviceLiveData {
 				this.ignition = jsonObject.getBoolean("ignition");
 			}
 
-			
+
 		}else {
 			this.weight =0.0;
 			this.deviceWorkingHoursPerDay = "00:00";
 			this.driverWorkingHoursPerDay = "00:00";
-			
+
 		}
 
-		
-		
-		
+
+
+
 	}
 	public CustomDeviceLiveData(int id ,
 								String deviceName ,
@@ -426,19 +420,19 @@ public class CustomDeviceLiveData {
 	    if(this.lastUpdate != null) {
 	    	SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd  HH:MM:ss");
 	    	TimeZone etTimeZone = TimeZone.getTimeZone("Asia/Riyadh"); //Target timezone
-	         
+
 	        Date currentDate = new Date();
 	        String deviceLastUpdate = FORMATTER.format(lastUpdate);
-	       
-	         
+
+
 	        FORMATTER.setTimeZone(etTimeZone);
 	        String now = FORMATTER.format(currentDate);
 	        try {
 				Date date1=new SimpleDateFormat("yyyy-MM-dd  HH:MM:ss").parse(now);
 				Date date2=new SimpleDateFormat("yyyy-MM-dd  HH:MM:ss").parse(deviceLastUpdate);
 				long diff = date1.getTime() - date2.getTime();
-				long diffMinutes = diff / (60 * 1000);  
-				 
+				long diffMinutes = diff / (60 * 1000);
+
               if(diffMinutes <=3 && diffMinutes >=0)
               {
                  this.status="online";
@@ -454,7 +448,7 @@ public class CustomDeviceLiveData {
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}  
+			}
 
 	    }
 		if(attributes != null) {
@@ -495,9 +489,9 @@ public class CustomDeviceLiveData {
 					this.crash = "No";
 					this.PowerUnpluged = "No";
 				}
-				
+
 			}
-			
+
 			if(jsonObject.has("weight")) {
 				this.weight = jsonObject.getDouble("weight");
 			}else
@@ -532,19 +526,19 @@ public class CustomDeviceLiveData {
 				this.ignition = jsonObject.getBoolean("ignition");
 			}
 
-			
+
 		}else {
 			this.weight =0.0;
 			this.deviceWorkingHoursPerDay = "00:00";
 			this.driverWorkingHoursPerDay = "00:00";
-			
+
 		}
 
-		
-		
-		
+
+
+
 	}
-	
+
 	public CustomDeviceLiveData(int id ,String deviceName , String lastUpdate ,
 			String positionId, String leftLetter,String middleLetter,String rightLetter,String driverName,
 			Double latitude ,Double longitude,Object attributes,String address,Double speed,String plate_num
@@ -619,7 +613,7 @@ public class CustomDeviceLiveData {
 		this.plate_num = plate_num;
 		this.sequence_number = sequence_number;
 		this.owner_name = owner_name;
-		
+
 	}
 	public CustomDeviceLiveData(int id ,String deviceName , String uniqueId,String lastUpdate,
 			Boolean expired ,String positionId,String photo,String create_date, Long leftDays,Double temperature, Double humidity) {
@@ -634,7 +628,7 @@ public class CustomDeviceLiveData {
 		this.leftDays = leftDays;
 		this.temperature = temperature;
 		this.humidity = humidity;
-	   		
+
 	}
 	public CustomDeviceLiveData(int id ,String deviceName , String uniqueId,String lastUpdate ,String positionId,String photo
 			,Object attributes , Double speed,Double latitude ,Double longitude,Boolean valid) {
@@ -650,7 +644,7 @@ public class CustomDeviceLiveData {
 		this.longitude= longitude;
 		this.valid= valid;
 
-	   		
+
 	}
 	
 	
@@ -669,6 +663,7 @@ public class CustomDeviceLiveData {
 	public void setDeviceName(String deviceName) {
 		this.deviceName = deviceName;
 	}
+
 
 	public String getLastUpdate() {
 		return lastUpdate;
@@ -947,8 +942,14 @@ public class CustomDeviceLiveData {
 	public void setLastPoints(ArrayList<Map<Object,Object>> lastPoints) {
 		this.lastPoints = lastPoints;
 	}
-	
-	
+
+	public String getAttributesSTR() {
+		return attributesSTR;
+	}
+
+	public void setAttributesSTR(String attributesSTR) {
+		this.attributesSTR = attributesSTR;
+	}
 	
 
 	

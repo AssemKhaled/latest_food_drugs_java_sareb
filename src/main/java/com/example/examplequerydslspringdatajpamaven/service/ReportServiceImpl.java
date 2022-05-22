@@ -1609,7 +1609,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	 */
 	@Override
 	public ResponseEntity<?> getStopsReport(String TOKEN, Long[] deviceIds, Long[] groupIds, String type, String from,
-			String to, int page, int start, int limit, Long userId, String timeOffset) {
+		                                 	String to, int page, int start, int limit, Long userId, String timeOffset) {
 		logger.info("************************ getStopsReport STARTED ***************************");
 
 		List<StopReport> stopReport = new ArrayList<StopReport>();
@@ -3270,7 +3270,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 	 */
 	@Override
 	public ResponseEntity<?> getSummaryReport(String TOKEN, Long[] deviceIds, Long[] groupIds, String type, String from,
-			String to, int page, int start, int limit, Long userId, String timeOffset) {
+			                                  String to, int page, int start, int limit, Long userId, String timeOffset) {
 		logger.info("************************ getSummaryReport STARTED ***************************");
 		List<SummaryReport> summaryReport = new ArrayList<>();
 		if(TOKEN.equals("")) {

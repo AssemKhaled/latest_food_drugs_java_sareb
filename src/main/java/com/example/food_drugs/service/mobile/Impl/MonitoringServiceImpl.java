@@ -203,7 +203,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
 
 
-    public ResponseWrapper<InventoryDataResponse> monitorringGetDetailsInventory(String TOKEN, Long inventoryId){
+    public ResponseWrapper<InventoryDataResponse> monitoringGetDetailsInventory(String TOKEN, Long inventoryId){
 
         ResponseHandler<InventoryDataResponse> responseHandler = new ResponseHandler<>();
 //        logger.info("******************** monitoringGetDevicePosition Service Started ********************");
@@ -255,6 +255,9 @@ public class MonitoringServiceImpl implements MonitoringService {
         }
 
     }
+
+
+
     @Override
     public ResponseWrapper<List<MongoInventoryWrapper>> monitoringGetAllInventoriesLastInfo(String TOKEN, Long userId, int offset, String search) {
         logger.info("************************ monitoringGetAllInventoriesLastInfo STARTED ***************************");

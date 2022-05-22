@@ -11,6 +11,8 @@ public class CustomMapData {
 	private Long id;
 	private String deviceName;
 	private String lastUpdate;
+	private String deviceTime;
+
 	private String lastUpdateApp;
 	private String positionId;
 	private Integer status;
@@ -25,13 +27,35 @@ public class CustomMapData {
 	private String address;
 	private Double temperature;
 	private Double humidity;
+	private String uniqueid;
 
+	public CustomMapData(Long id, String deviceName, String lastUpdate, String deviceTime, String lastUpdateApp, String positionId, Integer status, Integer vehicleStatus, Integer valid, Integer ignition, Double power, Double operator, Double latitude, Double longitude, Double speed, String address, Double temperature, Double humidity, String uniqueid) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.lastUpdate = lastUpdate;
+		this.deviceTime = deviceTime;
+		this.lastUpdateApp = lastUpdateApp;
+		this.positionId = positionId;
+		this.status = status;
+		this.vehicleStatus = vehicleStatus;
+		this.valid = valid;
+		this.ignition = ignition;
+		this.power = power;
+		this.operator = operator;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.speed = speed;
+		this.address = address;
+		this.temperature = temperature;
+		this.humidity = humidity;
+		this.uniqueid = uniqueid;
+	}
 
 	public CustomMapData() {
 		
 	}
-    public CustomMapData(Long id, String deviceName, String lastUpdate, String positionId,Integer status,Integer vehicleStatus
-    		,Double temperature, Double humidity) {
+    public CustomMapData(Long id, String deviceName, String lastUpdate, String positionId, Integer status, Integer vehicleStatus
+    		, Double temperature, Double humidity) {
     	super();
 		this.id = id;
 		this.deviceName = deviceName;
@@ -42,7 +66,7 @@ public class CustomMapData {
 		this.temperature = temperature;
 		this.humidity = humidity;
 
-    }
+	}
 	
     public CustomMapData(Long id, String deviceName, String lastUpdate, String positionId) {
     	super();
@@ -240,6 +264,18 @@ public class CustomMapData {
 		this.humidity = humidity;
 	}
 
+	public String getUniqueid() {
+		return uniqueid;
+	}
 
+	public void setUniqueid(String uniqueid) {
+		this.uniqueid = uniqueid;
+	}
+	public String getDeviceTime() {
+		return deviceTime;
+	}
 
+	public void setDeviceTime(String deviceTime) {
+		this.deviceTime = deviceTime;
+	}
 }

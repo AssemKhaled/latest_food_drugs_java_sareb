@@ -1,6 +1,9 @@
 package com.example.examplequerydslspringdatajpamaven.rest;
 
 
+import com.example.examplequerydslspringdatajpamaven.entity.CustomDeviceLiveData;
+import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
+import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -40,10 +43,10 @@ public class DashBoardRestController {
 	}
 	
 	@GetMapping(path = "/getAllDevicesLastInfo")
-	public ResponseEntity<?> getAllDevicesLastInfo(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
-			                                       @RequestParam (value = "userId", defaultValue = "0") Long userId,
-												   @RequestParam (value = "offset", defaultValue = "0")int offset,
-												   @RequestParam (value = "search", defaultValue = "") String search ){
+	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDevicesLastInfo(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																								 @RequestParam (value = "userId", defaultValue = "0") Long userId,
+																								 @RequestParam (value = "offset", defaultValue = "0")int offset,
+																								 @RequestParam (value = "search", defaultValue = "") String search ){
 		return deviceService.getAllDeviceLiveData(TOKEN,userId, offset, search);
 
 	}

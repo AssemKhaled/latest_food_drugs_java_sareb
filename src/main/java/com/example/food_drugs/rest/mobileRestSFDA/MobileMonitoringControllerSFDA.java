@@ -39,7 +39,7 @@ public class MobileMonitoringControllerSFDA {
     @GetMapping(path = "/inventories/details")
     public ResponseWrapper<InventoryDataResponse>getDetailsInventory(@RequestHeader(value = "TOKEN") String TOKEN ,
                                                                      @RequestParam(value = "inventoryId") Long inventoryId){
-        return monitoringService.monitorringGetDetailsInventory(TOKEN,inventoryId);
+        return monitoringService.monitoringGetDetailsInventory(TOKEN,inventoryId);
     }
 
 }

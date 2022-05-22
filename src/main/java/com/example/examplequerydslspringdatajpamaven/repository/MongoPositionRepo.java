@@ -2578,9 +2578,7 @@ public class MongoPositionRepo {
 	
 	public List<CustomMapData> getOfflineList(List<String> positionIds){
 
-		
 
-		
 		List<CustomMapData> positions = new ArrayList<CustomMapData>();
 
 		List<ObjectId> ids = new ArrayList<ObjectId>();
@@ -2630,7 +2628,7 @@ public class MongoPositionRepo {
 
 	    					position.setTemperature(roundTemp);
 	    					position.setHumidity(roundHum);
-	            			
+
 	            		}
 	            		
 	            	}

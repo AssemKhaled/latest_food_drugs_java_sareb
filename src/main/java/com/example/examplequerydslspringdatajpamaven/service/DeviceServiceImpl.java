@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
+import com.example.food_drugs.helpers.LiveDataMapping;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -109,7 +111,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	
 	@Autowired
 	private MongoPositionsRepository mongoPositionsRepository;
-	
+	@Autowired
+	private LiveDataMapping liveDataMapping;
 	@Value("${sendCommand}")
 	private String sendCommand;
 	
@@ -1713,29 +1716,30 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	 * get data of devices by limit 10 if it has position get data from mongo if no get only intial data
 	 */
 	@Override
-	public ResponseEntity<?> getAllDeviceLiveData(String TOKEN,Long userId,int offset,String search) {
+	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDeviceLiveData(String TOKEN,Long userId,int offset,String search) {
 		// TODO Auto-generated method stub
 		if(TOKEN.equals("")) {
-			 List<Device> devices = null;
-			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",devices);
+//			 List<Device> devices = null;
+			 getObjectResponse = new GetObjectResponse<>(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required", null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
 		
 		if(super.checkActive(TOKEN)!= null)
 		{
-			return super.checkActive(TOKEN);
+			getObjectResponse = new GetObjectResponse<>(HttpStatus.UNAUTHORIZED.value(), "UNAUTORIZED",null);
+			return  ResponseEntity.status(401).body(getObjectResponse);
 		}
 		if(userId.equals(0)) {
-			 List<CustomDeviceLiveData> allDevicesLiveData=	null;
-		    getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is required",allDevicesLiveData);
+			 List<CustomDeviceLiveDataResponse> allDevicesLiveData=	null;
+		    getObjectResponse = new GetObjectResponse<>(HttpStatus.BAD_REQUEST.value(), "User ID is required",allDevicesLiveData);
 			
 			logger.info("************************ getDevicesStatusAndDrives ENDED ***************************");
 			return ResponseEntity.badRequest().body(getObjectResponse);
 		}
 	    User loggedUser = userService.findById(userId);
 	    if( loggedUser == null) {
-	    	 List<CustomDeviceLiveData> allDevicesLiveData=	null;
-			    getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "Logged user is not found ",allDevicesLiveData);
+	    	 List<CustomDeviceLiveDataResponse> allDevicesLiveData=	null;
+			    getObjectResponse = new GetObjectResponse<>(HttpStatus.NOT_FOUND.value(), "Logged user is not found ",allDevicesLiveData);
 				
 				logger.info("************************ getDevicesStatusAndDrives ENDED ***************************");
 				return ResponseEntity.status(404).body(getObjectResponse);
@@ -1745,10 +1749,10 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	    if(loggedUser.getAccountType().equals(4)) {
 			 
 			List<Long> deviceIds = userClientDeviceRepository.getDevicesIds(userId);
-			List<CustomDeviceLiveData> allDevicesLiveData = new ArrayList<CustomDeviceLiveData>();
+			List<CustomDeviceLiveDataResponse> allDevicesLiveData = new ArrayList<>();
 			Integer size=0;
 			if(deviceIds.size() >0) {
-				allDevicesLiveData=	deviceRepository.getAllDevicesDataByIds(deviceIds, offset, search);
+				allDevicesLiveData=	deviceRepository.newGetAllDevicesDataByIds(deviceIds, offset, search);
 			    size=deviceRepository.getAllDevicesLiveDataSizeByIds(deviceIds,search);
 			    if(size > 0) {
 					for(int i=0;i<allDevicesLiveData.size();i++) {
@@ -2010,7 +2014,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 				}
 			}
 		    
-		    getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",allDevicesLiveData,size);
+		    getObjectResponse = new GetObjectResponse<>(HttpStatus.OK.value(), "success",allDevicesLiveData,size);
 			
 			logger.info("************************ getDevicesStatusAndDrives ENDED ***************************");
 			return ResponseEntity.ok().body(getObjectResponse);
@@ -2027,9 +2031,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					 usersIds.add(object.getId());
 				 }
 			 }
-	    
-	     
-			List<CustomDeviceLiveData> allDevicesLiveData=	deviceRepository.getAllDevicesData(usersIds, offset, search);
+
+			List<CustomDeviceLiveDataResponse> allDevicesLiveData = deviceRepository.newGetAllDevicesData(usersIds, offset, search);
 		    Integer size=deviceRepository.getAllDevicesLiveDataSize(usersIds,search);
 		    if(size > 0) {
 				for(int i=0;i<allDevicesLiveData.size();i++) {
@@ -2291,7 +2294,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 		    
 		    
 		    
-		    getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",allDevicesLiveData,size);
+		    getObjectResponse = new GetObjectResponse<>(HttpStatus.OK.value(), "success",allDevicesLiveData,size);
 			
 			logger.info("************************ getDevicesStatusAndDrives ENDED ***************************");
 			return ResponseEntity.ok().body(getObjectResponse);
@@ -2307,6 +2310,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	@Override
 	public ResponseEntity<?> getAllDeviceLiveDataMap(String TOKEN,Long userId) {
 		// TODO Auto-generated method stub
+		List<String> positionIds = new ArrayList<>();
 		if(TOKEN.equals("")) {
 			 List<Device> devices = null;
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",devices);
@@ -2338,8 +2342,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	    if(loggedUser.getAccountType().equals(4)) {
 			 
 			List<Long> deviceIds = userClientDeviceRepository.getDevicesIds(userId);
-			List<CustomMapData> allDevicesLiveDataNoPosition = new ArrayList<CustomMapData>();
-            List<CustomMapData> allDevices = new ArrayList<CustomMapData>();
+			List<CustomMapData> allDevicesLiveDataNoPosition;
+            List<CustomMapData> allDevices = new ArrayList<>();
 
 			if(deviceIds.size()>0) {
 				allDevicesLiveDataNoPosition =	deviceRepository.getAllDevicesDataMapByIds(deviceIds);
@@ -2349,26 +2353,40 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 
 				}
 
-				List<String> positionIdsOffline =  deviceRepository.getNumberOfOfflineDevicesListByIds(deviceIds);
-				List<String> positionIdsOutOfNetwork =  deviceRepository.getNumberOfOutOfNetworkDevicesListByIds(deviceIds);
-				List<String> positionIdsOnline =  deviceRepository.getNumberOfOnlineDevicesListByIds(deviceIds);
-
+//				List<String> positionIdsOffline =  deviceRepository.getNumberOfOfflineDevicesListByIds(deviceIds);
+			    List<Device> positionIdsOffline = deviceRepository.newGetNumberOfOfflineDevicesListByIds(deviceIds);
+//				List<String> positionIdsOutOfNetwork =  deviceRepository.getNumberOfOutOfNetworkDevicesListByIds(deviceIds);
+				List<Device> positionIdsOutOfNetwork =  deviceRepository.newGetNumberOfOutOfNetworkDevicesListByIds(deviceIds);
+//				List<String> positionIdsOnline =  deviceRepository.getNumberOfOnlineDevicesListByIds(deviceIds);
+				List<Device> positionIdsOnline =  deviceRepository.newGetNumberOfOnlineDevicesListByIds(deviceIds);
 
 
 				if(positionIdsOffline.size() > 0 ) {
-					List<CustomMapData> allDevicesPositionOffline = mongoPositionRepo.getOfflineList(positionIdsOffline);
+					for (Device device:positionIdsOffline) {
+						positionIds.add(device.getPositionid());
+					}
+//					List<CustomMapData> allDevicesPositionOffline = mongoPositionRepo.getOfflineList(positionIds);
+					List<CustomMapData> allDevicesPositionOffline = liveDataMapping.getList(positionIds,positionIdsOffline,"offline");
 					allDevices.addAll(allDevicesPositionOffline);
 
 				}
 				
 				if(positionIdsOutOfNetwork.size() > 0 ) {
-					List<CustomMapData> allDevicesPositionOutOfNetwork= mongoPositionRepo.getOutOfNetworkList(positionIdsOutOfNetwork);
+					for (Device device:positionIdsOutOfNetwork) {
+						positionIds.add(device.getPositionid());
+					}
+//					List<CustomMapData> allDevicesPositionOutOfNetwork= mongoPositionRepo.getOutOfNetworkList(positionIds);
+					List<CustomMapData> allDevicesPositionOutOfNetwork = liveDataMapping.getList(positionIds,positionIdsOutOfNetwork,"outOfNetwork");
 					allDevices.addAll(allDevicesPositionOutOfNetwork);
 
 				}
 				
 				if(positionIdsOnline.size() > 0 ) {
-					List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIdsOnline);
+					for (Device device:positionIdsOnline) {
+						positionIds.add(device.getPositionid());
+					}
+//					List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIds);
+					List<CustomMapData> allDevicesPositionOnline = liveDataMapping.getList(positionIds,positionIdsOnline,"online");
 					allDevices.addAll(allDevicesPositionOnline);
 
 				}
@@ -2402,28 +2420,48 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 				allDevices.addAll(allDevicesNoPosition);
 
 			}
-			
-			
 
-			List<String> positionIdsOffline =  deviceRepository.getNumberOfOfflineDevicesList(usersIds);
-			List<String> positionIdsOutOfNetwork =  deviceRepository.getNumberOfOutOfNetworkDevicesList(usersIds);
-			List<String> positionIdsOnline =  deviceRepository.getNumberOfOnlineDevicesList(usersIds);
+
+//			List<String> positionIdsOffline =  deviceRepository.getNumberOfOfflineDevicesList(usersIds);
+			List<Device> positionIdsOffline = deviceRepository.newGetNumberOfOfflineDevicesList(usersIds);
+//			List<String> positionIdsOutOfNetwork =  deviceRepository.getNumberOfOutOfNetworkDevicesList(usersIds);
+			List<Device> positionIdsOutOfNetwork =  deviceRepository.newGetNumberOfOutOfNetworkDevicesList(usersIds);
+//			List<String> positionIdsOnline =  deviceRepository.getNumberOfOnlineDevicesList(usersIds);
+			List<Device> positionIdsOnline =  deviceRepository.newGetNumberOfOnlineDevicesList(usersIds);
 
 			if(positionIdsOffline.size() > 0 ) {
-				List<CustomMapData> allDevicesPositionOffline = mongoPositionRepo.getOfflineList(positionIdsOffline);
+				for (Device device:positionIdsOffline) {
+					positionIds.add(device.getPositionid());
+				}
+//					List<CustomMapData> allDevicesPositionOffline = mongoPositionRepo.getOfflineList(positionIds);
+				List<CustomMapData> allDevicesPositionOffline = liveDataMapping.getList(positionIds,positionIdsOffline,"offline");
 				allDevices.addAll(allDevicesPositionOffline);
+//				List<CustomMapData> allDevicesPositionOffline = mongoPositionRepo.getOfflineList(positionIdsOffline);
+//				allDevices.addAll(allDevicesPositionOffline);
 
 			}
 			
 			if(positionIdsOutOfNetwork.size() > 0 ) {
-				List<CustomMapData> allDevicesPositionOutOfNetwork= mongoPositionRepo.getOutOfNetworkList(positionIdsOutOfNetwork);
+				for (Device device:positionIdsOutOfNetwork) {
+					positionIds.add(device.getPositionid());
+				}
+//					List<CustomMapData> allDevicesPositionOutOfNetwork= mongoPositionRepo.getOutOfNetworkList(positionIds);
+				List<CustomMapData> allDevicesPositionOutOfNetwork = liveDataMapping.getList(positionIds,positionIdsOutOfNetwork,"outOfNetwork");
 				allDevices.addAll(allDevicesPositionOutOfNetwork);
+//				List<CustomMapData> allDevicesPositionOutOfNetwork= mongoPositionRepo.getOutOfNetworkList(positionIdsOutOfNetwork);
+//				allDevices.addAll(allDevicesPositionOutOfNetwork);
 
 			}
 			
 			if(positionIdsOnline.size() > 0 ) {
-				List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIdsOnline);
+				for (Device device:positionIdsOnline) {
+					positionIds.add(device.getPositionid());
+				}
+//					List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIds);
+				List<CustomMapData> allDevicesPositionOnline = liveDataMapping.getList(positionIds,positionIdsOnline,"online");
 				allDevices.addAll(allDevicesPositionOnline);
+//				List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIdsOnline);
+//				allDevices.addAll(allDevicesPositionOnline);
 
 			}
 		    getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",allDevices);

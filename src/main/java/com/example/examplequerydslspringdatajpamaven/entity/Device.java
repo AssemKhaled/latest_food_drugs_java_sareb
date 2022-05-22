@@ -19,6 +19,8 @@ import javax.persistence.NamedNativeQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
+
+import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @SqlResultSetMappings({
@@ -251,7 +253,30 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
            ),
            
         }
-    ),
+    ),@SqlResultSetMapping(
+		name="NewDevicesData",
+		classes={
+				@ConstructorResult(
+						targetClass=CustomDeviceLiveDataResponse.class,
+						columns={
+								@ColumnResult(name="id",type=int.class),
+								@ColumnResult(name="deviceName",type=String.class),
+								@ColumnResult(name="uniqueId",type=String.class),
+								@ColumnResult(name="lastUpdate",type=String.class),
+								@ColumnResult(name="expired",type=Boolean.class),
+								@ColumnResult(name="positionId",type=String.class),
+								@ColumnResult(name="photo",type=String.class),
+								@ColumnResult(name="create_date",type=String.class),
+								@ColumnResult(name="temperature",type=Double.class),
+								@ColumnResult(name="leftDays",type=Long.class),
+								@ColumnResult(name="humidity",type=Double.class),
+								@ColumnResult(name="attributesSTR",type=String.class)
+
+						}
+				),
+
+		}
+),
 	@SqlResultSetMapping(
         name="vehicleInfo",
         classes={
@@ -488,7 +513,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " where tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null "
 			+ "  AND (  (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"
 			+ " GROUP BY tc_devices.id LIMIT :offset,10"),
-	
+
+	@NamedNativeQuery(name="getNewDevicesData",
+	resultSetMapping="NewDevicesData",
+	query=" SELECT  tc_devices.id as id ,tc_devices.uniqueid as uniqueId ,tc_devices.name as deviceName ,"
+			+ " tc_devices.lastupdate as lastUpdate, tc_devices.expired as expired, " +
+			"  tc_devices.positionid as positionId, " +
+			" tc_devices.photo as photo ,tc_devices.create_date as create_date "
+			+ ", DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays  "
+			+ " , tc_devices.lastTemp as temperature , tc_devices.lastHum as humidity ," +
+			"tc_devices.attributes as attributesSTR "
+			+ "FROM tc_devices "
+			+ " INNER JOIN  tc_user_device ON tc_devices.id=tc_user_device.deviceid "
+			+ " where tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null "
+			+ "  AND (  (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"
+			+ " GROUP BY tc_devices.id LIMIT :offset,10"),
+
 	@NamedNativeQuery(name="getDevicesDataByIds", 
 	resultSetMapping="DevicesData",
 	query=" SELECT  tc_devices.id as id ,tc_devices.uniqueid as uniqueId ,tc_devices.name as deviceName ,"
@@ -502,7 +542,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " where tc_devices.id IN (:deviceIds) and tc_devices.delete_date is null "
 			+ "  AND ( (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"
 			+ " GROUP BY tc_devices.id LIMIT :offset,10"),
-			
+
+	@NamedNativeQuery(name="getNewDevicesDataByIds",
+	resultSetMapping="NewDevicesData",
+	query=" SELECT  tc_devices.id as id ,tc_devices.uniqueid as uniqueId ,tc_devices.name as deviceName ,"
+			+ " tc_devices.lastupdate as lastUpdate, tc_devices.expired as expired, " +
+			"  tc_devices.positionid as positionId, " +
+			" tc_devices.photo as photo ,tc_devices.create_date as create_date "
+			+ ", DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays  "
+			+ " , tc_devices.lastTemp as temperature , tc_devices.lastHum as humidity ," +
+			"tc_devices.attributes as attributesSTR "
+			+ "FROM tc_devices "
+			+ " INNER JOIN  tc_user_device ON tc_devices.id=tc_user_device.deviceid "
+			+ " where tc_user_device.userid IN (:userIds) and tc_devices.delete_date is null "
+			+ "  AND (  (tc_devices.uniqueid LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.name LIKE LOWER(CONCAT('%',:search, '%'))) OR (tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))))"
+			+ " GROUP BY tc_devices.id LIMIT :offset,10"),
+
 	@NamedNativeQuery(name="getDevicesLiveDataMap", 
 	resultSetMapping="DevicesLiveDataMap", 
 	query="SELECT tc_devices.id as id ,tc_devices.name as deviceName , tc_devices.lastupdate as lastUpdate,tc_devices.positionid as positionId , " 
@@ -790,6 +845,7 @@ public class Device extends Attributes{
 
 	@Column(name = "end_date")
 	private Date endDate;
+
 
 	public Date getStartDate() {
 		return startDate;
