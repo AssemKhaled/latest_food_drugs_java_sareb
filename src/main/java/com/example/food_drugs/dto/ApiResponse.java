@@ -12,6 +12,6 @@ public class ApiResponse<T> {
     private Boolean success;
     private String message;
     private int size;
-    private T body;
+    private T entity;
 
 }

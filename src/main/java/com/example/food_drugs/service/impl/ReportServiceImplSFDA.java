@@ -13,12 +13,10 @@ import com.example.examplequerydslspringdatajpamaven.responses.AlarmSectionWrapp
 import com.example.food_drugs.dto.responses.*;
 import com.example.food_drugs.entity.*;
 import com.example.food_drugs.dto.DeviceTempHum;
-import com.example.food_drugs.helpers.ReportsHelper;
+import com.example.food_drugs.helpers.Impl.ReportsHelper;
 import com.example.food_drugs.mappers.PositionMapper;
 import com.example.food_drugs.repository.*;
-import com.example.food_drugs.dto.responses.*;
 import com.example.food_drugs.service.ReportServiceSFDA;
-import com.example.food_drugs.service.impl.DeviceServiceImplSFDA;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -141,15 +139,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
 		
-		
 		if(!TOKEN.equals("Schedule")) {
 			if(super.checkActive(TOKEN)!= null)
 			{
 				return super.checkActive(TOKEN);
 			}
 		}
-		
-		
+
 		User loggedUser = new User();
 		if(userId != 0) {
 			
@@ -168,9 +164,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
 		}
-		
-		
-		
+
 		List<Long>allInventories= new ArrayList<>();
 		
 		if(inventoryIds.length != 0 ) {
@@ -199,19 +193,15 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 									 parentClient = object;
 									 break;
 								 }
-								 
 								userServiceImpl.resetChildernArray();
 								childs = userServiceImpl.getAllChildernOfUser(parentClient.getId()); 
 							 }
-							 
 						}
 						else {
 							userServiceImpl.resetChildernArray();
 							childs = userServiceImpl.getAllChildernOfUser(userId);
 						}
-						
-						
-						
+
 						User parentChilds = new User();
 						if(!childs.isEmpty()) {
 							for(User object : childs) {
@@ -229,7 +219,6 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						
 						allInventories.add(inventoryId);
 					}
-					
 				}
 			}
 		}
@@ -255,7 +244,6 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			inputFormat.setLenient(false);
 			outputFormat.setLenient(false);
 
-			
 			try {
 				dateFrom = inputFormat.parse(start);
 				start = outputFormat.format(dateFrom);
@@ -296,10 +284,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				}
 				
 			}
-			
-			
-			
-			
+
 			Date today=new Date();
 
 			if(dateFrom.getTime() > dateTo.getTime()) {
@@ -312,12 +297,10 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				logger.info("************************ getInventoriesReport ENDED ***************************");		
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
-
 		}
 		List<InventoryLastData> data = new ArrayList<InventoryLastData>();
 		Integer size=0;
-		
-		
+
 		if(exportData.equals("exportData")) {
 			data = mongoInventoryLastDataRepo.getInventoriesReportSchedule(allInventories, dateFrom, dateTo);
 
@@ -653,7 +636,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	public ResponseEntity<?> getNotificationReportNew(String TOKEN, Long[] inventoryIds, Long[] warehouseIds, int offset,
 			String start, String end, String search, Long userId,String exportData) {
 		logger.info("************************ getInventoriesReport STARTED ***************************");		
-		List<InventoryLastData> inventoriesReport = new ArrayList<InventoryLastData>();
+		List<InventoryLastData> inventoriesReport = new ArrayList<>();
 		if(TOKEN.equals("")) {
 			
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventoriesReport);
@@ -901,7 +884,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		
 	
 		
-		List<InventoryNotification> data = new ArrayList<InventoryNotification>();
+		List<NewInventoryNotificationResponse> data = new ArrayList<>();
 		Integer size=0;
 		
 		
@@ -924,27 +907,27 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 					.findAllByInventoryIdAndCreatedDateBetween(inventoryIds[0],dateFrom,dateTo);
 			for(NotificationWrapper notificationWrapper : noti){
 				if(notificationWrapper.getType().equals("temperature alarm")){
-					data.add(InventoryNotification
+					data.add(NewInventoryNotificationResponse
 							.builder()
 							._id(notificationWrapper.get_id().toString())
 							.type(notificationWrapper.getType())
 							.create_date(notificationWrapper.getCreatedDate().toString())
-							.temperature(notificationWrapper.getAttributes().getValue())
+							.value(notificationWrapper.getAttributes().getValue())
 							.inventory_id(notificationWrapper.getInventoryId())
 							.attributes(notificationWrapper.getAttributes())
 									.inventoryName(inv.getInventoryName())
 									.warehouseName(inv.getWarehouseName())
 							.build());
 				}else {
-					data.add(InventoryNotification
+					data.add(NewInventoryNotificationResponse
 							.builder()
 							._id(notificationWrapper.get_id().toString())
 							.type(notificationWrapper.getType())
 							.create_date(notificationWrapper.getCreatedDate().toString())
-							.humidity(notificationWrapper.getAttributes().getValue())
+							.value(notificationWrapper.getAttributes().getValue())
 							.inventory_id(notificationWrapper.getInventoryId())
 							.attributes(notificationWrapper.getAttributes())
-									.inventoryName(inv.getInventoryName())
+							.inventoryName(inv.getInventoryName())
 							.warehouseName(inv.getWarehouseName())
 							.build());
 				}
@@ -957,7 +940,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		}
 		
 		if(!TOKEN.equals("Schedule")) {
-			data = mongoInventoryNotificationRepo.getNotificationsReport(allInventories, offset, dateFrom, dateTo);			
+			data = mongoInventoryNotificationRepo.newGetNotificationsReport(allInventories, offset, dateFrom, dateTo);
 			if(data.size()>0) {
 				size= mongoInventoryNotificationRepo.getNotificationsReportSize(allInventories,dateFrom, dateTo);
 				for(int i=0;i<data.size();i++) {
@@ -975,7 +958,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 			
 		}
 		else {
-			data = mongoInventoryNotificationRepo.getNotificationsReportSchedule(allInventories, dateFrom, dateTo);
+			data = mongoInventoryNotificationRepo.newGetNotificationsReportSchedule(allInventories, dateFrom, dateTo);
 			if(data.size()>0) {
 				for(int i=0;i<data.size();i++) {
 					
@@ -1252,7 +1235,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 
 
-		List<InventoryNotification> data = new ArrayList<InventoryNotification>();
+		List<InventoryNotification> data;
 		Integer size=0;
 
 

@@ -20,7 +20,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.DeviceTempHum;
 import com.example.food_drugs.dto.StopReport;
 import com.example.food_drugs.dto.SummaryReport;
 import com.example.food_drugs.dto.TripReport;
-import com.example.food_drugs.helpers.ReportsHelper;
+import com.example.food_drugs.helpers.Impl.ReportsHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -4843,8 +4843,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					  Double totalFuel=0.0;
 					  double roundOffFuel = 0.0;
 					  
-					  List<String> duplicateAddressList = new ArrayList<String>();				  
-					  duplicateAddressList.clear();
+					  List<String> duplicateAddressList = new ArrayList<>();
+					  List<String> longitudeList = new ArrayList<>();
 
 					  Map devicesStatus = new HashMap();
 					  
@@ -4856,7 +4856,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					  devicesStatus.put("totalDuration", totalDuration);
 				      devicesStatus.put("totalEngineHours", totalEngineHours);
 				      devicesStatus.put("totalSpentFuel", roundOffFuel);
-					  devicesStatus.put("totalVisitedPlace" ,0);
+//					  devicesStatus.put("totalVisitedPlace" ,0);
 					  
 					  Device device= deviceServiceImpl.findById(dev);
 					  
@@ -4874,13 +4874,17 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					  for(StopReport stopReportOne: stopReport) {
 						 
 						  
-						  if((long) stopReportOne.getDeviceId() == (long) dev) {
+						  if(stopReportOne.getDeviceId() == dev) {
 
 
 							  if(stopReportOne.getAddress() != null && stopReportOne.getAddress() != "") {
 								  duplicateAddressList.add(stopReportOne.getAddress());
 							  
 							  }
+							  if(stopReportOne.getLongitude() != null && stopReportOne.getLatitude() != null) {
+								  longitudeList.add(stopReportOne.getLongitude());
+							  }
+
 							  if(stopReportOne.getDuration() != null && stopReportOne.getDuration() != "") {
 
 								  timeDuration += Math.abs(  Long.parseLong(stopReportOne.getDuration())  );
@@ -4942,16 +4946,16 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 						  }
 					     
 					  }
-					  Map<String, Long> couterMap = duplicateAddressList.stream().collect(Collectors.groupingBy(e -> e.toString(),Collectors.counting()));
-					  devicesStatus.put("totalVisitedPlace" ,couterMap.size());
-					  
-					  
-					  if(devicesStatus.size() > 0) {
-						  data.add(devicesStatus);
-					  }
+//					  Map<String, Long> counterMap = duplicateAddressList.stream().collect(Collectors.groupingBy(e -> e,Collectors.counting()));
+					  List<String> totalVisitedPlaces = longitudeList.stream().distinct().collect(Collectors.toList());
+//					  logger.info(" LIST :"+totalVisitedPlaces);
+//					  logger.info("NUMMMMMM ====" + totalVisitedPlaces.size());
+					  devicesStatus.put("totalVisitedPlace" ,totalVisitedPlaces.size());
+					  data.add(devicesStatus);
 
+//					  if(devicesStatus.size() > 0) {
+//					  }
 				  }
-				  
 			  }
 			  
 			  

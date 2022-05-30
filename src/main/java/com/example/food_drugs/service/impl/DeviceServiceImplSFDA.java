@@ -9,7 +9,6 @@ import com.example.food_drugs.dto.AttributesWrapper;
 import com.example.food_drugs.dto.responses.DeviceResponseDataWrapper;
 import com.example.food_drugs.dto.responses.GraphDataWrapper;
 import com.example.food_drugs.dto.responses.GraphObject;
-import com.example.food_drugs.dto.responses.*;
 import com.example.food_drugs.service.DeviceServiceSFDA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -154,7 +153,7 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 					return ResponseEntity.badRequest().body(getObjectResponse);
 			 }
 			 
-		     device.setDelete_date(null);
+		     device.setDeleteDate(null);
 		     deviceRepository.save(device);
 		     
 		     List<Device> devices = null;

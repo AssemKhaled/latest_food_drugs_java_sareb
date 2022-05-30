@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
-import com.example.food_drugs.helpers.LiveDataMapping;
+import com.example.food_drugs.helpers.Impl.LiveDataMapping;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -362,7 +362,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					}
 			    	
 			    	device.setIs_deleted(null);
-			    	device.setDelete_date(null);
+			    	device.setDeleteDate(null);
 			    	
 			    	deviceRepository.save(device);
 			    	List<Device> devices = null;
@@ -762,7 +762,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 		     int month = cal.get(Calendar.MONTH) + 1;
 		     int year = cal.get(Calendar.YEAR);
 		     String date =  Integer.toString(year)+"-"+ Integer.toString(month)+"-"+ Integer.toString(day);
-		     device.setDelete_date(date);
+		     device.setDeleteDate(date);
 		    
 		     Set<Driver> drivers =new HashSet<>() ;
 	         device.setDriver(drivers);
@@ -802,7 +802,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 		if(device == null ) {
 			return null;
 		}
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 
 			return null;
 		}
@@ -847,7 +847,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			return ResponseEntity.status(404).body(getObjectResponse);
 		}
 		else {
-			if(device.getDelete_date() != null) {
+			if(device.getDeleteDate() != null) {
 
 				List<Device> devices = null;
 				getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This device is not found",devices);
@@ -2499,7 +2499,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			}
 			Device device = findById(deviceId);
 			if(device != null ) {
-				if(device.getDelete_date()==null) {
+				if(device.getDeleteDate()==null) {
 					boolean isParent = false;
 					   if(loggedUser.getAccountType().equals(4)) {
 						    Set<User>parentClient = loggedUser.getUsersOfUser();

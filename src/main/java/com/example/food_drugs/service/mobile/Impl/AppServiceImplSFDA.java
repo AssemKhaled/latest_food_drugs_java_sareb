@@ -219,7 +219,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 				return ResponseEntity.badRequest().body(getObjectResponse);
 			}
 
-			device.setDelete_date(null);
+			device.setDeleteDate(null);
 			deviceRepository.save(device);
 
 			List<Device> devices = null;
@@ -4380,7 +4380,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 		if (TOKEN.equals("")) {
 			builder.setMessage("TOKEN id is required");
 			builder.setStatusCode(HttpStatus.BAD_REQUEST.value());
-			builder.setBody(results);
+			builder.setEntity(results);
 			builder.setSize(results.size());
 			builder.setSuccess(false);
 			return builder.build();
@@ -4394,7 +4394,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 			if (user == null) {
 				builder.setMessage("This User is not Found");
 				builder.setStatusCode(HttpStatus.NOT_FOUND.value());
-				builder.setBody(results);
+				builder.setEntity(results);
 				builder.setSize(results.size());
 				builder.setSuccess(false);
 				return builder.build();
@@ -4402,7 +4402,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 			if (user.getDelete_date() != null) {
 				builder.setMessage("This User Was Delete at : " + user.getDelete_date());
 				builder.setStatusCode(HttpStatus.NOT_FOUND.value());
-				builder.setBody(results);
+				builder.setEntity(results);
 				builder.setSize(results.size());
 				builder.setSuccess(false);
 				return builder.build();
@@ -4487,14 +4487,14 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 									.build());
 
 							}
-						builder.setBody(results);
+						builder.setEntity(results);
 						builder.setStatusCode(200);
 						builder.setMessage("Data Found");
 						builder.setSize(results.size());
 						builder.setSuccess(true);
 						return builder.build();
 					}else {
-						builder.setBody(results);
+						builder.setEntity(results);
 						builder.setStatusCode(401);
 						builder.setMessage("No Search Data Found");
 						builder.setSize(results.size());
@@ -4503,7 +4503,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 					}
 				}
 			} else {
-				builder.setBody(results);
+				builder.setEntity(results);
 				builder.setStatusCode(401);
 				builder.setMessage("No WareHouses Data Found");
 				builder.setSize(results.size());
@@ -4512,7 +4512,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 			}
 		}
 //		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
-		builder.setBody(results);
+		builder.setEntity(results);
 		builder.setStatusCode(401);
 		builder.setMessage("No Data Found");
 		builder.setSize(results.size());

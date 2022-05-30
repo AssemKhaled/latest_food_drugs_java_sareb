@@ -1972,7 +1972,7 @@ public class ElmServiceImplSFDA  extends RestServiceController implements ElmSer
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 			logger.info("************************ deviceUpdate ENDED ***************************");
@@ -2808,7 +2808,7 @@ public class ElmServiceImplSFDA  extends RestServiceController implements ElmSer
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 			logger.info("************************ deviceRegistrtaion ENDED ***************************");

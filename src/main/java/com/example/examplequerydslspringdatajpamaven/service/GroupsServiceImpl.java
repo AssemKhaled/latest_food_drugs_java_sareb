@@ -1334,7 +1334,7 @@ public class GroupsServiceImpl extends RestServiceController implements GroupsSe
 						Device device =null;
 						device = deviceService.findById(deviceIdToAssign);
 						if(device != null) {
-							if(device.getDelete_date() == null) {
+							if(device.getDeleteDate() == null) {
 								
 								devices.add(device);
 						        

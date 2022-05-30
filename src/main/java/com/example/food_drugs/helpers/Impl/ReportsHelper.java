@@ -1,4 +1,4 @@
-package com.example.food_drugs.helpers;
+package com.example.food_drugs.helpers.Impl;
 
 import com.example.examplequerydslspringdatajpamaven.entity.*;
 import com.example.examplequerydslspringdatajpamaven.repository.MongoPositionsRepository;
@@ -267,7 +267,7 @@ public class ReportsHelper {
         return summaryReports;
     }
 
-    public List<DeviceTempHum> deviceTempAndHumProcessHandler(List<MongoPositions> mongoPositions,String timeOffset){
+    public List<DeviceTempHum>  deviceTempAndHumProcessHandler(List<MongoPositions> mongoPositions,String timeOffset){
         List<DeviceTempHum> positions = new ArrayList<>();
         ObjectMapper oMapper = new ObjectMapper();
 

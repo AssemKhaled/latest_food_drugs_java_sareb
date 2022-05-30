@@ -1,4 +1,4 @@
-package com.example.food_drugs.helpers;
+package com.example.food_drugs.helpers.Impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

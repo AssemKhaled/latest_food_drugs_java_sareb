@@ -18,7 +18,7 @@ public interface DeviceService {
 	
 	public Device findById(Long deviceId);
 
-	public ResponseEntity<?>  getAllUserDevices(String TOKEN,Long userId , int offset, String search, String exportData);
+	ResponseEntity<?>  getAllUserDevices(String TOKEN,Long userId , int offset, String search, String exportData);
 	
 	public ResponseEntity<?> createDevice(String TOKEN,Device device,Long userId);
 	

@@ -23,7 +23,7 @@ public interface InventoryService {
 
 	public ResponseEntity<?> getInventoriesNotifications(String TOKEN,Long userId,int offset,String search);
 	public ResponseEntity<?> getAllInventoriesLastInfo(String TOKEN,Long userId,int offset,String search);
-	ResponseEntity<?> getAllInventoriesLastInfoNew(String TOKEN,Long userId,int offset,String search);
+	ResponseEntity<?> getAllInventoriesLastInfoNew(String TOKEN,Long userId,int offset,String search,String timeOffset);
 	
 	public ResponseEntity<?> getInventoryUnSelectOfClient(String TOKEN,Long loggedUserId,Long userId);
 	public ResponseEntity<?> assignClientInventories(String TOKEN,Long loggedUserId,Long userId,Long [] inventoryId);

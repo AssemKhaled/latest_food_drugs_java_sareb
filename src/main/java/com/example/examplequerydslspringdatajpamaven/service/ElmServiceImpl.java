@@ -1273,7 +1273,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 			logger.info("************************ deviceUpdate ENDED ***************************");
@@ -1569,7 +1569,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 			logger.info("************************ deviceDelete ENDED ***************************");
@@ -1882,7 +1882,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 			logger.info("************************ deviceRegistrtaion ENDED ***************************");
@@ -2541,7 +2541,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This vehicle is deleted from elm",null);
 			logger.info("************************ deviceInquery ENDED ***************************");
@@ -4284,7 +4284,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 							}
 
 
-							if(device.getDelete_date() != null) {
+							if(device.getDeleteDate() != null) {
 								
 								getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 								logger.info("************************ deviceRegistrtaion ENDED ***************************");
@@ -4740,7 +4740,7 @@ public class ElmServiceImpl extends RestServiceController implements ElmService{
 		}
 
 
-		if(device.getDelete_date() != null) {
+		if(device.getDeleteDate() != null) {
 			
 			getObjectResponse = new GetObjectResponse( HttpStatus.NOT_FOUND.value(), "This Device is deleted",null);
 			logger.info("************************ deviceUpdate ENDED ***************************");

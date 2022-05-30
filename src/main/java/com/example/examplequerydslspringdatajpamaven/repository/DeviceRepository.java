@@ -2,6 +2,7 @@ package com.example.examplequerydslspringdatajpamaven.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.transaction.Transactional;
 
@@ -27,7 +28,9 @@ import com.example.examplequerydslspringdatajpamaven.entity.LastLocationsList;
  */
 @Component
 public interface DeviceRepository extends  JpaRepository<Device, Long>, QueryDslPredicateExecutor<Device> {
-	
+
+	Optional<List<Device>> findAllByUserIdInAndDeleteDate(List<Long> userIds , String deleteDate);
+
 	@Query(value = "SELECT * from tc_devices where tc_devices.simcardNumber=:simcardNumber and tc_devices.delete_date is null",nativeQuery = true)
 	public List<Device> checkSIMCard(@Param("simcardNumber")String simcardNumber);
 	

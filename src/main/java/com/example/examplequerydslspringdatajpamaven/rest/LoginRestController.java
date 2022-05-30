@@ -1,13 +1,16 @@
 package com.example.examplequerydslspringdatajpamaven.rest;
 
 
-import org.springframework.beans.factory.annotation.Autowired;	
+import com.example.examplequerydslspringdatajpamaven.service.LoginService;
+import com.example.examplequerydslspringdatajpamaven.service.LoginServiceImpl;
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.responses.LoginResponse;
+import com.example.food_drugs.exception.ApiGetException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.examplequerydslspringdatajpamaven.service.LoginService;
 
 /**
  * Services Login and Logout Component
@@ -18,14 +21,21 @@ import com.example.examplequerydslspringdatajpamaven.service.LoginService;
 @RestController
 public class LoginRestController {
 	
-	@Autowired
-	private LoginService loginService;
+	private final LoginService loginService;
+
+	public LoginRestController(LoginService loginService) {
+		this.loginService = loginService;
+	}
 
 	@GetMapping(path = "/login")
 	public 	ResponseEntity<?> login(@RequestHeader(value = "Authorization", defaultValue = "")String authtorization ){
-
-		
 		return loginService.login(authtorization);
+//		try{
+//			return ResponseEntity.ok(loginServiceImpl.login(authtorization));
+//
+//		}catch (Exception | Error e){
+//			throw new ApiGetException(e.getLocalizedMessage());
+//		}
 	}
 	
 	@GetMapping(path = "/logout")

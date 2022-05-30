@@ -1,4 +1,4 @@
-package com.Fuinco.Fuinco.Monitoring.exception;
+package com.example.food_drugs.exception;
 
 import lombok.Builder;
 import lombok.Getter;

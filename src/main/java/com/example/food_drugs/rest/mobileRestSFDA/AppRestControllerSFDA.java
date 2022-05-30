@@ -977,7 +977,7 @@ public class AppRestControllerSFDA {
 
 			builder.setMessage(e.getLocalizedMessage());
 			builder.setStatusCode(401);
-			builder.setBody(null);
+			builder.setEntity(null);
 			builder.setSize(0);
 			builder.setSuccess(false);
 

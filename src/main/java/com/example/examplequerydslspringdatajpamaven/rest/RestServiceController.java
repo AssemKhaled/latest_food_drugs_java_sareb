@@ -67,7 +67,7 @@ public class RestServiceController {
 
 			builder.setMessage("TOKEN id is required");
 			builder.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-			builder.setBody(loggedUser);
+			builder.setEntity(loggedUser);
 			builder.setSize(0);
 			builder.setSuccess(false);
 

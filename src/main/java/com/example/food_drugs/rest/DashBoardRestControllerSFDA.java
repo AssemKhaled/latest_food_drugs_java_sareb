@@ -108,8 +108,9 @@ public class DashBoardRestControllerSFDA {
 	public ResponseEntity<?> getAllInventoriesLastInfoNew(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
 													   @RequestParam (value = "userId", defaultValue = "0") Long userId,
 													   @RequestParam (value = "offset", defaultValue = "0")int offset,
-													   @RequestParam (value = "search", defaultValue = "") String search ){
-		return inventoryServiceImpl.getAllInventoriesLastInfoNew(TOKEN,userId, offset, search);
+													   @RequestParam (value = "search", defaultValue = "") String search,
+													   @RequestParam (value = "timeOffset", defaultValue = "") String timeOffset){
+		return inventoryServiceImpl.getAllInventoriesLastInfoNew(TOKEN,userId, offset, search,timeOffset);
 
 	}
 	

@@ -9,9 +9,9 @@ public class ApiResponseBuilder<T> {
     private Boolean success;
     private String message;
     private int size;
-    private T body;
+    private T entity;
 
     public ApiResponse<T> build(){
-        return new ApiResponse<T>(this.statusCode,this.success,this.message,this.size,this.body);
+        return new ApiResponse<T>(this.statusCode,this.success,this.message,this.size,this.entity);
     }
 }

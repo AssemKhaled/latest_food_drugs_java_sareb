@@ -80,7 +80,18 @@ public class Inventory {
 	
 	@Column(name = "update_date_in_elm")
 	private Date update_date_in_elm;
-	
+
+//	@Column(name = "convert_to_utc")
+//	private Boolean convertToUtc;
+//
+//	public Boolean getConvertToUtc() {
+//		return convertToUtc;
+//	}
+//
+//	public void setConvertToUtc(Boolean convertToUtc) {
+//		this.convertToUtc = convertToUtc;
+//	}
+
 	public Long getId() {
 		return id;
 	}

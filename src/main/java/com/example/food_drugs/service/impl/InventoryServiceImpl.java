@@ -19,6 +19,7 @@ import javax.net.ssl.SSLContext;
 
 import com.example.food_drugs.dto.responses.InventorySummaryDataWrapper;
 import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
+import com.example.food_drugs.helpers.Impl.Utilities;
 import com.example.food_drugs.service.InventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -94,6 +95,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	
 	@Autowired
 	private UserServiceImpl userServiceImpl;
+
 	
 	@Autowired
 	private UserRoleService userRoleService;
@@ -121,7 +123,13 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	
 	@Autowired
 	private MongoInventoryLastDataRepo mongoInventoryLastDataRepo;
-	
+
+	private final Utilities utilities;
+
+	public InventoryServiceImpl(Utilities utilities) {
+		this.utilities = utilities;
+	}
+
 	@Override
 	public ResponseEntity<?> getInventoriesList(String TOKEN, Long id, int offset, String search, int active,String exportData) {
         logger.info("************************ getInventoriesList STARTED ***************************");
@@ -1307,7 +1315,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	}
 
 	@Override
-	public ResponseEntity<?> getAllInventoriesLastInfoNew(String TOKEN, Long userId, int offset, String search) {
+	public ResponseEntity<?> getAllInventoriesLastInfoNew(String TOKEN, Long userId, int offset, String search ,String timeOffset) {
 		logger.info("************************ getAllInventoriesLastInfo STARTED ***************************");
 
 		List<InventoryLastData> inventories = new ArrayList<InventoryLastData>();
@@ -1360,7 +1368,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 											.temperature(Double.valueOf(df.format(mongoInv.getTemperature())))
 											.inventoryId(mongoInv.getInventoryId())
 											.inventoryName(inventorySummaryWrapper.getLastDataId())
-											.createDate(simpleDateFormat.format(mongoInv.getCreateDate()))
+											.createDate(utilities.monitoringTimeZoneConverter(mongoInv.getCreateDate(),timeOffset))
 											.humidity(Double.valueOf(df.format(mongoInv.getHumidity())))
 											.build());
 						}
@@ -3186,28 +3194,35 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		for(BindData obj:list) {
 
 			Long inventoryId = inventoryRepository.getInventoryByNumber(obj.getInventoryNumber(), "skarpt");
-		
+			Date dateTime = null;
+			String create_date = null;
 			if(inventoryId  != null) {
 				Inventory inventory = inventoryRepository.findOne(inventoryId);
-				
-				Date dateTime = null;
-				String create_date = null;
-				
-				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
-				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); 
-				
-				try {
-					dateTime = input.parse(obj.getCreate_date().toString());
-				} catch (java.text.ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				create_date = output.format(dateTime);
 
-				System.out.println(create_date);
-				System.out.println(create_date);
-				System.out.println(create_date);
-				System.out.println(create_date);
+				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				if (true){
+					SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+					try{
+						isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+						dateTime = isoFormat.parse(obj.getCreate_date());
+					} catch (Exception e){
+						e.printStackTrace();
+					}
+
+				}
+				else {
+
+					SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+					try {
+						dateTime = input.parse(obj.getCreate_date().toString());
+					} catch (java.text.ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+				create_date = output.format(dateTime);
 
 				Double oldTemp = null;
 				Double oldTHum = null;
@@ -3218,8 +3233,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						oldTHum = check.getHumidity();
 					}
 				}
-				
-				
+
 						
 				ObjectId lastDataId = saveLastDataHandler(inventory,dateTime,obj.getTemperature(),obj.getHumidity());
 

@@ -1,4 +1,4 @@
-package com.example.food_drugs.helpers;
+package com.example.food_drugs.helpers.Impl;
 
 import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
@@ -16,6 +16,19 @@ public class Utilities {
     public double speedConverter(Double speed){
         double convertedSpeed = Math.abs(speed * (1.852));
         return Math.round(convertedSpeed*100.0)/100.0;
+    }
+
+    public String monitoringTimeZoneConverter(Date date, String timeOffset){
+        SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+        if(timeOffset.contains("%2B")){
+            timeOffset = "+" + timeOffset.substring(3);
+        }
+        if(date != null){
+            ZoneOffset zo = ZoneOffset.of(timeOffset);
+            OffsetDateTime odt = OffsetDateTime.ofInstant(date.toInstant(), zo);
+          return String.valueOf(odt).substring(0,19).replace("T", " ");
+        }
+        return null;
     }
 
     public String timeZoneConverter(Date date, String timeOffset){

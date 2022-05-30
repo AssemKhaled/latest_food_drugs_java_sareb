@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 
+import com.example.food_drugs.dto.responses.NewInventoryNotificationResponse;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -339,7 +340,117 @@ public class MongoInventoryNotificationRepo {
 	        
 		return notifications;
 	}
-    
+    public List<NewInventoryNotificationResponse> newGetNotificationsReport(List<Long> allInventories,int offset,Date start,Date end){
+
+
+		Calendar calendarFrom = Calendar.getInstance();
+		calendarFrom.setTime(start);
+		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+		start = calendarFrom.getTime();
+
+		Calendar calendarTo = Calendar.getInstance();
+		calendarTo.setTime(end);
+		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+		end = calendarTo.getTime();
+
+		List<NewInventoryNotificationResponse> notifications = new ArrayList<>();
+
+	    Aggregation aggregation = newAggregation(
+
+
+	            match(Criteria.where("inventory_id").in(allInventories).and("create_date").gte(start).lte(end)),
+	            project("type","attributes","inventory_id").and("create_date").dateAsFormattedString("%Y-%m-%d %H:%M:%S.%LZ").as("create_date"),
+	            sort(Sort.Direction.DESC, "create_date"),
+	            skip(offset),
+	            limit(10)
+
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
+
+
+	        AggregationResults<BasicDBObject> groupResults
+	            = mongoTemplate.aggregate(aggregation,"tc_inventory_notifications", BasicDBObject.class);
+
+
+
+	        if(groupResults.getMappedResults().size() > 0) {
+
+	            Iterator<BasicDBObject> iterator = groupResults.getMappedResults().iterator();
+	            while (iterator.hasNext()) {
+	            	BasicDBObject object = (BasicDBObject) iterator.next();
+
+					NewInventoryNotificationResponse notification = new NewInventoryNotificationResponse();
+                    if(object.containsField("inventory_id") && object.get("inventory_id") != null) {
+
+                    	notification.setInventory_id(object.getLong("inventory_id"));
+
+	            	}
+					if(object.containsField("create_date") && object.get("create_date") != null) {
+
+
+						Date dateTime = null;
+						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+
+						try {
+							dateTime = inputFormat.parse(object.getString("create_date"));
+
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
+
+						notification.setCreate_date(outputFormat.format(dateTime));
+	                }
+					if(object.containsField("attributes") && object.get("attributes") != null) {
+						notification.setAttributes(object.get("attributes").toString());
+
+	            	}
+
+					if(object.containsField("type") && object.get("type") != null) {
+						notification.setType(object.get("type").toString());
+	                	JSONObject attr = new JSONObject(notification.getAttributes().toString());
+
+	                	if(notification.getType().equals("temperature alarm")) {
+							if(attr.has("value")) {
+
+								Double roundTemp = 0.0;
+								roundTemp = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+
+								notification.setValue(roundTemp);
+
+
+							}
+						}
+                        if(notification.getType().equals("humidity alarm")) {
+							if(attr.has("value")) {
+
+								Double roundHum = 0.0;
+								roundHum = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+
+								notification.setValue(roundHum);
+							}
+						}
+
+
+	            	}
+					if(object.containsField("_id") && object.get("_id") != null) {
+						notification.set_id(object.getObjectId("_id").toString());
+
+					}
+					notifications.add(notification);
+
+	            }
+	        }
+
+		return notifications;
+	}
+
     public List<InventoryNotification> getNotificationsReportSchedule(List<Long> allInventories,Date start,Date end){
 		
 		Calendar calendarFrom = Calendar.getInstance();
@@ -445,7 +556,112 @@ public class MongoInventoryNotificationRepo {
 	        
 		return notifications;
 	}
-    
+    public List<NewInventoryNotificationResponse> newGetNotificationsReportSchedule(List<Long> allInventories,Date start,Date end){
+
+		Calendar calendarFrom = Calendar.getInstance();
+		calendarFrom.setTime(start);
+		calendarFrom.add(Calendar.HOUR_OF_DAY, 3);
+		start = calendarFrom.getTime();
+
+		Calendar calendarTo = Calendar.getInstance();
+		calendarTo.setTime(end);
+		calendarTo.add(Calendar.HOUR_OF_DAY, 3);
+		end = calendarTo.getTime();
+
+		List<NewInventoryNotificationResponse> notifications = new ArrayList<>();
+
+	    Aggregation aggregation = newAggregation(
+
+
+	            match(Criteria.where("inventory_id").in(allInventories).and("create_date").gte(start).lte(end)),
+	            project("type","attributes","inventory_id").and("create_date").dateAsFormattedString("%Y-%m-%d %H:%M:%S.%LZ").as("create_date"),
+	            sort(Sort.Direction.DESC, "create_date")
+
+	    		).withOptions(newAggregationOptions().allowDiskUse(true).build());
+
+
+	        AggregationResults<BasicDBObject> groupResults
+	            = mongoTemplate.aggregate(aggregation,"tc_inventory_notifications", BasicDBObject.class);
+
+
+
+	        if(groupResults.getMappedResults().size() > 0) {
+
+	            Iterator<BasicDBObject> iterator = groupResults.getMappedResults().iterator();
+	            while (iterator.hasNext()) {
+	            	BasicDBObject object = (BasicDBObject) iterator.next();
+
+					NewInventoryNotificationResponse notification = new NewInventoryNotificationResponse();
+                    if(object.containsField("inventory_id") && object.get("inventory_id") != null) {
+
+                    	notification.setInventory_id(object.getLong("inventory_id"));
+
+	            	}
+					if(object.containsField("create_date") && object.get("create_date") != null) {
+
+						Date dateTime = null;
+						SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+
+						try {
+							dateTime = inputFormat.parse(object.getString("create_date"));
+
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+
+						Calendar calendarTime = Calendar.getInstance();
+						calendarTime.setTime(dateTime);
+						calendarTime.add(Calendar.HOUR_OF_DAY, 3);
+						dateTime = calendarTime.getTime();
+
+						notification.setCreate_date(outputFormat.format(dateTime));
+
+	                }
+					if(object.containsField("attributes") && object.get("attributes") != null) {
+						notification.setAttributes(object.get("attributes").toString());
+
+	            	}
+
+					if(object.containsField("type") && object.get("type") != null) {
+						notification.setType(object.get("type").toString());
+	                	JSONObject attr = new JSONObject(notification.getAttributes().toString());
+
+	                	if(notification.getType().equals("temperature alarm")) {
+							if(attr.has("value")) {
+
+								Double roundTemp = 0.0;
+								roundTemp = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+
+								notification.setValue(roundTemp);
+							}
+						}
+                        if(notification.getType().equals("humidity alarm")) {
+							if(attr.has("value")) {
+
+								Double roundHum = 0.0;
+								roundHum = Math.round(attr.getDouble("value") * 100.0) / 100.0;
+
+								notification.setValue(roundHum);
+							}
+						}
+
+
+	            	}
+					if(object.containsField("_id") && object.get("_id") != null) {
+						notification.set_id(object.getObjectId("_id").toString());
+
+					}
+					notifications.add(notification);
+
+	            }
+	        }
+
+		return notifications;
+	}
+
     public Integer getNotificationsReportSize(List<Long> allInventories,Date start,Date end){
 		
 		

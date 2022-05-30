@@ -1,4 +1,4 @@
-package com.example.food_drugs.helpers;
+package com.example.food_drugs.helpers.Impl;
 
 import com.example.food_drugs.dto.responses.ResponseWrapper;
 import org.apache.commons.logging.Log;

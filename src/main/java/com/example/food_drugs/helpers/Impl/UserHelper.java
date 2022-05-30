@@ -1,4 +1,4 @@
-package com.example.food_drugs.helpers;
+package com.example.food_drugs.helpers.Impl;
 
 import com.example.examplequerydslspringdatajpamaven.entity.User;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;

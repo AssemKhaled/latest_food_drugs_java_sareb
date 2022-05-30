@@ -375,7 +375,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 				+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 	     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 	     		+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
-	     		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+	     		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(tc_devices.end_date,CURRENT_DATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 	     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 	     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 	     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -395,7 +395,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
     		+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
     		+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm  "
-    		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+    		+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(tc_devices.end_date,CURRENT_DATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
     		+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
     		+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
     		+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -415,8 +415,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
-			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
-			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
+			+ " ,tc_devices.update_date_in_elm as update_date_elm , DDATEDIFF(tc_devices.end_date,CURRENT_DATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null"
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
 			+ " is null INNER JOIN tc_user_device ON tc_user_device.deviceid = tc_devices.id "
@@ -435,7 +435,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm  "
-			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(DATE_ADD(tc_devices.update_date_in_elm, INTERVAL 275 DAY),CURDATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(tc_devices.end_date,CURRENT_DATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null" 
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -446,7 +446,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " OR tc_devices.reference_key LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.sequence_number LIKE LOWER(CONCAT('%',:search, '%')) OR tc_devices.lastupdate LIKE LOWER(CONCAT('%',:search, '%'))"
 			+ " OR tc_drivers.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_geofences.name LIKE LOWER(CONCAT('%',:search, '%')) OR tc_users.name LIKE LOWER(CONCAT('%',:search, '%')) ) "
 			+ " GROUP BY tc_devices.id,tc_drivers.id,tc_users.id "),
-	
+//		DATE_ADD(tc_devices.end_date, INTERVAL 275 DAY)
 	@NamedNativeQuery(name="getDevicesListApp", 
 	resultSetMapping="DevicesListApp", 
 	query=" SELECT tc_devices.id as id ,tc_devices.name as deviceName, tc_devices.uniqueid as uniqueId,"
@@ -733,7 +733,7 @@ public class Device extends Attributes{
 	private Integer is_deleted=null;
 	
 	@Column(name = "delete_date")
-	private String delete_date=null;
+	private String deleteDate =null;
 	
     @Column(name = "init_sensor")
 	private Integer init_sensor;
@@ -863,7 +863,7 @@ public class Device extends Attributes{
 		this.endDate = endDate;
 	}
 
-	public Device(Long id, String name, String uniqueid, String lastupdate, String positionid, String position_id, String phone, String model, String plate_num, String right_letter, String middle_letter, String left_letter, Integer plate_type, String reference_key, Integer is_deleted, String delete_date, Integer init_sensor, Integer init_sensor2, Integer car_weight, String reject_reason, String sequence_number, Integer is_valid, Integer expired, String calibrationData, String fuel, String sensorSettings, String lineData, String create_date, Integer lastWeight, String owner_name, String username, String owner_id, String brand, String made_year, String color, String license_exp, Integer date_type, String photo, String icon, String protocol, String port, String device_type, Date regestration_to_elm_date, String representative, String delete_from_elm, Date delete_from_elm_date, Date update_date_in_elm, String simcardNumber, Long userId, Double lastHum, Double lastTemp, Date startDate, Date endDate, Set<User> user, Set<Driver> driver, Set<Geofence> geofence, Set<Group> groups, Set<Notification> notificationDevice, Set<Attribute> attributeDevice) {
+	public Device(Long id, String name, String uniqueid, String lastupdate, String positionid, String position_id, String phone, String model, String plate_num, String right_letter, String middle_letter, String left_letter, Integer plate_type, String reference_key, Integer is_deleted, String deleteDate, Integer init_sensor, Integer init_sensor2, Integer car_weight, String reject_reason, String sequence_number, Integer is_valid, Integer expired, String calibrationData, String fuel, String sensorSettings, String lineData, String create_date, Integer lastWeight, String owner_name, String username, String owner_id, String brand, String made_year, String color, String license_exp, Integer date_type, String photo, String icon, String protocol, String port, String device_type, Date regestration_to_elm_date, String representative, String delete_from_elm, Date delete_from_elm_date, Date update_date_in_elm, String simcardNumber, Long userId, Double lastHum, Double lastTemp, Date startDate, Date endDate, Set<User> user, Set<Driver> driver, Set<Geofence> geofence, Set<Group> groups, Set<Notification> notificationDevice, Set<Attribute> attributeDevice) {
 		this.id = id;
 		this.name = name;
 		this.uniqueid = uniqueid;
@@ -879,7 +879,7 @@ public class Device extends Attributes{
 		this.plate_type = plate_type;
 		this.reference_key = reference_key;
 		this.is_deleted = is_deleted;
-		this.delete_date = delete_date;
+		this.deleteDate = deleteDate;
 		this.init_sensor = init_sensor;
 		this.init_sensor2 = init_sensor2;
 		this.car_weight = car_weight;
@@ -1212,14 +1212,14 @@ public class Device extends Attributes{
 
 
 
-	public String getDelete_date() {
-		return delete_date;
+	public String getDeleteDate() {
+		return deleteDate;
 	}
 
 
 
-	public void setDelete_date(String delete_date) {
-		this.delete_date = delete_date;
+	public void setDeleteDate(String delete_date) {
+		this.deleteDate = delete_date;
 	}
 
 

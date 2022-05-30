@@ -504,7 +504,7 @@ public class AppServiceImpl extends RestServiceController implements AppService{
 			}
 			Device device = deviceServiceImpl.findById(deviceId);
 			if(device != null ) {
-				if(device.getDelete_date()==null) {
+				if(device.getDeleteDate()==null) {
 					boolean isParent = false;
 					   if(loggedUser.getAccountType().equals(4)) {
 						    Set<User>parentClient = loggedUser.getUsersOfUser();
@@ -4084,7 +4084,7 @@ public class AppServiceImpl extends RestServiceController implements AppService{
 		     int month = cal.get(Calendar.MONTH) + 1;
 		     int year = cal.get(Calendar.YEAR);
 		     String date =  Integer.toString(year)+"-"+ Integer.toString(month)+"-"+ Integer.toString(day);
-		     device.setDelete_date(date);
+		     device.setDeleteDate(date);
 		     
 		     Set<Driver> drivers =new HashSet<>() ;
 	         device.setDriver(drivers);
@@ -4148,7 +4148,7 @@ public class AppServiceImpl extends RestServiceController implements AppService{
 			return ResponseEntity.status(404).body(getObjectResponse);
 		}
 		else {
-			if(device.getDelete_date() != null) {
+			if(device.getDeleteDate() != null) {
 
 				List<Device> devices = null;
 				getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This device is not found",devices);
