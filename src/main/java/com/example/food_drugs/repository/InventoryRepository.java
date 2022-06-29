@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.example.food_drugs.dto.responses.InventoriesAndWarehousesWrapper;
 import com.example.food_drugs.dto.responses.InventorySummaryDataWrapper;
+import com.example.food_drugs.dto.responses.InventorySummaryDataWrapperResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +20,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 
 	List<Inventory> findAllByWarehouseId(Long warehouseId);
 
-	Optional<List<Inventory>> findAllByWarehouseIdIn(List<Long> wareHouseIds , Pageable pageable);
+//	List<Inventory> findAllByUserIdInAndDeleteDate(List<Long> userIds , String deleteDate , Pageable pageable);
+	List<Inventory> findAllByUserIdInAndDeleteDate(List<Long> userIds , String deleteDate );
 
 	Optional<List<Inventory>> findAllByWarehouseIdInAndDeleteDate(List<Long> wareHouseIds, Date deleteDate);
 
@@ -88,11 +90,15 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Que
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null", nativeQuery = true)
 	public List<Long> getAllInventoriesIds(@Param("userIds")List<Long> userIds);
 
-	@Query(value = "SELECT tc_inventories.id as id , tc_inventories.name as name , tc_inventories.lastDataId as lastDataId FROM tc_inventories"
-			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null  " +
+	@Query(value = "SELECT tc_inventories.id as id , tc_inventories.name as name , tc_inventories.lastDataId as lastDataId"
+			+ " FROM tc_inventories WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null  " +
 			"and tc_inventories.lastDataId is Not null LIMIT :offset,10 ", nativeQuery = true)
 	List<InventorySummaryDataWrapper> getAllInventoriesSummaryData(@Param("userIds")List<Long> userIds, @Param("offset") int offset);
-	
+
+	@Query(value = "SELECT tc_inventories.id, tc_inventories.name, tc_inventories.lastDataId, tc_inventories.warehouseId," +
+			"tc_inventories.storingCategory FROM tc_inventories WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null  " +
+			"and tc_inventories.lastDataId is Not null LIMIT :offset,10 ", nativeQuery = true)
+	List<InventorySummaryDataWrapperResponse> getAllInventoriesSummaryDataNew(@Param("userIds")List<Long> userIds, @Param("offset") int offset);
 	@Query(value = "SELECT tc_inventories.* FROM tc_inventories"
 			+ " WHERE tc_inventories.userId IN(:userIds) and tc_inventories.delete_date is null and tc_inventories.protocolType =:type", nativeQuery = true)
 	public List<Inventory> getAllInventoriesTypeProtocolCSV(@Param("userIds") Long userIds,@Param("type") String type);

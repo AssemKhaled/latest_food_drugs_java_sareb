@@ -1,22 +1,22 @@
 package com.example.food_drugs.rest;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.Request.NotificationSettingRequest;
+import com.example.food_drugs.exception.ApiGetException;
+import com.example.food_drugs.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.example.examplequerydslspringdatajpamaven.entity.Notification;
 import com.example.examplequerydslspringdatajpamaven.service.NotificationServiceImpl;
-import com.example.food_drugs.service.impl.NotificationServiceImplSFDA;;
+import com.example.food_drugs.service.impl.NotificationServiceImplSFDA;;import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 
 /**
  * Services of notification component
@@ -121,12 +121,45 @@ public class NotificationsRestControllerSFDA {
 													             @RequestParam (value = "deviceId", defaultValue = "0") Long deviceId,
 													             @RequestParam (value = "groupId", defaultValue = "0") Long groupId,                                              
 																 @RequestParam (value = "userId", defaultValue = "0") Long userId) {
-															
-	
+
     	return  notificationServiceImpl.getNotificationSelect(TOKEN,userId,deviceId,groupId);
 
-		
 	}
-	
-	
+
+	@PostMapping("/notificationSetting")
+	ResponseEntity<ApiResponse<NotificationSettingRequest>> notificationSetting(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																				@RequestParam (value = "userId", defaultValue = "0") Long userId,
+																				@RequestBody NotificationSettingRequest notificationSettingRequest) {
+		try{
+			return ResponseEntity.ok(
+					notificationServiceImplSFDA.notificationSetting(TOKEN,userId,notificationSettingRequest));
+
+		}catch (Exception | Error e){
+			throw new ApiRequestException(e.getLocalizedMessage());
+		}
+	}
+	@GetMapping("/getNotificationSetting")
+	ResponseEntity<ApiResponse<NotificationSettingRequest>> getNotificationSetting(@RequestHeader(value = "TOKEN", defaultValue = "")String TOKEN,
+																				@RequestParam (value = "userId", defaultValue = "0") Long userId) {
+		try{
+			return ResponseEntity.ok(
+					notificationServiceImplSFDA.getNotificationSetting(TOKEN,userId));
+
+		}catch (Exception | Error e){
+			throw new ApiRequestException(e.getLocalizedMessage());
+		}
+	}
+
+
+	@RequestMapping(value = "/sendEmail")
+	public String sendEmail()  {
+
+		try {
+			notificationServiceImplSFDA.sendEmail();
+			return "Email sent successfully";
+		}catch (Exception e){
+			throw new ApiGetException(e.getLocalizedMessage());
+		}
+	}
+
 }

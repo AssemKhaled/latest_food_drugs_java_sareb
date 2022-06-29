@@ -298,7 +298,7 @@ public class DeviceRestControllerSFDA {
 		return deviceServiceImplSFDA.getDeviceGraphDataDashboard(TOKEN,userId,offset,limit);
 	}
 
-	@GetMapping(value = "/getGraphData/v2.0")
+	@GetMapping(value = "/getGraphData/v2.0")//******DEPRECATED*******
 	public ResponseEntity<GetObjectResponse<GraphDataWrapper>> getDeviceGraphDataDashboard(@RequestParam (value = "deviceId", defaultValue = "0") Integer deviceId) {
 		return deviceServiceImplSFDA.getDataForGraphByDeviceID(deviceId);
 	}

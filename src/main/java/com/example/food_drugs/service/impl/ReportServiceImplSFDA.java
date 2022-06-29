@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -688,7 +690,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						if(createdBy.toString().equals(userId.toString())) {
 							isParent=true;
 						}
-						List<User>childs = new ArrayList<User>();
+						List<User>childs;
 						if(loggedUser.getAccountType().equals(4)) {
 							 List<User> parents=userServiceImpl.getAllParentsOfuser(loggedUser,loggedUser.getAccountType());
 							 if(parents.isEmpty()) {
@@ -751,7 +753,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 							isParent=true;
 						}
 						
-						List<User>childs = new ArrayList<User>();
+						List<User>childs;
 						if(loggedUser.getAccountType().equals(4)) {
 							 List<User> parents=userServiceImpl.getAllParentsOfuser(loggedUser,loggedUser.getAccountType());
 							 if(parents.isEmpty()) {
@@ -1488,6 +1490,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 				
 				try {
+					TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+					inputFormat.setTimeZone(etTimeZone);
 					dateFrom = inputFormat.parse(start);
 					start = outputFormat.format(dateFrom);
 					
@@ -1495,6 +1499,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				} catch (ParseException e2) {
 					// TODO Auto-generated catch block
 					try {
+						TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+						inputFormat.setTimeZone(etTimeZone);
 						dateFrom = inputFormat1.parse(start);
 						start = outputFormat.format(dateFrom);
 
@@ -1509,6 +1515,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				}
 				
 				try {
+					TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+					inputFormat.setTimeZone(etTimeZone);
 					dateTo = inputFormat.parse(end);
 					end = outputFormat.format(dateTo);
 					
@@ -1516,6 +1524,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 				} catch (ParseException e2) {
 					// TODO Auto-generated catch block
 					try {
+						TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+						inputFormat.setTimeZone(etTimeZone);
 						dateTo = inputFormat1.parse(end);
 						end = outputFormat.format(dateTo);
 
@@ -1582,7 +1592,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		        }
 			}
 			Integer size = 0;
-			List<MongoPositions> mongoPositionsList = new ArrayList<>();
+			List<MongoPositions> mongoPositionsList;
 			List<DeviceTempHum> deviceTempHumList = new ArrayList<>();
 
 			if(exportData.equals("exportData")) {
@@ -2856,6 +2866,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	@Override
 	public ResponseEntity<?> getDeviceCFRReport(TripDetailsRequest request)  {
 
+		//Request Formatting
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 		LocalDateTime from = LocalDateTime.parse(request.getStartTime(), inputFormatter);
 		LocalDateTime to = LocalDateTime.parse(request.getEndTime(), inputFormatter);
@@ -2976,7 +2987,6 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 
 		return pdfSummary;
 
-		
 	}
 
 	public AlarmsReportResponseWrapper getAlarmSection(long deviceID,String start,String end){
@@ -3173,8 +3183,8 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 	}
 
 	public Double getAvgTemp(Map attributesMap) {
-		int count = 0;
-		Double avg = 0.0;
+//		int count = 0;
+		AtomicReference<Double> avg = new AtomicReference<>(0.0);
 		List<Double> avgs = new ArrayList<>();
 		if(attributesMap.keySet().toString().contains("temp")){
 			attributesMap.keySet().stream().filter(o ->
@@ -3183,14 +3193,13 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 						if(!attributesMap.get(o).equals(0.0) && !attributesMap.get(o).equals(300.0)) {
 							avgs.add((Double) attributesMap.get(o));
 						}
-
 					});
 		}
 		for(Double avrage : avgs){
-			avg+=avrage;
+			avg.updateAndGet(v -> v + avrage);
 		}
 		if(avgs.size()>0){
-			avg/=avgs.size();
+			avg.updateAndGet(v -> v / avgs.size());
 		}
 //		if(attributesMap.containsKey("temp1")) {
 //			if(!attributesMap.get("temp1").equals(0.0) && !attributesMap.get("temp1").equals(300.0)) {
@@ -3274,7 +3283,7 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 //			avg = avg/count;
 //		}
 //
-		return avg;
+		return avg.get();
 		
 	}
 	public Double getHumAvg(Map attributesMap){
@@ -3352,26 +3361,29 @@ public class ReportServiceImplSFDA extends RestServiceController implements Repo
 		return pos;
 	}
 	
-	public Double calcMKT(List<Position> positions) {
+	public Double 	calcMKT(List<Position> positions) {
 		double allExponenials = 0.0;
 		double result = 0.0;
-		for(Position position :positions) {
-			Map attributesMap = position.getAttributes();
-			Double recordAvg = getAvgTemp(attributesMap);
-			 double t1 = -(10000/(recordAvg+273.1));//t1 value is ΔH/RT, according to the formula: H/R=10000K K = 273.1 + temperature, so 10000 divided by K equals t1
-			 double e1 = Math.exp(t1);//Find the value of e to the power of t1 //Math.exp(x) e to the power of x
-			 allExponenials += e1;
-		}
+//		for(Position position :positions) {
+//			Map attributesMap = position.getAttributes();
+//			Double recordAvg = getAvgTemp(attributesMap);
+//			 double t1 = -(10000/(recordAvg+273.1));//t1 value is ΔH/RT, according to the formula: H/R=10000K K = 273.1 + temperature, so 10000 divided by K equals t1
+//			 double e1 = Math.exp(t1);//Find the value of e to the power of t1 //Math.exp(x) e to the power of x
+//			 allExponenials += e1;
+//			allExponenials += position.getExpoDeltaHRTkelvins();
+//			40.2887620398829\\40.23883963989806
+//		}
+//		allExponenials = positions.stream().filter(position -> position.getExpoDeltaHRTkelvins() != null).mapToDouble(Position::getExpoDeltaHRTkelvins).sum();
+	allExponenials = positions
+			.stream()
+			.map(Position::getExpoDeltaHRTkelvins)
+			.mapToDouble(Double::doubleValue).sum();
 		int n = positions.size();
 		if (n>0) {
 			result = Math.log((allExponenials)/n);
-			result = ((-10000/result)-273.1);
+			result = ((-10000/result)-273.1); //in c
 		}
 		return result;
-		 
-		        
-		 
-		         
 	}
 	
 	

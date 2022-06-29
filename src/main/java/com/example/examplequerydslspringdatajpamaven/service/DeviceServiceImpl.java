@@ -4,8 +4,13 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import com.example.food_drugs.config.ConnectionToTracer;
+import com.example.food_drugs.dto.Request.CreateVehicleInTracerRequest;
+import com.example.food_drugs.dto.responses.CreateVehicleInTracerResponse;
 import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
 import com.example.food_drugs.helpers.Impl.LiveDataMapping;
+import com.example.food_drugs.helpers.Impl.Utilities;
+import com.example.food_drugs.repository.DeviceRepositorySFDA;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -94,6 +99,8 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	
 	@Autowired 
 	private DeviceRepository deviceRepository;
+	@Autowired
+	private DeviceRepositorySFDA deviceRepositorySFDA;
 	
 	private GetObjectResponse getObjectResponse;
 	
@@ -113,9 +120,16 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	private MongoPositionsRepository mongoPositionsRepository;
 	@Autowired
 	private LiveDataMapping liveDataMapping;
+	private final ConnectionToTracer connectionToTracer;
+	private final Utilities utilities;
 	@Value("${sendCommand}")
 	private String sendCommand;
-	
+
+	public DeviceServiceImpl(ConnectionToTracer connectionToTracer, Utilities utilities) {
+		this.connectionToTracer = connectionToTracer;
+		this.utilities = utilities;
+	}
+
 	/**
 	 * get list device by limit 10
 	 */
@@ -363,8 +377,52 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			    	
 			    	device.setIs_deleted(null);
 			    	device.setDeleteDate(null);
-			    	
-			    	deviceRepository.save(device);
+					ResponseEntity<CreateVehicleInTracerRequest> createVehicleInTracerRequest;
+
+					createVehicleInTracerRequest = connectionToTracer.createDeviceTracerResponse(
+							CreateVehicleInTracerRequest.
+									builder()
+									.name(device.getName())
+									.uniqueId(device.getUniqueid())
+									.build()
+					);
+
+					Long id = createVehicleInTracerRequest.getBody().getId();
+					device.setId(id);
+
+					logger.info("{+++++++***** ID IS : ********" + id);
+//					deviceRepository.save(device);
+
+					Device device2 = deviceRepository.findOne(id);
+
+					device2.setSequence_number(device.getSequence_number());
+					device2.setIs_deleted(device.getIs_deleted());
+					device2.setDeleteDate(device.getDeleteDate());
+					device2.setCreate_date(device.getCreate_date());
+					device2.setPlate_num(device.getPlate_num() );
+					device2.setLeft_letter(device.getLeft_letter()) ;
+					device2.setMiddle_letter(device.getLeft_letter());
+					device2.setRight_letter(device.getLeft_letter());
+					device2.setPhoto(device.getPhoto());
+					device2.setUser(device.getUser());
+					device2.setPhone(device.getPhone());
+					device2.setModel(device.getModel());
+					device2.setPlate_type(device.getPlate_type());
+					device2.setOwner_name(device.getOwner_name());
+					device2.setOwner_id(device.getOwner_id());
+					device2.setBrand(device.getBrand());
+					device2.setMade_year(device.getMade_year());
+					device2.setCar_weight(device.getCar_weight());
+					device2.setColor(device.getColor());
+					device2.setDevice_type(device.getDevice_type());
+					device2.setExpired(device.getExpired());
+					device2.setStartDate(device.getStartDate());
+					device2.setEndDate(device.getEndDate());
+					device2.setRepresentative(device.getRepresentative());
+					device2.setSimcardNumber(device.getSimcardNumber());
+
+					deviceRepository.save(device2);
+
 			    	List<Device> devices = null;
 			    	
 			    	if(userCreater.getAccountType().equals(4)) {
@@ -378,14 +436,11 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			    		}
 			    		
 			    	}
-			    	
 			    	getObjectResponse = new GetObjectResponse(HttpStatus.OK.value() , "success",devices);
 					logger.info("************************ createDevice ENDED ***************************");
 					return ResponseEntity.ok().body(getObjectResponse);
 			    }
 			}
-			
-	        
 		}
 		
 	}
@@ -430,9 +485,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
 		}
-	
-		
-		
+
 		if(device.getId() == null || device.getName() == null ||device.getName().equals("") 
 			|| device.getUniqueid() == null || device.getUniqueid().equals("")
 			|| device.getSequence_number() == null || device.getSequence_number().equals("")
@@ -519,7 +572,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			userCreater = oldDevice.getUser();
 	        device.setUser(userCreater);
 	        
-			Set<Driver> driver=new HashSet<>();
+			Set<Driver> driver;
 			driver = oldDevice.getDriver();
 	        device.setDriver(driver);
 
@@ -527,15 +580,15 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 			attributeDevice = oldDevice.getAttributeDevice();
 	        device.setAttributeDevice(attributeDevice);
 	        
-	        Set<Geofence> geofences=new HashSet<>();
+	        Set<Geofence> geofences;
 	        geofences = oldDevice.getGeofence();
 	        device.setGeofence(geofences);
 	        
-	        Set<Group> groups=new HashSet<>();
+	        Set<Group> groups;
 	        groups = oldDevice.getGroups();
 	        device.setGroups(groups);
 	        
-	        Set<Notification> notificationDevice=new HashSet<>();
+	        Set<Notification> notificationDevice;
 	        notificationDevice = oldDevice.getNotificationDevice();
 	        device.setNotificationDevice(notificationDevice);
 	        
@@ -558,7 +611,6 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					}
 				}
 				
-				
 				if(newPhoto == null) {
 					device.setPhoto("not_available.png");
 				}
@@ -577,26 +629,28 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 				    			device.setPhoto(decodePhoto.Base64_Image(newPhoto,"vehicle"));
 				    		}
 						}
-
 				    }
 				}
-
-				
-				
-				
-				
-			
+				ResponseEntity<CreateVehicleInTracerRequest> createVehicleInTracerRequest;
+				Device res = deviceRepository.findOne(device.getId());
+				if (!Objects.equals(device.getUniqueid(), res.getUniqueid())){
+					createVehicleInTracerRequest = connectionToTracer.updateDeviceTracerResponse(
+							CreateVehicleInTracerRequest.
+									builder()
+									.id(device.getId())
+									.name(device.getName())
+									.uniqueId(device.getUniqueid())
+									.build()
+					);
+					device.setId(createVehicleInTracerRequest.getBody().getId());
+				}
+				logger.info(device.getId());
 		    	deviceRepository.save(device);
-		    	List<Device> devices = null;
-		    	getObjectResponse = new GetObjectResponse(HttpStatus.OK.value() , "success",devices);
+		    	getObjectResponse = new GetObjectResponse(HttpStatus.OK.value() , "success", null);
 				logger.info("************************ editDevice ENDED ***************************");
 				return ResponseEntity.ok().body(getObjectResponse);
 	        }
-	        
-	        
-	        
 		}
-		
 	}
 
 	@Override
@@ -1716,7 +1770,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 	 * get data of devices by limit 10 if it has position get data from mongo if no get only intial data
 	 */
 	@Override
-	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDeviceLiveData(String TOKEN,Long userId,int offset,String search) {
+	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDeviceLiveData(String TOKEN,Long userId,int offset,String search,String timeOffset) {
 		// TODO Auto-generated method stub
 		if(TOKEN.equals("")) {
 //			 List<Device> devices = null;
@@ -1772,18 +1826,20 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 						if(allDevicesLiveData.get(i).getLastUpdate() != null) {
 							SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 							Date now = new Date();
+							Date dateLast = new Date();
 							String strDate = formatter.format(now);
 							try {
-								Date dateLast = formatter.parse(allDevicesLiveData.get(i).getLastUpdate());
+								 dateLast = formatter.parse(allDevicesLiveData.get(i).getLastUpdate());
 								Date dateNow = formatter.parse(strDate);
 								
 						        minutes = getDateDiff (dateLast, dateNow, TimeUnit.MINUTES);  
-						        
-		
+
 							} catch (ParseException e) {
 								e.printStackTrace();
 							}
-							
+
+							allDevicesLiveData.get(i).setLastUpdate(utilities.monitoringTimeZoneConverter(dateLast,timeOffset));
+
 							if(minutes <= 3) {
 		                    	allDevicesLiveData.get(i).setVehicleStatus("online");
 							}
@@ -2053,9 +2109,10 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 					if(allDevicesLiveData.get(i).getLastUpdate() != null) {
 						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						Date now = new Date();
+						Date dateLast = null;
 						String strDate = formatter.format(now);
 						try {
-							Date dateLast = formatter.parse(allDevicesLiveData.get(i).getLastUpdate());
+							dateLast = formatter.parse(allDevicesLiveData.get(i).getLastUpdate());
 							Date dateNow = formatter.parse(strDate);
 							
 					        minutes = getDateDiff (dateLast, dateNow, TimeUnit.MINUTES);  
@@ -2064,6 +2121,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 						} catch (ParseException e) {
 							e.printStackTrace();
 						}
+						allDevicesLiveData.get(i).setLastUpdate(utilities.monitoringTimeZoneConverter(dateLast,timeOffset));
 						
 						if(minutes < 3) {
 	                    	allDevicesLiveData.get(i).setVehicleStatus("online");
@@ -2073,7 +2131,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 						}
 						if(minutes < 8 && minutes > 3) {
 	                    	allDevicesLiveData.get(i).setVehicleStatus("unknown");
-	
+
 						}	
 					}
 					else {
@@ -2413,7 +2471,7 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 				 }
 			 }
 	    
-            List<CustomMapData> allDevices = new ArrayList<CustomMapData>();
+            List<CustomMapData> allDevices = new ArrayList<>();
 
 			List<CustomMapData> allDevicesNoPosition = deviceRepository.getAllDevicesDataMap(usersIds);
 			if(allDevicesNoPosition.size() > 0 ) {
@@ -2459,10 +2517,11 @@ public class DeviceServiceImpl extends RestServiceController implements DeviceSe
 				}
 //					List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIds);
 				List<CustomMapData> allDevicesPositionOnline = liveDataMapping.getList(positionIds,positionIdsOnline,"online");
-				allDevices.addAll(allDevicesPositionOnline);
+				if (!allDevicesPositionOnline.isEmpty()) {
+					allDevices.addAll(allDevicesPositionOnline);
+				}
 //				List<CustomMapData> allDevicesPositionOnline= mongoPositionRepo.getOnlineList(positionIdsOnline);
 //				allDevices.addAll(allDevicesPositionOnline);
-
 			}
 		    getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",allDevices);
 			

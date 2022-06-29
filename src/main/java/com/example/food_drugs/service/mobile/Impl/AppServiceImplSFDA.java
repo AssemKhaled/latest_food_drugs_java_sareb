@@ -4374,6 +4374,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 	@Override
 	public ApiResponse<List<WareHouseInvLastDataResponse>> getWareHouseInvLastData(String TOKEN, Long userId,  int whSize, int offset, String search) {
 
+		logger.info("****************** getWareHouseInvLastData STARTED ******************");
 		List<WareHouseInvLastDataResponse> results = new ArrayList<>();
 		ApiResponseBuilder<List<WareHouseInvLastDataResponse>> builder = new ApiResponseBuilder<>();
 
@@ -4472,6 +4473,7 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 									mongoInventoryLastDataList.remove(lastTempAndHum.get());
 									lastInvData.add(InventoryLastDataResponse
 											.builder()
+											.wareHouseId(warehouse.getId())
 											.inventoryName(inventory.getName())
 											.lastUpdated(inventory.getLastUpdate())
 											.lastTemperature(lastTempAndHum.get().getTemperature())
@@ -4485,8 +4487,8 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 									.wareHouseName(warehouse.getName())
 									.inventoryData(lastInvData)
 									.build());
-
 							}
+						logger.info("****************** getWareHouseInvLastData ENDED ******************");
 						builder.setEntity(results);
 						builder.setStatusCode(200);
 						builder.setMessage("Data Found");
@@ -4511,7 +4513,6 @@ public class AppServiceImplSFDA extends RestServiceController implements AppServ
 				return builder.build();
 			}
 		}
-//		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
 		builder.setEntity(results);
 		builder.setStatusCode(401);
 		builder.setMessage("No Data Found");

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
@@ -62,19 +63,38 @@ public class LiveDataMapping {
 
                 if(object.containsField("deviceid") && object.get("deviceid") != null) {
                     position.setId(object.getLong("deviceid"));
-                    Long deviceId= Long.valueOf(deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getId());
-                    Double lastTemp = deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getLastTemp();
-                    Double lasthum = deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getLastHum();
-                    if (deviceId != null){
-                        Double roundTemp;
-                        Double roundHum;
-                        roundTemp = Math.round(lastTemp * 100.0) / 100.0;
-                        roundHum = Math.round(lasthum * 100.0) / 100.0;
+//                    Long deviceId= deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getId();
+//                    Double lastTemp = deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getLastTemp();
+//                    Double lasthum = deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getLastHum();
+                    Double roundTemp = null;
+                    Double roundHum = null;
+                    String uniqueId = null;
+                    String lastUpdate = null;
+                    Double lastTemp ;
+                    Double lastHum ;
+                    try{
+                        Device res;
+                        List<Device> data= deviceList.stream()
+                                .filter(device -> device.getId().equals(position.getId()))
+                                .collect(Collectors.toList());
+                        if (!data.isEmpty()) {
+                            res = data.get(0);
+                             uniqueId = res.getUniqueid();
+                             lastUpdate = res.getLastupdate();
+                             lastTemp = res.getLastTemp();
+                             lastHum = res.getLastHum();
+                            roundTemp = Math.round(lastTemp * 100.0) / 100.0;
+                            roundHum = Math.round(lastHum * 100.0) / 100.0;
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                         position.setTemperature(roundTemp);
                         position.setHumidity(roundHum);
-                        position.setUniqueid(deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getUniqueid());
-                        position.setLastUpdate(deviceList.stream().filter(device -> device.getId().equals(position.getId())).findFirst().get().getLastupdate());
-                    }
+                        position.setUniqueid(uniqueId);
+                        position.setLastUpdate(lastUpdate);
+
 //                    Device device = deviceRepository.findOne(position.getId());
 //                    if(device != null) {
 //
@@ -88,7 +108,6 @@ public class LiveDataMapping {
 //                        position.setHumidity(roundHum);
 //
 //                    }
-
                 }
 
                 if(object.containsField("address") && object.get("address") != null) {

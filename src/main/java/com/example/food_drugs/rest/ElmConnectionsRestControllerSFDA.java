@@ -263,4 +263,42 @@ public class ElmConnectionsRestControllerSFDA {
 		return elmServiceImplSFDA.warehouseInquiry(TOKEN,loggedUserId,userId);
 	}
 
+	@GetMapping(path = "/findLastPositionsSequenceNumberSpeedZero")
+	public ResponseEntity<?> findLastPositionsSequenceNumberSpeedZero(
+			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){
+
+		return elmServiceImplSFDA.findLastPositionsSequenceNumberSpeedZero(sequenceNumber);
+	}
+
+	@GetMapping(path = "/findLastPositionsSequenceNumberNoneSpeedZero")
+	public ResponseEntity<?> findLastPositionsSequenceNumberNoneSpeedZero(
+			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){
+
+		return elmServiceImplSFDA.findLastPositionsSequenceNumberNoneSpeedZero(sequenceNumber);
+	}
+	@GetMapping(path = "/findLastNoneZeroVelocityPositionsBySequenceNumber")
+	public ResponseEntity<?> findLastNoneZeroVelocityPositionsBySequenceNumber(
+			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){
+
+		return elmServiceImplSFDA.findLastNoneZeroVelocityPositionsBySequenceNumber(sequenceNumber);
+	}
+	@GetMapping(path = "/findLastZeroVelocityPositionsBySequenceNumber")
+	public ResponseEntity<?> findLastZeroVelocityPositionsBySequenceNumber(
+			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){
+
+		return elmServiceImplSFDA.findLastZeroVelocityPositionsBySequenceNumber(sequenceNumber);
+	}
+	@GetMapping(path ="/findDeviceData")
+	public ResponseEntity<?> findDeviceData(
+			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){
+
+		return elmServiceImplSFDA.findDeviceData(sequenceNumber);
+	}
+	@GetMapping(path ="/findDeviceLastPosition")
+	public ResponseEntity<?> findDeviceLastPosition(
+			@RequestParam (value = "sequenceNumber", defaultValue = "") String sequenceNumber){
+
+		return elmServiceImplSFDA.findDeviceLastPosition(sequenceNumber);
+	}
+
 }

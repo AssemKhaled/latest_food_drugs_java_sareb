@@ -2,6 +2,7 @@ package com.example.food_drugs.repository;
 
 import java.util.List;
 
+import com.example.examplequerydslspringdatajpamaven.entity.Device;
 import com.example.food_drugs.dto.responses.DeviceNames;
 import com.example.food_drugs.dto.responses.mobile.DeviceMonitoringResponse;
 import org.springframework.data.jpa.repository.JpaRepository;

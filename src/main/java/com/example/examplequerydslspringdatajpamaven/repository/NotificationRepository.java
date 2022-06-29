@@ -19,12 +19,16 @@ import com.example.examplequerydslspringdatajpamaven.entity.Notification;
  */
 public interface NotificationRepository extends  JpaRepository<Notification, Long>, QueryDslPredicateExecutor<Notification>{
 	
-	
+
+	void deleteNotificationByIdIn(List<Long> ids);
 	@Query(value = "SELECT tc_notifications.* FROM tc_notifications INNER JOIN tc_user_notification ON tc_user_notification.notificationid = tc_notifications.id"
 			+ " WHERE tc_user_notification.userid IN(:userIds) and  tc_notifications.delete_date is null"
 			+ " and ((tc_notifications.type Like %:search%) )" + 
 			" LIMIT :offset,10 ", nativeQuery = true)
 	public List<Notification> getAllNotifications(@Param("userIds")List<Long> userIds,@Param("offset") int offset,@Param("search") String search);
+	@Query(value = "SELECT tc_notifications.* FROM tc_notifications INNER JOIN tc_user_notification ON tc_user_notification.notificationid = tc_notifications.id"
+			+ " WHERE tc_user_notification.userid = :userIds and  tc_notifications.delete_date is null", nativeQuery = true)
+	public List<Notification> getNotifications(@Param("userIds")Long userIds);
 	
 	@Query(value = "SELECT tc_notifications.* FROM tc_notifications INNER JOIN tc_user_notification ON tc_user_notification.notificationid = tc_notifications.id"
 			+ " WHERE tc_user_notification.userid IN(:userIds) and  tc_notifications.delete_date is null"

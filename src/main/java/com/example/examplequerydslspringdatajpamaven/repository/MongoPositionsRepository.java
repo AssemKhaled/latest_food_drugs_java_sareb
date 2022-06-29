@@ -21,6 +21,7 @@ public interface MongoPositionsRepository extends MongoRepository<MongoPositions
 	public List<MongoPositions> deleteByIdIn(List<String> positionIds);
 	
 	public Integer countByDeviceidIn(List<Long> deviceIds);
+	Optional<List<MongoPositions>> findAllBy_idIn(List<String> ids);
 	
 	@Query("{ '_id' : { $in: ?0 } }")
 	public List<MongoPositions> findByIdIn(List<String> positionIds);
@@ -49,5 +50,8 @@ public interface MongoPositionsRepository extends MongoRepository<MongoPositions
 
 	Integer countAllByDeviceidAndDevicetimeBetween(Long deviceId, Date start, Date end);
 	Optional<MongoPositions> findAllByDeviceid(Long deviceId);
+	List<MongoPositions> findTop10ByDeviceidAndSpeedOrderByServertimeDesc(Long deviceId , double speed);
+
+	List<MongoPositions> findTop10ByDeviceidAndSpeedAfterOrderByServertimeDesc(Long deviceId , double speed);
 }
 

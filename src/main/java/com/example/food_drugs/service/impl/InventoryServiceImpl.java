@@ -17,8 +17,14 @@ import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 
-import com.example.food_drugs.dto.responses.InventorySummaryDataWrapper;
-import com.example.food_drugs.dto.responses.MongoInventoryWrapper;
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.ApiResponseBuilder;
+import com.example.food_drugs.dto.responses.InventoryListDashBoardResponse;
+import com.example.food_drugs.dto.responses.VehicleListDashBoardResponse;
+import com.example.food_drugs.dto.responses.allInventoriesLastInfoResponse;
+import com.example.food_drugs.exception.ApiGetException;
+import com.example.food_drugs.helpers.Impl.AssistantServiceImpl;
+import com.example.food_drugs.helpers.Impl.Dictionary;
 import com.example.food_drugs.helpers.Impl.Utilities;
 import com.example.food_drugs.service.InventoryService;
 import org.springframework.http.ResponseEntity;
@@ -80,53 +86,58 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	private static final Log logger = LogFactory.getLog(InventoryServiceImpl.class);
 
 	private GetObjectResponse getObjectResponse;
-	 
+
+	private final com.example.food_drugs.helpers.Impl.Dictionary dictionary;
+	private final AssistantServiceImpl assistantServiceImpl;
+
 	@Autowired
 	private MongoInventoryLastDataRepository mongoInventoryLastDataRepository;
-	
+
 	@Autowired
 	private MongoInventoryLastDataRepositoryElmData mongoInventoryLastDataRepositoryElmData;
-	
+
 	@Autowired
 	private MongoInventoryNotificationRepository mongoInventoryNotificationRepository;
-	
+
 	@Autowired
 	private SensorsInventoriesRepository sensorsInventoriesRepository;
-	
+
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
-	
+
 	@Autowired
 	private UserRoleService userRoleService;
-	
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private InventoryRepository inventoryRepository;
-	
+
 	@Autowired
 	UserClientWarehouseRepository userClientWarehouseRepository;
-	
+
 	@Autowired
 	private WarehousesRepository warehousesRepository;
-	
+
 	@Autowired
 	private UserRepositorySFDA userRepositorySFDA;
-	
+
 	@Autowired
 	private UserClientInventoryRepository userClientInventoryRepository;
-	
+
 	@Autowired
 	private MongoInventoryNotificationRepo mongoInventoryNotificationRepo;
-	
+
 	@Autowired
 	private MongoInventoryLastDataRepo mongoInventoryLastDataRepo;
 
 	private final Utilities utilities;
 
-	public InventoryServiceImpl(Utilities utilities) {
+	public InventoryServiceImpl(Dictionary dictionary, AssistantServiceImpl assistantServiceImpl, Utilities utilities) {
+		this.dictionary = dictionary;
+		this.assistantServiceImpl = assistantServiceImpl;
 		this.utilities = utilities;
 	}
 
@@ -136,18 +147,18 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	    Integer size = 0;
 	    List<Map> data = new ArrayList<>();
 		List<Inventory> inventories = new ArrayList<Inventory>();
-		
+
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventories);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
 		}
 		if(id != 0) {
-			
+
 			User user = userServiceImpl.findById(id);
 			if(user == null ) {
 				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This User is not Found",inventories);
@@ -180,12 +191,12 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 
 								 }
-									
+
 								 if(active == 2) {
 									if(exportData.equals("exportData")) {
 										inventories = inventoryRepository.getInventoriesByIdsAllExport(inventoryIds,search);
 
-										
+
 									}
 									else {
 										inventories = inventoryRepository.getInventoriesByIdsAll(inventoryIds,offset,search);
@@ -194,11 +205,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 
 								 }
-									
+
 								 if(active == 1) {
 									if(exportData.equals("exportData")) {
 										inventories = inventoryRepository.getInventoriesByIdsExport(inventoryIds,search);
-	
+
 									}
 									else {
 										inventories = inventoryRepository.getInventoriesByIds(inventoryIds,offset,search);
@@ -222,7 +233,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 							 }
 						 }
 
-						 
+
 						 if(active == 0) {
 							if(exportData.equals("exportData")) {
 								inventories = inventoryRepository.getInventoriesDeactiveExport(usersIds,search);
@@ -235,7 +246,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 
 						 }
-							
+
 						 if(active == 2) {
 							if(exportData.equals("exportData")) {
 								inventories = inventoryRepository.getInventoriesAllExport(usersIds,search);
@@ -248,11 +259,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 
 						 }
-							
+
 						 if(active == 1) {
 							if(exportData.equals("exportData")) {
 								inventories = inventoryRepository.getInventoriesExport(usersIds,search);
-	
+
 							}
 							else {
 								inventories = inventoryRepository.getInventories(usersIds,offset,search);
@@ -262,16 +273,16 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 						 }
 					}
-				    
 
-					
-					
-					 
+
+
+
+
 
 					 for(Inventory inventory:inventories) {
 					     Map InventoriesList= new HashMap();
 
-					     
+
 					     InventoriesList.put("id", inventory.getId());
 					     InventoriesList.put("trackerIMEI", inventory.getTrackerIMEI());
 					     InventoriesList.put("inventoryNumber", inventory.getInventoryNumber());
@@ -280,11 +291,11 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					     InventoriesList.put("userId", inventory.getUserId());
 					     InventoriesList.put("delete_date", inventory.getDeleteDate());
 						 InventoriesList.put("warehouseId", inventory.getWarehouseId());
-						 InventoriesList.put("referenceKey", inventory.getReferenceKey());	
+						 InventoriesList.put("referenceKey", inventory.getReferenceKey());
 						 InventoriesList.put("protocolType", inventory.getProtocolType());
 						 InventoriesList.put("userName", null);
 						 InventoriesList.put("warehouserName", null);
-						 
+
 						 InventoriesList.put("create_date", inventory.getCreate_date());
 						 InventoriesList.put("regestration_to_elm_date", inventory.getRegestration_to_elm_date());
 						 InventoriesList.put("delete_from_elm_date", inventory.getDelete_from_elm_date());
@@ -297,7 +308,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 							 war = warehousesRepository.findOne(inventory.getWarehouseId());
 
 						 }
-						 
+
                          if(inventory.getUserId() != null) {
     						 us = userRepository.findOne(inventory.getUserId());
 
@@ -312,8 +323,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						 }
 						 data.add(InventoriesList);
 
-						 
-						
+
+
 
 					}
 					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "Success",data,size);
@@ -326,12 +337,12 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					return  ResponseEntity.status(404).body(getObjectResponse);
 
 				}
-				
+
 			}
 
 		}
 		else{
-			
+
 			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",inventories);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 
@@ -344,16 +355,16 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		Date now = new Date();
 		SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String nowTime = isoFormat.format(now);
-		
+
 		inventory.setCreate_date(nowTime);
 		inventory.setDeleteDate(null);
-		
+
 		List<Inventory> inventories= new ArrayList<Inventory>();
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventories);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -405,56 +416,56 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 							 inventory.setUserId(userId);
 
 						 }
-						
+
 						List<Inventory> res = inventoryRepository.checkDublicateAdd(inventory.getUserId(), inventory.getName(), inventory.getInventoryNumber());
 					    List<Integer> duplictionList =new ArrayList<Integer>();
 						List<Inventory> res2 = inventoryRepository.checkDublicateAddByInv(inventory.getInventoryNumber());
 
 						if(!res.isEmpty() || !res2.isEmpty()) {
 							for(int i=0;i<res.size();i++) {
-								
+
 								if(res.get(i).getName() != null) {
 									if(res.get(i).getName().equals(inventory.getName())) {
-										duplictionList.add(1);				
-					
+										duplictionList.add(1);
+
 									}
 								}
-								
-								
-								
+
+
+
 							}
 							for(int i=0;i<res2.size();i++) {
-								
+
 								if(res2.get(i).getInventoryNumber() != null) {
 
 									if(res2.get(i).getInventoryNumber().equals(inventory.getInventoryNumber())) {
-										duplictionList.add(2);				
-					
+										duplictionList.add(2);
+
 									}
-									
+
 								}
-								
+
 							}
 							getObjectResponse = new GetObjectResponse( 201, "This inventorie was found before",duplictionList);
 							return ResponseEntity.ok().body(getObjectResponse);
 
 						}
-						
-						
-						
+
+
+						inventory.setConvertToUtc(Boolean.TRUE);
 						inventoryRepository.save(inventory);
 						inventories.add(inventory);
-						
+
 						if(user.getAccountType().equals(4)) {
 				    		userClientInventory saveData = new userClientInventory();
-					        
+
 					        Long invId = inventoryRepository.getInventoryIdByName(parent.getId(),inventory.getName(),inventory.getInventoryNumber());
 				    		if(invId != null) {
 					    		saveData.setUserid(userId);
 					    		saveData.setInventoryid(invId);
 					    		userClientInventoryRepository.save(saveData);
 				    		}
-				    		
+
 				    	}
 
 						getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"sucsess",inventories);
@@ -468,8 +479,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						return ResponseEntity.badRequest().body(getObjectResponse);
 
 					}
-					
-					
+
+
 				}
 				else {
 					getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "This User ID is not Found",inventories);
@@ -478,15 +489,15 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				}
 
 			}
-           			
-			
+
+
 		}
 		else {
-			
+
 			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",inventories);
 			return ResponseEntity.badRequest().body(getObjectResponse);
 
-			
+
 		}
 	}
 
@@ -498,7 +509,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventories);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -506,7 +517,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		User loggedUser = userServiceImpl.findById(userId);
 		 if(loggedUser == null) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "logged User is not found ",null);
-			 return  ResponseEntity.status(404).body(getObjectResponse); 
+			 return  ResponseEntity.status(404).body(getObjectResponse);
 		 }
 		 if(loggedUser.getAccountType()!= 1) {
 			if(!userRoleService.checkUserHasPermission(userId, "INVENTORY", "edit")) {
@@ -514,7 +525,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				return  ResponseEntity.badRequest().body(getObjectResponse);
 			}
 		}
-		 
+
 		 if(inventory.getId() == null) {
 			 getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "Inventory ID is Required",inventories);
 			return ResponseEntity.status(404).body(getObjectResponse);
@@ -536,7 +547,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		if(createdBy.toString().equals(userId.toString())) {
 			isParent=true;
 		}
-		
+
 		List<User>childs = new ArrayList<User>();
 		if(loggedUser.getAccountType().equals(4)) {
 			 List<User> parents=userServiceImpl.getAllParentsOfuser(loggedUser,loggedUser.getAccountType());
@@ -551,19 +562,19 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					 parentClient = object;
 					 break;
 				 }
-				 
+
 				userServiceImpl.resetChildernArray();
-				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId()); 
+				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId());
 			 }
-			 
+
 		}
 		else {
 			userServiceImpl.resetChildernArray();
 			childs = userServiceImpl.getAllChildernOfUser(userId);
 		}
-		
-		
- 		
+
+
+
 		User parentChilds = new User();
 		if(!childs.isEmpty()) {
 			for(User object : childs) {
@@ -574,7 +585,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				}
 			}
 		}
-		
+
 		if(loggedUser.getAccountType().equals(4)) {
 			List<Long> inventoryData = userClientInventoryRepository.getInventory(userId,inventory.getId());
 			if(inventoryData.isEmpty()) {
@@ -584,12 +595,12 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				isParent = true;
 			}
 		}
-		
+
 		if(isParent == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventories",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(inventory.getName()== null || inventory.getName().equals("")
 				   || inventory.getActivity()== null || inventory.getActivity().equals("")
 				   || inventory.getInventoryNumber()== null || inventory.getInventoryNumber().equals("")
@@ -600,61 +611,61 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 		}
 		else {
-			
-			
+
+
 			List<Inventory> res = inventoryRepository.checkDublicateEdit(inventory.getId(),inventory.getUserId(), inventory.getName(), inventory.getInventoryNumber());
 		    List<Integer> duplictionList =new ArrayList<Integer>();
 			List<Inventory> res2 = inventoryRepository.checkDublicateEditByInv(inventory.getId(), inventory.getInventoryNumber());
 
 			if(!res.isEmpty() || !res2.isEmpty()) {
 				for(int i=0;i<res.size();i++) {
-					
+
 					if(res.get(i).getName() != null) {
 
 						if(res.get(i).getName().equals(inventory.getName())) {
-							duplictionList.add(1);				
-		
+							duplictionList.add(1);
+
 						}
 					}
-					
-					
+
+
 				}
 				for(int i=0;i<res2.size();i++) {
 					if(res2.get(i).getInventoryNumber() != null) {
 
 						if(res2.get(i).getInventoryNumber().equals(inventory.getInventoryNumber())) {
-							duplictionList.add(2);				
-		
+							duplictionList.add(2);
+
 						}
 					}
 
-					
-					
+
+
 				}
 				getObjectResponse = new GetObjectResponse( 201, "This inventory was found before",duplictionList);
 				return ResponseEntity.ok().body(getObjectResponse);
 
 			}
 
-			
-			
-			
+
+
+
 			inventoryRepository.save(inventory);
-			
+
 
 			inventories.add(inventory);
 			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(),"Updated Successfully",inventories);
 			logger.info("************************ editInventories ENDED ***************************");
 			return ResponseEntity.ok().body(getObjectResponse);
 
-				
-				
-			
-		
+
+
+
+
 		}
-		
-				
-			    
+
+
+
 	}
 
 	@Override
@@ -665,7 +676,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -687,14 +698,14 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this Inventory not found or deleted",null);
 			 return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-		
+
 		User loggedUser = userServiceImpl.findById(userId);
 		if(loggedUser == null) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this user not found",null);
 			 return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-		
-		
+
+
 		Long createdBy=inventory.getUserId();
 		Boolean isParent=false;
 
@@ -715,19 +726,19 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					 parentClient = object;
 					 break;
 				 }
-				 
+
 				userServiceImpl.resetChildernArray();
-				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId()); 
+				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId());
 			 }
-			 
+
 		}
 		else {
 			userServiceImpl.resetChildernArray();
 			childs = userServiceImpl.getAllChildernOfUser(userId);
 		}
-		
-		
-		
+
+
+
 		User parentChilds = new User();
 		if(!childs.isEmpty()) {
 			for(User object : childs) {
@@ -738,7 +749,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				}
 			}
 		}
-		
+
 		if(loggedUser.getAccountType().equals(4)) {
 			List<Long> inventoryData = userClientInventoryRepository.getInventory(userId,inventory.getId());
 			if(inventoryData.isEmpty()) {
@@ -748,15 +759,15 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				isParent = true;
 			}
 		}
-		
-		
+
+
 		if(isParent == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventory",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
-		
-		
+
+
+
 		List<Inventory> inventories = new ArrayList<Inventory>();
 		inventories.add(inventory);
 		getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",inventories);
@@ -770,7 +781,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -778,7 +789,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		User loggedUser = userServiceImpl.findById(userId);
 		 if(loggedUser == null) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "logged User is not found",null);
-			 return  ResponseEntity.status(404).body(getObjectResponse); 
+			 return  ResponseEntity.status(404).body(getObjectResponse);
 		 }
 		 if(loggedUser.getAccountType()!= 1) {
 			if(!userRoleService.checkUserHasPermission(userId, "INVENTORY", "delete")) {
@@ -817,19 +828,19 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					 parentClient = object;
 					 break;
 				 }
-				 
+
 				userServiceImpl.resetChildernArray();
-				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId()); 
+				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId());
 			 }
-			 
+
 		}
 		else {
 			userServiceImpl.resetChildernArray();
 			childs = userServiceImpl.getAllChildernOfUser(userId);
 		}
-		
-		
- 		
+
+
+
 		User parentChilds = new User();
 		if(!childs.isEmpty()) {
 			for(User object : childs) {
@@ -840,7 +851,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				}
 			}
 		}
-		
+
 		if(loggedUser.getAccountType().equals(4)) {
 			List<Long> inventoryData = userClientInventoryRepository.getInventory(userId,inventory.getId());
 			if(inventoryData.isEmpty()) {
@@ -850,21 +861,21 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				isParent = true;
 			}
 		}
-		
+
 		if(isParent == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventory",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
-		
+
+
 	    inventory.setDeleteDate(null);
 	    inventoryRepository.save(inventory);
-	    
-	    
+
+
 		getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",null);
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}
-	
+
 	@Override
 	public ResponseEntity<?> deleteInventory(String TOKEN, Long InventoryId, Long userId) {
 		// TODO Auto-generated method stub
@@ -872,7 +883,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -880,7 +891,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		User loggedUser = userServiceImpl.findById(userId);
 		 if(loggedUser == null) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "logged User is not found",null);
-			 return  ResponseEntity.status(404).body(getObjectResponse); 
+			 return  ResponseEntity.status(404).body(getObjectResponse);
 		 }
 		 if(loggedUser.getAccountType()!= 1) {
 			if(!userRoleService.checkUserHasPermission(userId, "INVENTORY", "delete")) {
@@ -902,7 +913,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this Inventory not found or deleted",null);
 			 return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-				
+
 
 
 		Long createdBy=inventory.getUserId();
@@ -925,19 +936,19 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					 parentClient = object;
 					 break;
 				 }
-				 
+
 				userServiceImpl.resetChildernArray();
-				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId()); 
+				childs = userServiceImpl.getAllChildernOfUser(parentClient.getId());
 			 }
-			 
+
 		}
 		else {
 			userServiceImpl.resetChildernArray();
 			childs = userServiceImpl.getAllChildernOfUser(userId);
 		}
-		
-		
- 		
+
+
+
 		User parentChilds = new User();
 		if(!childs.isEmpty()) {
 			for(User object : childs) {
@@ -948,7 +959,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				}
 			}
 		}
-		
+
 		if(loggedUser.getAccountType().equals(4)) {
 			List<Long> inventoryData = userClientInventoryRepository.getInventory(userId,inventory.getId());
 			if(inventoryData.isEmpty()) {
@@ -958,13 +969,13 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				isParent = true;
 			}
 		}
-		
+
 		if(isParent == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventory",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
-		
+
+
 		Calendar cal = Calendar.getInstance();
 		int day = cal.get(Calendar.DATE);
 	    int month = cal.get(Calendar.MONTH) + 1;
@@ -974,7 +985,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	    inventory.setWarehouseId(null);
 	    inventoryRepository.save(inventory);
 
-	    
+
 		getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "success",null);
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}
@@ -987,7 +998,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -995,7 +1006,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		User loggedUser = userServiceImpl.findById(userId);
 		 if(loggedUser == null) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "logged User is not found",null);
-			 return  ResponseEntity.status(404).body(getObjectResponse); 
+			 return  ResponseEntity.status(404).body(getObjectResponse);
 		 }
 		 if(loggedUser.getAccountType()!= 1) {
 			if(!userRoleService.checkUserHasPermission(userId, "INVENTORY", "assignWarehouse")) {
@@ -1017,8 +1028,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this Inventory not found or deleted",null);
 			 return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-		
-		
+
+
 		Boolean isParentInventory=true;
 
 		if(loggedUser.getAccountType().equals(4)) {
@@ -1029,21 +1040,21 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			else {
 				isParentInventory = true;
 			}
-			
-			
+
+
 		}
-		
+
 		if(isParentInventory == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventory",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
-		
+
+
 		inventory.setWarehouseId(null);
 		inventoryRepository.save(inventory);
 
-	    
-	    
+
+
 		getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "removed successfully",null);
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}
@@ -1055,7 +1066,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -1067,7 +1078,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		User loggedUser = userServiceImpl.findById(userId);
 		 if(loggedUser == null) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "loggedUser is not found",null);
-			 return  ResponseEntity.status(404).body(getObjectResponse); 
+			 return  ResponseEntity.status(404).body(getObjectResponse);
 		 }
 		 if(loggedUser.getAccountType()!= 1) {
 			if(!userRoleService.checkUserHasPermission(userId, "INVENTORY", "assignWarehouse")) {
@@ -1089,7 +1100,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this Inventory not found or deleted",null);
 			 return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-		
+
 		if(warehouseId == 0) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "No warehouseId  to assign",null);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
@@ -1104,7 +1115,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			getObjectResponse = new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "this warehouse not found or deleted",null);
 			 return  ResponseEntity.status(404).body(getObjectResponse);
 		}
-		
+
 		Boolean isParentWarehouse=true;
 		Boolean isParentInventory=true;
 
@@ -1116,7 +1127,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			else {
 				isParentInventory = true;
 			}
-			
+
 			List<Long> warehousesData = userClientWarehouseRepository.getWarehouse(userId,warehouse.getId());
 			if(warehousesData.isEmpty()) {
 				isParentWarehouse = false;
@@ -1125,22 +1136,22 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				isParentWarehouse = true;
 			}
 		}
-		
+
 		if(isParentInventory == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get inventory",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(isParentWarehouse == false) {
 			getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "Not creater or parent of creater to get warehouse",null);
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		inventory.setWarehouseId(warehouseId);
 		inventoryRepository.save(inventory);
 
-	    
-	    
+
+
 		getObjectResponse = new GetObjectResponse(HttpStatus.OK.value(), "assigned successfully",null);
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}
@@ -1148,13 +1159,13 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	@Override
 	public ResponseEntity<?> getInventoriesNotifications(String TOKEN, Long userId, int offset, String search) {
 		logger.info("************************ getNotifications STARTED ***************************");
-		
+
 		List<InventoryNotification> notifications = new ArrayList<InventoryNotification>();
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",notifications);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -1162,7 +1173,7 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		List<Long> allInventories = new ArrayList<Long>();
 		List<Long>usersIds= new ArrayList<>();
 		if(userId != 0) {
-		
+
 			User user = userServiceImpl.findById(userId);
 			if(user != null) {
 				userServiceImpl.resetChildernArray();
@@ -1176,32 +1187,32 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					 allInventories = inventoryRepository.getAllInventoriesIds(usersIds);
 
 				 }
-				 
 
-				
+
+
 
 					notifications = mongoInventoryNotificationRepo.getNotificationsToday(allInventories, offset);
 					Integer size=0;
 					if(notifications.size()>0) {
 						//size= mongoInventoryNotificationRepo.getNotificationsTodaySize(allInventories);
 						for(int i=0;i<notifications.size();i++) {
-							
+
 							Inventory inventory = inventoryRepository.findOne(notifications.get(i).getInventory_id());
 							if(inventory != null) {
 								notifications.get(i).setInventoryName(inventory.getName());
 
 							}
 						}
-							
+
 					}
 
-				    
+
 
 					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",notifications,size);
 					logger.info("************************ getNotifications ENDED ***************************");
 					return  ResponseEntity.ok().body(getObjectResponse);
 
-				
+
 			}
 			else {
 				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "User ID is not found",notifications);
@@ -1209,9 +1220,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				return  ResponseEntity.status(404).body(getObjectResponse);
 
 			}
-			
-			
-			
+
+
+
 		}
 		else {
 			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",notifications);
@@ -1219,19 +1230,19 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			return  ResponseEntity.badRequest().body(getObjectResponse);
 
 		}
-		
+
 	}
 
 	@Override
 	public ResponseEntity<?> getAllInventoriesLastInfo(String TOKEN, Long userId, int offset, String search) {
 		logger.info("************************ getAllInventoriesLastInfo STARTED ***************************");
-		
+
 		List<InventoryLastData> inventories = new ArrayList<InventoryLastData>();
 		if(TOKEN.equals("")) {
 			 getObjectResponse = new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "TOKEN id is required",inventories);
 			 return  ResponseEntity.badRequest().body(getObjectResponse);
 		}
-		
+
 		if(super.checkActive(TOKEN)!= null)
 		{
 			return super.checkActive(TOKEN);
@@ -1239,15 +1250,15 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		List<Long> allInventories = new ArrayList<Long>();
 		List<Long>usersIds= new ArrayList<>();
 		if(userId != 0) {
-		
+
 			User user = userServiceImpl.findById(userId);
 			if(user != null) {
 				userServiceImpl.resetChildernArray();
 
 				 if(user.getAccountType() == 4) {
-					 
+
 					 allInventories = userClientInventoryRepository.getInventoryIds(userId);
-					 
+
 				 }
 				 else {
 					 usersIds.add(userId);
@@ -1267,15 +1278,15 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 
 				 }
-				 
 
-				
+
+
 					inventories = mongoInventoryLastDataRepo.getLastData(allInventories, offset);
 					Integer size=0;
 					if(inventories.size()>0) {
 						size= mongoInventoryLastDataRepo.getLastDataSize(allInventories);
 						for(int i=0;i<inventories.size();i++) {
-							
+
 							Inventory inventory = inventoryRepository.findOne(inventories.get(i).getInventory_id());
 							if(inventory != null) {
 								inventories.get(i).setInventoryName(inventory.getName());
@@ -1288,13 +1299,13 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						}
 					}
 
-				    
+
 
 					getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",inventories,size);
 					logger.info("************************ getNotifications ENDED ***************************");
 					return  ResponseEntity.ok().body(getObjectResponse);
 
-				
+
 			}
 			else {
 				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "User ID is not found",inventories);
@@ -1302,9 +1313,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				return  ResponseEntity.status(404).body(getObjectResponse);
 
 			}
-			
-			
-			
+
+
+
 		}
 		else {
 			getObjectResponse= new GetObjectResponse(HttpStatus.BAD_REQUEST.value(), "User ID is Required",inventories);
@@ -1328,8 +1339,9 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 		{
 			return super.checkActive(TOKEN);
 		}
-		List<MongoInventoryWrapper> inventoryLastData =  new ArrayList<>();
-		List<InventorySummaryDataWrapper> allInventoriesSumDataFromMySQL = new ArrayList<>();
+		List<allInventoriesLastInfoResponse> inventoryLastData =  new ArrayList<>();
+//		List<InventorySummaryDataWrapperResponse> allInventoriesSumDataFromMySQL = new ArrayList<>();
+		List<Inventory> allInventoriesSumDataFromMySQL = new ArrayList<>();
 		List<Long>usersIds= new ArrayList<>();
 		if(userId != 0) {
 
@@ -1338,7 +1350,8 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				userServiceImpl.resetChildernArray();
 
 				if(user.getAccountType() == 4)
-					allInventoriesSumDataFromMySQL = inventoryRepository.getAllInventoriesSummaryData(usersIds, offset);
+//					allInventoriesSumDataFromMySQL = inventoryRepository.findAllByUserIdInAndDeleteDate(usersIds,null, new PageRequest(offset,10));
+					allInventoriesSumDataFromMySQL = inventoryRepository.findAllByUserIdInAndDeleteDate(usersIds,null);
 				else {
 					usersIds.add(userId);
 					List<User>childernUsers = userServiceImpl.getActiveAndInactiveChildern(userId);
@@ -1352,29 +1365,77 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 						}
 					}
 
-					allInventoriesSumDataFromMySQL = inventoryRepository.getAllInventoriesSummaryData(usersIds,offset);
+//					allInventoriesSumDataFromMySQL = inventoryRepository.findAllByUserIdInAndDeleteDate(usersIds,null, new PageRequest(offset,10));
+					allInventoriesSumDataFromMySQL = inventoryRepository.findAllByUserIdInAndDeleteDate(usersIds,null);
 
 				}
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				DecimalFormat df = new DecimalFormat("#.##");
-				for (InventorySummaryDataWrapper inventorySummaryWrapper : allInventoriesSumDataFromMySQL){
+				List<Long> wareHouseIds = new ArrayList<>();
+				List<String> lastDataIds = new ArrayList<>();
+//				for (Inventory inventory : allInventoriesSumDataFromMySQL) {
+//					if (inventory.getWarehouseId() != null){
+//						wareHouseIds.add(inventory.getWarehouseId());
+//					}
+//				}
+				wareHouseIds = allInventoriesSumDataFromMySQL.stream()
+						.map(Inventory::getWarehouseId)
+						.filter(Objects::nonNull).collect(Collectors.toList());
+				lastDataIds = allInventoriesSumDataFromMySQL.stream()
+						.map(Inventory::getLastDataId)
+						.filter(Objects::nonNull).collect(Collectors.toList());
+				Optional<List<MonogoInventoryLastData>> mongoInv = mongoInventoryLastDataRepository.findAllBy_idIn(lastDataIds);
+				Optional<List<Warehouse>> optionalWarehouseList = warehousesRepository.findAllByIdIn(wareHouseIds);
+				List<Warehouse> warehouseList = optionalWarehouseList.get();
+				List<MonogoInventoryLastData> monogoInventoryLastDataList = mongoInv.get();
+				String wareHouseName=null;
+				ObjectId _id = null;
+				Double temp = null;
+				Double hum = null;
+				Date createDate = null;
+
+				for (Inventory inventorySummaryWrapper : allInventoriesSumDataFromMySQL){
 					if(inventorySummaryWrapper.getLastDataId()!=null){
-						MonogoInventoryLastData mongoInv = mongoInventoryLastDataRepository.findById(inventorySummaryWrapper.getName());
 						if(mongoInv!=null){
-							inventoryLastData.add(
-									MongoInventoryWrapper
-											.builder()
-											._id(mongoInv.get_id())
-											.temperature(Double.valueOf(df.format(mongoInv.getTemperature())))
-											.inventoryId(mongoInv.getInventoryId())
-											.inventoryName(inventorySummaryWrapper.getLastDataId())
-											.createDate(utilities.monitoringTimeZoneConverter(mongoInv.getCreateDate(),timeOffset))
-											.humidity(Double.valueOf(df.format(mongoInv.getHumidity())))
-											.build());
+							try {
+								List<Warehouse> warehouseList1= warehouseList.stream().filter(warehouse -> warehouse.getId().equals(inventorySummaryWrapper.getWarehouseId())).collect(Collectors.toList());
+								List<MonogoInventoryLastData> monogoInventoryLastDataList1 = monogoInventoryLastDataList.stream().filter(monogoInventoryLastData -> monogoInventoryLastData.getInventoryId().equals(inventorySummaryWrapper.getId())).collect(Collectors.toList());
+								if(!warehouseList1.isEmpty())
+								{
+									wareHouseName= warehouseList1.get(0).getName();
+								}else {
+									wareHouseName = null;
+								}
+								if (!monogoInventoryLastDataList1.isEmpty()){
+									_id = monogoInventoryLastDataList1.get(0).get_id();
+									temp = monogoInventoryLastDataList1.get(0).getTemperature();
+									hum = monogoInventoryLastDataList1.get(0).getHumidity();
+									createDate = monogoInventoryLastDataList1.get(0).getCreateDate();
+
+								}else {
+									_id = null;
+									temp =null;
+									hum = null;
+									createDate = null;
+								}
+								inventoryLastData.add(
+										allInventoriesLastInfoResponse
+												.builder()
+												._id(_id)
+												.temperature(Double.valueOf(df.format(temp)))
+												.inventoryId(inventorySummaryWrapper.getId())
+												.inventoryName(inventorySummaryWrapper.getName())
+												.wareHouseName(wareHouseName)
+												.storingCategory(dictionary.Type(inventorySummaryWrapper.getStoringCategory()))
+												.createDate(utilities.monitoringTimeZoneConverter(createDate,timeOffset))
+												.humidity(Double.valueOf(df.format(hum)))
+												.build());
+							}catch (Exception e){
+								throw new ApiGetException(e.getLocalizedMessage());
+							}
+
 						}
-
 					}
-
 				}
 
 				Integer size=inventoryRepository.getInventoriesSize(usersIds);
@@ -1387,7 +1448,6 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				logger.info("************************ getNotifications ENDED ***************************");
 				return  ResponseEntity.ok().body(getObjectResponse);
 
-
 			}
 			else {
 				getObjectResponse= new GetObjectResponse(HttpStatus.NOT_FOUND.value(), "User ID is not found",inventoryLastData);
@@ -1395,8 +1455,6 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 				return  ResponseEntity.status(404).body(getObjectResponse);
 
 			}
-
-
 
 		}
 		else {
@@ -1406,10 +1464,6 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 
 		}
 	}
-
-
-
-
 
 
 	@Override
@@ -3196,32 +3250,46 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 			Long inventoryId = inventoryRepository.getInventoryByNumber(obj.getInventoryNumber(), "skarpt");
 			Date dateTime = null;
 			String create_date = null;
+
+//			if(inventoryId  != null) {
+//				Inventory inventory = inventoryRepository.findOne(inventoryId);
+//
+////				Date dateTime = null;
+////				String create_date = null;
+//
+//				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+//
+//				try {
+//					dateTime = input.parse(obj.getCreate_date().toString());
+//				} catch (java.text.ParseException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			if(inventoryId  != null) {
 				Inventory inventory = inventoryRepository.findOne(inventoryId);
 
 				SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				if (true){
-					SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+				SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+				if (inventory.getConvertToUtc() != true){
 					try{
-						isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-						dateTime = isoFormat.parse(obj.getCreate_date());
+						input.setTimeZone(TimeZone.getTimeZone("UTC"));
+						dateTime = input.parse(obj.getCreate_date().toString());
 					} catch (Exception e){
 						e.printStackTrace();
 					}
 
 				}
 				else {
-
-					SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
 					try {
+						input.setTimeZone(TimeZone.getTimeZone("Asia/Riyadh"));
 						dateTime = input.parse(obj.getCreate_date().toString());
 					} catch (java.text.ParseException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
-
 				create_date = output.format(dateTime);
 
 				Double oldTemp = null;
@@ -3234,7 +3302,6 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 					}
 				}
 
-						
 				ObjectId lastDataId = saveLastDataHandler(inventory,dateTime,obj.getTemperature(),obj.getHumidity());
 
 				saveHumidityHandler(inventory, dateTime, obj.getHumidity(), oldTHum);
@@ -3356,5 +3423,96 @@ public class InventoryServiceImpl extends RestServiceController implements Inven
 	@Override
 	public ResponseEntity<?> inventoryMonthelyView(String endDate) {
 		return ResponseEntity.status(200).body(inventoryRepository.inventoryMonthelyView(endDate));
+	}
+
+	@Override
+	public ApiResponse<List<InventoryListDashBoardResponse>> inventoryListDashBoard(String TOKEN, Long userId) {
+
+		ApiResponseBuilder<List<InventoryListDashBoardResponse>> builder = new ApiResponseBuilder<>();
+		List<InventoryListDashBoardResponse> result = new ArrayList<>();
+		List<Long> userIds;
+		List<String> lastDataIds;
+		List<Long> wareHouseIds;
+		userIds = assistantServiceImpl.getChildrenOfUser(userId);
+
+		if (TOKEN.equals("")) {
+			builder.setMessage("TOKEN id is required");
+			builder.setStatusCode(HttpStatus.BAD_REQUEST.value());
+			builder.setEntity(null);
+			builder.setSize(0);
+			builder.setSuccess(false);
+			return builder.build();
+		}
+
+		if (super.checkActiveByApi(TOKEN) != null) {
+			return super.checkActiveByApi(TOKEN);
+		}
+
+		List<Inventory> inventoryList = inventoryRepository.findAllByUserIdInAndDeleteDate(userIds,null);
+		if (!inventoryList.isEmpty()){
+			List<Inventory> inventories = inventoryList;
+
+			lastDataIds = inventories.stream()
+					.map(Inventory::getLastDataId)
+					.filter(Objects::nonNull).collect(Collectors.toList());
+			wareHouseIds = inventories.stream()
+					.map(Inventory::getWarehouseId)
+					.filter(Objects::nonNull).collect(Collectors.toList());
+
+			Optional<List<MonogoInventoryLastData>> optionalMonogoInventoryLastDataList =
+					mongoInventoryLastDataRepository.findAllBy_idIn(lastDataIds);
+			List<MonogoInventoryLastData> monogoInventoryLastDataList = optionalMonogoInventoryLastDataList.get();
+			Optional<List<Warehouse>> optionalWarehouseList =
+					warehousesRepository.findAllByIdIn(wareHouseIds);
+			List<Warehouse> warehouseList = optionalWarehouseList.get();
+
+			String wareHouseName; Double temp; Double hum;
+
+			for (Inventory inventory:inventories) {
+				try {
+					List<Warehouse> warehouseNames = warehouseList.stream()
+							.filter(warehouse -> warehouse.getId()
+									.equals(inventory.getWarehouseId())).collect(Collectors.toList());
+					List<MonogoInventoryLastData> mongoInv = monogoInventoryLastDataList.stream()
+							.filter(monogoInventoryLastData -> monogoInventoryLastData.getInventoryId()
+									.equals(inventory.getId())).collect(Collectors.toList());
+					if (!warehouseNames.isEmpty()) {
+						wareHouseName= warehouseNames.get(0).getName();
+					}else {
+						wareHouseName = null;
+					}
+					if (!mongoInv.isEmpty()){
+						temp = mongoInv.get(0).getTemperature();
+						hum = mongoInv.get(0).getHumidity();
+					}else {
+						temp= null;
+						hum = null;
+					}
+					result.add(
+							InventoryListDashBoardResponse
+									.builder()
+									.inventoryName(inventory.getName())
+									.wareHouseName(wareHouseName)
+									.lastUpdate(inventory.getLastUpdate())
+									.temp(temp)
+									.humidity(hum)
+									.storingCategory(dictionary.RangeInTempAndHumValid(inventory.getStoringCategory(),temp,hum))
+									.build()
+					);
+				}catch (Exception e){
+					throw new ApiGetException(e.getLocalizedMessage());
+				}
+
+			}
+			builder.setEntity(result);
+			builder.setStatusCode(200);
+			builder.setMessage("Data Found");
+			builder.setSize(result.size());
+			builder.setSuccess(true);
+			return builder.build();
+
+		}else {
+			throw new ApiGetException("No Inventories Found");
+		}
 	}
 }

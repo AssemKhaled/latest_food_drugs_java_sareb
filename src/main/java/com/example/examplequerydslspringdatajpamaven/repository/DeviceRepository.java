@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,6 +30,7 @@ import com.example.examplequerydslspringdatajpamaven.entity.LastLocationsList;
 @Component
 public interface DeviceRepository extends  JpaRepository<Device, Long>, QueryDslPredicateExecutor<Device> {
 
+//	Optional<List<Device>> findAllByUserIdInAndDeleteDate(List<Long> userIds , String deleteDate, Pageable pageable);
 	Optional<List<Device>> findAllByUserIdInAndDeleteDate(List<Long> userIds , String deleteDate);
 
 	@Query(value = "SELECT * from tc_devices where tc_devices.simcardNumber=:simcardNumber and tc_devices.delete_date is null",nativeQuery = true)
@@ -307,7 +309,7 @@ public interface DeviceRepository extends  JpaRepository<Device, Long>, QueryDsl
 			" AND ( ( TIMESTAMPDIFF(day ,tc_devices.update_date_in_elm,CURDATE()) >= 275) " + 
 			" or (tc_devices.update_date_in_elm IS NULL) )"
 			+ "order by tc_devices.id LIMIT 100,100", nativeQuery = true)
-	public List<Long> getAllDevicesExpired();
+	List<Long> getAllDevicesExpired();
 	
 	
 	@Query(value = " SELECT tc_devices.id FROM tc_devices " + 

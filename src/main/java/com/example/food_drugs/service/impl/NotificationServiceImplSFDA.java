@@ -1,14 +1,22 @@
 package com.example.food_drugs.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.ApiResponseBuilder;
+import com.example.food_drugs.dto.Request.NotificationSettingRequest;
+import com.example.food_drugs.entity.EmailsMongo;
+import com.example.food_drugs.exception.ApiGetException;
+import com.example.food_drugs.repository.EmailMongoRepository;
 import com.example.food_drugs.service.NotificationServiceSFDA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import com.example.examplequerydslspringdatajpamaven.entity.Notification;
@@ -21,6 +29,10 @@ import com.example.examplequerydslspringdatajpamaven.service.UserRoleService;
 import com.example.examplequerydslspringdatajpamaven.service.UserServiceImpl;
 import com.example.food_drugs.repository.NotificationRepositorySFDA;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.transaction.Transactional;
+
 /**
  * services functionality related to notifications
  * @author fuinco
@@ -28,26 +40,31 @@ import com.example.food_drugs.repository.NotificationRepositorySFDA;
  */
 @Component
 @Service
+@Transactional
 public class NotificationServiceImplSFDA extends RestServiceController implements NotificationServiceSFDA {
 
 	private static final Log logger = LogFactory.getLog(NotificationServiceImpl.class);
 
 	private GetObjectResponse getObjectResponse;
-	
-	@Autowired
-	private UserServiceImpl userService;
-	
-	@Autowired
-	private UserRoleService userRoleService;
-	
-	@Autowired
-	private NotificationRepository notificationRepository;
-	
-	@Autowired
-	private NotificationRepositorySFDA notificationRepositorySFDA;
-	
-	@Autowired 
-	private NotificationServiceImpl notificationServiceImpl;
+	private final   UserServiceImpl userService;
+	private final UserRoleService userRoleService;
+	private final NotificationRepository notificationRepository;
+	private final NotificationRepositorySFDA notificationRepositorySFDA;
+	private final NotificationServiceImpl notificationServiceImpl;
+	private final   JavaMailSender javaMailSender;
+	private final EmailMongoRepository emailMongoRepository;
+	private final UserRepository userRepository;
+
+	public NotificationServiceImplSFDA(UserServiceImpl userService, UserRoleService userRoleService, NotificationRepository notificationRepository, NotificationRepositorySFDA notificationRepositorySFDA, NotificationServiceImpl notificationServiceImpl, JavaMailSender javaMailSender, EmailMongoRepository emailMongoRepository, UserRepository userRepository) {
+		this.userService = userService;
+		this.userRoleService = userRoleService;
+		this.notificationRepository = notificationRepository;
+		this.notificationRepositorySFDA = notificationRepositorySFDA;
+		this.notificationServiceImpl = notificationServiceImpl;
+		this.javaMailSender = javaMailSender;
+		this.emailMongoRepository = emailMongoRepository;
+		this.userRepository = userRepository;
+	}
 
 	@Override
 	public ResponseEntity<?> activeNotification(String TOKEN, Long notificationId, Long userId) {
@@ -271,4 +288,246 @@ public class NotificationServiceImplSFDA extends RestServiceController implement
 
 		}
 	}
+
+	@Override
+	public ApiResponse<NotificationSettingRequest> notificationSetting(String TOKEN,Long userId, NotificationSettingRequest notificationSettingRequest) {
+
+		ApiResponseBuilder<NotificationSettingRequest> builder = new ApiResponseBuilder<>();
+		List<String> nType;
+		List<Notification> ids;
+		List<Long> notiIds;
+		String notifyBy;
+		String emails;
+		if (TOKEN.equals("")) {
+			builder.setMessage("TOKEN id is required");
+			builder.setStatusCode(HttpStatus.BAD_REQUEST.value());
+			builder.setEntity(null);
+			builder.setSize(0);
+			builder.setSuccess(false);
+			return builder.build();
+		}
+		if (super.checkActiveByApi(TOKEN) != null) {
+			return super.checkActiveByApi(TOKEN);
+		}
+
+		User user ;
+		user = userRepository.findOne(userId);
+		notifyBy = notificationSettingRequest.getNotifyBy().stream()
+				.map(String::valueOf)
+				.collect(Collectors.joining(","));
+		emails = notificationSettingRequest.getEmails().stream()
+				.map(String::valueOf)
+				.collect(Collectors.joining(",","{","}"));
+		Set<User> users = new HashSet<>();
+		users.add(user);
+		ids = notificationRepository.getNotifications(userId);
+		if (notificationSettingRequest.getNotificationType().isEmpty()
+				&& notificationSettingRequest.getNotifyBy().isEmpty()
+				&& notificationSettingRequest.getEmails().isEmpty()){
+			if (!ids.isEmpty()){
+				notiIds = ids.stream().map(Notification::getId).collect(Collectors.toList());
+				notificationRepository.deleteNotificationByIdIn(notiIds);
+
+			}
+		}else {
+			if (!ids.isEmpty()){
+				notiIds = ids.stream().map(Notification::getId).collect(Collectors.toList());
+				notificationRepository.deleteNotificationByIdIn(notiIds);
+			}
+			if (user != null) {
+				user.setEmails(emails);
+				nType = notificationSettingRequest.getNotificationType();
+
+				for (int i = 0; i < nType.size(); i++) {
+					Notification notification = Notification
+							.builder()
+							.notificators(notifyBy)
+							.type(nType.get(i))
+							.always(true)
+							.userNotification(users)
+							.build();
+					notificationRepository.save(notification);
+				}
+				builder.setMessage("success");
+				builder.setStatusCode(HttpStatus.OK.value());
+				builder.setEntity(null);
+				builder.setSize(0);
+				builder.setSuccess(true);
+				return builder.build();
+			} else {
+				throw new ApiGetException("User Not Found");
+			}
+		}
+		builder.setMessage("Notifications Deleted");
+		builder.setStatusCode(HttpStatus.OK.value());
+		builder.setEntity(null);
+		builder.setSize(0);
+		builder.setSuccess(true);
+		return builder.build();
+	}
+
+	@Override
+	public ApiResponse<NotificationSettingRequest> getNotificationSetting(String TOKEN, Long userId) {
+		ApiResponseBuilder<NotificationSettingRequest> builder = new ApiResponseBuilder<>();
+		List<Notification> result ;
+		User user;
+		List<String> nType;
+		List<String> notifyBy;
+		List<String> notifcators;
+		List<String> emails = new ArrayList<>();
+		NotificationSettingRequest notificationSettingRequest;
+		if (TOKEN.equals("")) {
+			builder.setMessage("TOKEN id is required");
+			builder.setStatusCode(HttpStatus.BAD_REQUEST.value());
+			builder.setEntity(null);
+			builder.setSize(0);
+			builder.setSuccess(false);
+			return builder.build();
+		}
+
+		if (super.checkActiveByApi(TOKEN) != null) {
+			return super.checkActiveByApi(TOKEN);
+		}
+		user = userRepository.findOne(userId);
+		if (user != null){
+			result = notificationRepository.getNotifications(userId);
+			if (!result.isEmpty()){
+				nType = result.stream()
+						.map(Notification::getType)
+						.distinct()
+						.collect(Collectors.toList());
+				emails.add(user.getEmails());
+
+
+				notifyBy = result.stream()
+						.map(Notification::getNotificators)
+						.distinct().collect(Collectors.toList());
+				String [] items = notifyBy.get(0).split("\\s*,\\s*");
+				notifcators = Arrays.asList(items);
+
+				notificationSettingRequest = NotificationSettingRequest
+						.builder()
+						.notificationType(nType)
+						.notifyBy(notifcators)
+						.emails(emails)
+						.build();
+
+
+			}else {
+				notificationSettingRequest = NotificationSettingRequest
+						.builder()
+						.notificationType(null)
+						.notifyBy(null)
+						.emails(null)
+						.build();
+			}
+			builder.setMessage("success");
+			builder.setStatusCode(HttpStatus.OK.value());
+			builder.setEntity(notificationSettingRequest);
+			builder.setSize(1);
+			builder.setSuccess(true);
+			return builder.build();
+		}else {
+			throw new ApiGetException("NO SUCH USER Exist");
+		}
+
+	}
+
+	@Override
+	public void sendEmail() {
+
+		SimpleMailMessage msg = new SimpleMailMessage();
+		List<Long> userIds;
+		Optional<List<EmailsMongo>> optionalEmailsMongoList = emailMongoRepository.findAllByIsSent(false);
+		if (optionalEmailsMongoList.isPresent()){
+			List<EmailsMongo> emailsMongoList = optionalEmailsMongoList.get();
+			userIds = emailsMongoList.stream()
+					.map(EmailsMongo::getUserId)
+					.distinct()
+					.filter(Objects::nonNull).collect(Collectors.toList());
+			Optional<List<User>> optionalUserList = userRepository.findAllByIdIn(userIds);
+			if (optionalUserList.isPresent()) {
+				List<User> userList = optionalUserList.get();
+				for (EmailsMongo emails: emailsMongoList) {
+				try {
+					List<User> users = userList.stream()
+							.filter(user -> user.getId().equals(emails.getUserId()))
+							.collect(Collectors.toList());
+					if (!users.isEmpty()){
+						if (users.get(0).getEmails() != null){
+							msg.setTo(users.get(0).getEmails());
+							msg.setSubject(emails.getSubject());
+							msg.setText(emails.getBody());
+							javaMailSender.send(msg);
+						}
+					}
+				}catch (Exception e){
+					throw new ApiGetException(e.getLocalizedMessage());
+				}
+				}
+
+			}else {
+				throw new ApiGetException("USERS NOT FOUND");
+			}
+
+		}else {
+			System.out.println("NO EMAILS FOUND TO BE SENT");
+		}
+	}
+
+//	public void sendUsersEmails() throws MessagingException {
+//		List<EmailsMongo> emails = emailRepository.findAllByIsSentOrderByTime(false);
+//
+//		System.out.println(emails.size() + "----------------------------------------------------------------");
+//
+//		Map<Long, List<String>> users = new HashMap<>();
+//		for(MongoEmail email:emails){
+//			if(!users.containsKey(email.getUserId())){
+//				User user = userRepository.findOne(email.getUserId());
+//				if(user == null){
+//					continue;
+//				}
+//				List<String> userEmails = new ArrayList<>();
+//				if(user.getEmail() != null){
+//					userEmails.add(user.getEmail());
+//				}
+//				if(user.getEmail1() != null){
+//					userEmails.add(user.getEmail1());
+//				}
+//				if(user.getEmail2() != null){
+//					userEmails.add(user.getEmail2());
+//				}
+//				if(user.getEmail3() != null){
+//					userEmails.add(user.getEmail3());
+//				}
+//				if(user.getEmails()!= null){
+//					JSONArray jsonEmails = new JSONArray(user.getEmails());
+//					for(int i = 0; i < jsonEmails.length(); i++){
+//						userEmails.add(jsonEmails.getJSONObject(i).getString("email"));
+//					}
+//				}
+//				users.put(user.getId(), userEmails);
+//			}
+//
+//			//send email to users.get(user.getId())
+//
+//
+//			int n = users.get(email.getUserId()).size();
+//			String[] to = new String[n];
+//			for(int  i = 0; i < n; i++){
+//				to[i] = users.get(email.getUserId()).get(i);
+//			}
+//
+////            String[] to = {"a000wael@gmail.com", "ahm.wael0@gmail.com", "hossamragab1997@gmail.com"};
+//
+//			MimeMessage mimeMessage = mailSender.createMimeMessage();
+//			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+//			helper.setText(email.getBody(), true);
+//			helper.setTo(to);
+//			helper.setSubject(email.getSubject());
+//			mailSender.send(mimeMessage);
+//			email.setSent(true);
+//			emailRepository.save(email);
+//		}
+//	}
 }

@@ -11,6 +11,7 @@ import java.util.Date;
 @Setter
 @Getter
 public class MongoInventoryWrapper {
+
    private Double temperature;
 
    private Double humidity ;
@@ -22,5 +23,7 @@ public class MongoInventoryWrapper {
    private String inventoryName ;
 
    private ObjectId _id;
+
+
 
 }

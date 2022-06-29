@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class InventoryLastDataResponse {
 
+    private Long wareHouseId;
     private String inventoryName;
     private String lastUpdated;
     private Double lastTemperature;

@@ -1,4 +1,4 @@
-package com.example.food_drugs.rest;
+package com.example.food_drugs.rest.mobileRestSFDA;
 
 import java.util.List;
 import java.util.Map;

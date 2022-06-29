@@ -14,6 +14,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 /**
  * Model of table tc_notifications in DB
@@ -21,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tc_notifications")
 public class Notification extends Attributes{
 	
@@ -94,7 +100,7 @@ public class Notification extends Attributes{
 	}
 
 
-	@JsonIgnore 
+	@JsonIgnore
 	@ManyToMany(
             fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}
@@ -139,6 +145,5 @@ public class Notification extends Attributes{
 	public void setDevices(Set<Device> devices) {
 		this.devices = devices;
 	}
-	
-	
+
 }

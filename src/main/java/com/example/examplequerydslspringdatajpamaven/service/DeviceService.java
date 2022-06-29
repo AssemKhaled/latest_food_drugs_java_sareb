@@ -46,7 +46,7 @@ public interface DeviceService {
 	
 	public ResponseEntity<?> getDeviceStatus(String TOKEN,Long userId);
 	
-	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDeviceLiveData(String TOKEN, Long userId, int offset, String search);
+	public ResponseEntity<GetObjectResponse<CustomDeviceLiveDataResponse>> getAllDeviceLiveData(String TOKEN, Long userId, int offset, String search , String timeOffset);
 	
 	public ResponseEntity<?> vehicleInfo(String TOKEN,Long deviceId,Long userId);
 	

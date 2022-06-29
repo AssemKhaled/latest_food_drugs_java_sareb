@@ -3,14 +3,7 @@ package com.example.examplequerydslspringdatajpamaven.service;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -312,7 +305,9 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			inputFormat1.setLenient(false);
 			inputFormat.setLenient(false);
 			outputFormat.setLenient(false);
-
+			TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+			inputFormat.setTimeZone(etTimeZone);
+			outputFormat.setTimeZone(etTimeZone);
 			
 			try {
 				dateFrom = inputFormat.parse(start);
@@ -2673,10 +2668,12 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			SimpleDateFormat inputFormat1 = new SimpleDateFormat("yyyy-MM-dd");
-			inputFormat1.setLenient(false);
-			inputFormat.setLenient(false);
-			outputFormat.setLenient(false);
-
+//			inputFormat1.setLenient(false);
+//			inputFormat.setLenient(false);
+//			outputFormat.setLenient(false);
+			TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+			inputFormat.setTimeZone(etTimeZone);
+			outputFormat.setTimeZone(etTimeZone);
 			
 			try {
 				dateFrom = inputFormat.parse(from);
@@ -4015,7 +4012,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 			        .queryParam("page", page)
 			        .queryParam("start", start)
 			        .queryParam("limit",limit).build();
-		  HttpEntity<String> request = new HttpEntity<String>(headers);
+		  HttpEntity<String> request = new HttpEntity<>(headers);
 		  String URL = builder.toString();
 		  if(allDevices.size()>0) {
 			  for(int i=0;i<allDevices.size();i++) {
@@ -5858,7 +5855,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 
 		SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS SSSS");
+//		SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS SSSS");
+		SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat inputFormat1 = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 		inputFormat1.setLenient(false);
 		inputFormat.setLenient(false);
@@ -6482,6 +6480,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 
 				
 				try {
+					TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+					inputFormat.setTimeZone(etTimeZone);
 					dateFrom = inputFormat.parse(start);
 					start = outputFormat.format(dateFrom);
 					
@@ -6489,6 +6489,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				} catch (ParseException e2) {
 					// TODO Auto-generated catch block
 					try {
+						TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+						inputFormat.setTimeZone(etTimeZone);
 						dateFrom = inputFormat1.parse(start);
 						start = outputFormat.format(dateFrom);
 
@@ -6503,6 +6505,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				}
 				
 				try {
+					TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+					inputFormat.setTimeZone(etTimeZone);
 					dateTo = inputFormat.parse(end);
 					end = outputFormat.format(dateTo);
 					
@@ -6510,6 +6514,8 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 				} catch (ParseException e2) {
 					// TODO Auto-generated catch block
 					try {
+						TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+						inputFormat.setTimeZone(etTimeZone);
 						dateTo = inputFormat1.parse(end);
 						end = outputFormat.format(dateTo);
 
@@ -6521,10 +6527,7 @@ public class ReportServiceImpl extends RestServiceController implements ReportSe
 					}
 					
 				}
-				
-				
-				
-				
+
 				Date today=new Date();
 
 				if(dateFrom.getTime() > dateTo.getTime()) {

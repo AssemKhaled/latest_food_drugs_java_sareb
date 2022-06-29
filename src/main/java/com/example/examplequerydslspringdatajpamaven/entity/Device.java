@@ -3,25 +3,11 @@ package com.example.examplequerydslspringdatajpamaven.entity;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.Column;
-import javax.persistence.CascadeType;
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.SqlResultSetMappings;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.example.food_drugs.dto.responses.CustomDeviceLiveDataResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 
 @SqlResultSetMappings({
 	@SqlResultSetMapping(
@@ -415,7 +401,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			+ " tc_devices.start_date as startDate ,tc_devices.end_date as endDate , "
 			+ " tc_drivers.name as driverName,tc_users.name as companyName,tc_users.id as companyId ,GROUP_CONCAT(tc_geofences.name )AS geofenceName"
 			+ " ,tc_devices.create_date as create_date ,tc_devices.delete_from_elm_date as delete_date_elm "
-			+ " ,tc_devices.update_date_in_elm as update_date_elm , DDATEDIFF(tc_devices.end_date,CURRENT_DATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
+			+ " ,tc_devices.update_date_in_elm as update_date_elm , DATEDIFF(tc_devices.end_date,CURRENT_DATE()) as leftDays FROM tc_devices LEFT JOIN  tc_device_driver ON tc_devices.id=tc_device_driver.deviceid"
 			+ " LEFT JOIN  tc_drivers ON tc_drivers.id=tc_device_driver.driverid and tc_drivers.delete_date is null"
 			+ " LEFT JOIN  tc_device_geofence ON tc_devices.id=tc_device_geofence.deviceid" 
 			+ " LEFT JOIN  tc_geofences ON tc_geofences.id=tc_device_geofence.geofenceid and tc_geofences.delete_date"
@@ -643,16 +629,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 			" INNER JOIN tc_user_device ON tc_user_device.deviceid=tc_devices.id " + 
 			" INNER JOIN tc_users ON tc_user_device.userid=tc_users.id " + 
 			" where tc_devices.delete_date IS NULL " + 
-			" AND tc_devices.create_date Is NOT NULL " + 
-			" AND TIMESTAMPDIFF(day ,tc_devices.create_date,:currentDate) >= 275 " + 
+			" AND tc_devices.create_date Is NOT NULL " +
 			" AND tc_devices.reference_key IS NOT NULL " + 
 			" AND tc_devices.expired IS False " + 
-			" AND ( ( TIMESTAMPDIFF(day ,tc_devices.update_date_in_elm,:currentDate) >= 275) " + 
-			" or (tc_devices.update_date_in_elm IS NULL) ) " + 
+			" AND ( ( TIMESTAMPDIFF(day ,tc_devices.end_date,:currentDate) <= 15) " +
 			" ORDER BY tc_devices.create_date ASC LIMIT 1000 " ),
-	
-	
-	@NamedNativeQuery(name="getVehicleInfoData", 
+//		" AND TIMESTAMPDIFF(day ,tc_devices.create_date,:currentDate) >= 275 " +
+//		+
+//				" or (tc_devices.update_date_in_elm IS NULL) ) "
+
+		@NamedNativeQuery(name="getVehicleInfoData",
 	resultSetMapping="vehicleInfo",
 	query=" SELECT tc_drivers.id as driverId,tc_drivers.uniqueid as driverUniqueId,tc_drivers.name as driverName,tc_drivers.photo as driverPhoto," + 
 			" tc_devices.id as id,tc_devices.lastupdate as lastUpdate,tc_devices.name as deviceName,tc_devices.uniqueid as uniqueId,tc_devices.sequence_number as sequenceNumber," + 
@@ -681,6 +667,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 
+@Builder
 @Entity
 @Table(name = "tc_devices")
 public class Device extends Attributes{
@@ -690,7 +677,7 @@ public class Device extends Attributes{
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "name") 
+	@Column(name = "name")
 	private String name;
 	
 	@Column(name = "uniqueid")
@@ -846,6 +833,16 @@ public class Device extends Attributes{
 	@Column(name = "end_date")
 	private Date endDate;
 
+	@Column(name = "storingCategory")
+	private String storingCategory;
+
+	public String getStoringCategory() {
+		return storingCategory;
+	}
+
+	public void setStoringCategory(String storingCategory) {
+		this.storingCategory = storingCategory;
+	}
 
 	public Date getStartDate() {
 		return startDate;
@@ -917,6 +914,69 @@ public class Device extends Attributes{
 		this.lastTemp = lastTemp;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.user = user;
+		this.driver = driver;
+		this.geofence = geofence;
+		this.groups = groups;
+		this.notificationDevice = notificationDevice;
+		this.attributeDevice = attributeDevice;
+	}
+
+	public Device(Long id, String name, String uniqueid, String lastupdate, String positionid, String position_id, String phone, String model, String plate_num, String right_letter, String middle_letter, String left_letter, Integer plate_type, String reference_key, Integer is_deleted, String deleteDate, Integer init_sensor, Integer init_sensor2, Integer car_weight, String reject_reason, String sequence_number, Integer is_valid, Integer expired, String calibrationData, String fuel, String sensorSettings, String lineData, String create_date, Integer lastWeight, String owner_name, String username, String owner_id, String brand, String made_year, String color, String license_exp, Integer date_type, String photo, String icon, String protocol, String port, String device_type, Date regestration_to_elm_date, String representative, String delete_from_elm, Date delete_from_elm_date, Date update_date_in_elm, String simcardNumber, Long userId, Double lastHum, Double lastTemp, Date startDate, Date endDate, String storingCategory, Set<User> user, Set<Driver> driver, Set<Geofence> geofence, Set<Group> groups, Set<Notification> notificationDevice, Set<Attribute> attributeDevice) {
+		this.id = id;
+		this.name = name;
+		this.uniqueid = uniqueid;
+		this.lastupdate = lastupdate;
+		this.positionid = positionid;
+		this.position_id = position_id;
+		this.phone = phone;
+		this.model = model;
+		this.plate_num = plate_num;
+		this.right_letter = right_letter;
+		this.middle_letter = middle_letter;
+		this.left_letter = left_letter;
+		this.plate_type = plate_type;
+		this.reference_key = reference_key;
+		this.is_deleted = is_deleted;
+		this.deleteDate = deleteDate;
+		this.init_sensor = init_sensor;
+		this.init_sensor2 = init_sensor2;
+		this.car_weight = car_weight;
+		this.reject_reason = reject_reason;
+		this.sequence_number = sequence_number;
+		this.is_valid = is_valid;
+		this.expired = expired;
+		this.calibrationData = calibrationData;
+		this.fuel = fuel;
+		this.sensorSettings = sensorSettings;
+		this.lineData = lineData;
+		this.create_date = create_date;
+		this.lastWeight = lastWeight;
+		this.owner_name = owner_name;
+		this.username = username;
+		this.owner_id = owner_id;
+		this.brand = brand;
+		this.made_year = made_year;
+		this.color = color;
+		this.license_exp = license_exp;
+		this.date_type = date_type;
+		this.photo = photo;
+		this.icon = icon;
+		this.protocol = protocol;
+		this.port = port;
+		this.device_type = device_type;
+		this.regestration_to_elm_date = regestration_to_elm_date;
+		this.representative = representative;
+		this.delete_from_elm = delete_from_elm;
+		this.delete_from_elm_date = delete_from_elm_date;
+		this.update_date_in_elm = update_date_in_elm;
+		this.simcardNumber = simcardNumber;
+		this.userId = userId;
+		this.lastHum = lastHum;
+		this.lastTemp = lastTemp;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.storingCategory = storingCategory;
 		this.user = user;
 		this.driver = driver;
 		this.geofence = geofence;

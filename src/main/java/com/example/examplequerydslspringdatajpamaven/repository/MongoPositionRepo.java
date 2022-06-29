@@ -2038,8 +2038,6 @@ public class MongoPositionRepo {
 	            		position.setPositionId(object.getObjectId("_id").toString());
 	
 					}
-					
-	            	
 	            	
 	            }
 	        }

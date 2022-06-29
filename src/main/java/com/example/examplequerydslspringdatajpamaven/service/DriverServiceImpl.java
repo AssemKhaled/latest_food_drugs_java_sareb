@@ -8,6 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.example.food_drugs.config.ConnectionToTracer;
+import com.example.food_drugs.dto.Request.AddDriverTracerRequest;
+import com.example.food_drugs.dto.Request.CreateVehicleInTracerRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,8 @@ public class DriverServiceImpl extends RestServiceController implements DriverSe
 
 	@Autowired
 	DriverRepository driverRepository;
+
+	private final ConnectionToTracer connectionToTracer;
 	
 	@Autowired
 	private UserRoleService userRoleService;
@@ -63,8 +69,12 @@ public class DriverServiceImpl extends RestServiceController implements DriverSe
 	
 	@Autowired
 	UserClientDriverRepository userClientDriverRepository;
-	
-	
+
+	public DriverServiceImpl(ConnectionToTracer connectionToTracer) {
+		this.connectionToTracer = connectionToTracer;
+	}
+
+
 	/**
 	 * get drivers list with limit 10
 	 */
@@ -306,7 +316,21 @@ public class DriverServiceImpl extends RestServiceController implements DriverSe
 								
 								driver.setIs_deleted(null);
 								driver.setDelete_date(null);
-								
+
+								ResponseEntity<AddDriverTracerRequest> addDriverTracerRequest;
+
+								addDriverTracerRequest = connectionToTracer.addDriverTracerResponse(
+										AddDriverTracerRequest.
+												builder()
+												.name(driver.getName())
+												.uniqueId(driver.getUniqueid())
+												.build()
+								);
+
+								Long driverId = addDriverTracerRequest.getBody().getId();
+								driver.setId(driverId);
+								logger.info("{+++++++***** ID IS : ********" + driverId);
+
 								driverRepository.save(driver);
 								drivers.add(driver);
 								

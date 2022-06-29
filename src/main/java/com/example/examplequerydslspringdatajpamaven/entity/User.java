@@ -2,17 +2,10 @@ package com.example.examplequerydslspringdatajpamaven.entity;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.JoinColumn;
+import javax.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -114,6 +107,9 @@ public class User extends Attributes{
 	@Column(name = "update_date_in_elm")
 	private Date update_date_in_elm;
 
+	@Column(name = "emails")
+	private String emails;
+
 	 @JsonIgnore
 	 @ManyToMany(
 	        fetch = FetchType.LAZY,
@@ -148,6 +144,15 @@ public class User extends Attributes{
 	public User() {
 		
 	}
+
+	public String getEmails() {
+		return emails;
+	}
+
+	public void setEmails(String emails) {
+		this.emails = emails;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -353,11 +358,14 @@ public class User extends Attributes{
 	public void setGroups(Set<Group> groups) {
 		this.groups = groups;
 	}
-    
-	
+
+	//@ManyToMany
+//@JoinTable(name = "tc_user_notification", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+//		inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
 	@JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             mappedBy = "userNotification")
+
     private Set<Notification> notifications = new HashSet<>();
 
 	public Set<Notification> getNotifications() {

@@ -2,12 +2,7 @@ package com.example.food_drugs.service.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -15,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 
+import com.example.examplequerydslspringdatajpamaven.entity.*;
+import com.example.examplequerydslspringdatajpamaven.repository.*;
 import com.example.food_drugs.dto.responses.ElmInquiryResponse;
 import com.example.food_drugs.service.ElmServiceSFDA;
 import org.apache.commons.logging.Log;
@@ -36,15 +33,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import com.example.examplequerydslspringdatajpamaven.entity.User;
-import com.example.examplequerydslspringdatajpamaven.entity.VehiclePlate;
-import com.example.examplequerydslspringdatajpamaven.entity.Device;
-import com.example.examplequerydslspringdatajpamaven.entity.ElmReturn;
-import com.example.examplequerydslspringdatajpamaven.entity.MongoElmLogs;
-import com.example.examplequerydslspringdatajpamaven.repository.DeviceRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.MongoElmLogsRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.UserClientDeviceRepository;
-import com.example.examplequerydslspringdatajpamaven.repository.UserRepository;
 import com.example.examplequerydslspringdatajpamaven.responses.GetObjectResponse;
 import com.example.examplequerydslspringdatajpamaven.rest.RestServiceController;
 import com.example.food_drugs.entity.MongoElmLogsSFDA;
@@ -148,8 +136,13 @@ public class ElmServiceImplSFDA  extends RestServiceController implements ElmSer
 
 	private final UserServiceImplSFDA userServiceImplSFDA;
 
-	public ElmServiceImplSFDA(UserServiceImplSFDA userServiceImplSFDA) {
+	private final MongoPositionRepo mongoPositionRepo;
+	private final MongoPositionsRepository mongoPositionsRepository;
+
+	public ElmServiceImplSFDA(UserServiceImplSFDA userServiceImplSFDA, MongoPositionRepo mongoPositionRepo, MongoPositionsRepository mongoPositionsRepository) {
 		this.userServiceImplSFDA = userServiceImplSFDA;
+		this.mongoPositionRepo = mongoPositionRepo;
+		this.mongoPositionsRepository = mongoPositionsRepository;
 	}
 
 	@Override
@@ -3215,7 +3208,14 @@ public class ElmServiceImplSFDA  extends RestServiceController implements ElmSer
 		
 		for(MongoElmLiveLocationSFDA position:positions) {
 			Map record = new HashMap();
-			
+
+			if(position.getTemperature() != null && !Objects.equals(position.getTemperature(), "")){
+				if(Double.parseDouble(position.getTemperature()) >= 100){
+					position.setTemperature("90");
+				}
+			}
+
+
 			record.put("referenceKey", position.getReferenceKey());
 			record.put("driverReferenceKey", position.getDriverReferenceKey());
 			record.put("latitude", position.getLatitude());
@@ -3321,5 +3321,218 @@ public class ElmServiceImplSFDA  extends RestServiceController implements ElmSer
 		return  ResponseEntity.ok().body(getObjectResponse);
 	}
 
-	
+	@Override
+	public ResponseEntity<?> findLastPositionsSequenceNumberSpeedZero(String sequenceNumber) {
+		logger.info("************************ findLastPositionsSequenceNumberSpeedZero Started ***************************");
+
+		Device device = deviceRepository.getDeviceBySequenceNumber(sequenceNumber);
+		List<MongoPositions> positionsZeroSpeed = mongoPositionsRepository
+				.findTop10ByDeviceidAndSpeedOrderByServertimeDesc(device.getId(),0.0);
+		logger.info("************************ findLastPositionsSequenceNumberSpeedZero Get Data With Size "+positionsZeroSpeed.size()+" ***************************");
+
+		Map dataFinal= new HashMap();
+		dataFinal.put("positionZeroSpeed", positionsZeroSpeed);
+		List<Map<Object,Object>> result = new ArrayList<>();
+		result.add(dataFinal);
+
+		logger.info("************************ findLastPositionsSequenceNumberSpeedZero ENDED ***************************");
+
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",result);
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
+
+	@Override
+	public ResponseEntity<?> findLastPositionsSequenceNumberNoneSpeedZero(String sequenceNumber) {
+		logger.info("************************ findLastPositionsSequenceNumberNoneSpeedZero Started ***************************");
+
+		Device device = deviceRepository.getDeviceBySequenceNumber(sequenceNumber);
+		List<MongoPositions> positionsZeroSpeed = mongoPositionsRepository
+				.findTop10ByDeviceidAndSpeedAfterOrderByServertimeDesc(device.getId(),0.0);
+		logger.info("************************ findLastPositionsSequenceNumberNoneSpeedZero Get Data With Size "+positionsZeroSpeed.size()+" ***************************");
+
+		Map dataFinal= new HashMap();
+		dataFinal.put("positionsGreaterZeroSpeed", positionsZeroSpeed);
+		List<Map<Object,Object>> result = new ArrayList<Map<Object,Object>>();
+		result.add(dataFinal);
+
+		logger.info("************************ findLastPositionsSequenceNumberNoneSpeedZero ENDED ***************************");
+
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",result);
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
+
+	@Override
+	public ResponseEntity<?> findLastZeroVelocityPositionsBySequenceNumber(String sequenceNumber) {
+		logger.info("************************ findLastZeroVelocityPositionsBySequenceNumber Started ***************************");
+
+		Device device = deviceRepository.getDeviceBySequenceNumber(sequenceNumber);
+
+		List<LastElmData> positionsZeroVelocity = new ArrayList<LastElmData>();
+		if(device.getReference_key() != null) {
+			positionsZeroVelocity = mongoPositionRepo.getLastPositionVelocityZero(device.getReference_key());
+
+		}
+
+		Map dataFinal= new HashMap();
+		dataFinal.put("positionsZeroVelocity", positionsZeroVelocity);
+		List<Map<Object,Object>> result = new ArrayList<Map<Object,Object>>();
+		result.add(dataFinal);
+
+		logger.info("************************ findLastZeroVelocityPositionsBySequenceNumber ENDED ***************************");
+
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",result);
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
+
+	@Override
+	public ResponseEntity<?> findLastNoneZeroVelocityPositionsBySequenceNumber(String sequenceNumber) {
+		logger.info("************************ findLastNoneZeroVelocityPositionsBySequenceNumber Started ***************************");
+
+		Device device = deviceRepository.getDeviceBySequenceNumber(sequenceNumber);
+
+		List<LastElmData> positionsGreaterZeroVelocity = new ArrayList<>();
+
+		if(device.getReference_key() != null) {
+			positionsGreaterZeroVelocity = mongoPositionRepo.getLastPositionGreaterVelocityZero(device.getReference_key());
+
+		}
+
+
+		Map dataFinal= new HashMap();
+		dataFinal.put("positionsGreaterZeroVelocity", positionsGreaterZeroVelocity);
+		List<Map<Object,Object>> result = new ArrayList<Map<Object,Object>>();
+		result.add(dataFinal);
+
+		logger.info("************************ findLastNoneZeroVelocityPositionsBySequenceNumber ENDED ***************************");
+
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",result);
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
+
+	@Override
+	public ResponseEntity<?> findDeviceData(String sequenceNumber) {
+		logger.info("************************ findDeviceData Started ***************************");
+		if(sequenceNumber.equals("")) {
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "No Sequence Number Selected",null);
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+		Device device = deviceRepository.getDeviceBySequenceNumber(sequenceNumber);
+
+		if(device == null) {
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "No Data For This Sequence Number In DB",null);
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+
+		List<Map<Object,Object>> result = new ArrayList<>();
+
+
+		Map dataFinal= new HashMap();
+
+		Map deviceData= new HashMap();
+		deviceData.put("Name", device.getName());
+		deviceData.put("Unique Id", device.getUniqueid());
+		deviceData.put("Sequence Number", device.getSequence_number());
+
+		if(device.getExpired() == 1) {
+			deviceData.put("Expired", "Expired");
+
+		}
+		else {
+			deviceData.put("Expired", "Not Expired");
+		}
+
+		if(device.getReference_key() != null) {
+			deviceData.put("Reference Key", device.getReference_key());
+
+		}
+		else {
+			deviceData.put("Reference Key", "No Reference Key");
+		}
+
+		List<Map> calibrationData=new ArrayList<Map>();
+		deviceData.put("Calibration Data", calibrationData);
+
+		if(device.getCalibrationData() != null) {
+
+			String str = device.getCalibrationData().toString();
+			String arrOfStr[] = str.split(" ");
+
+			for (String a : arrOfStr) {
+				JSONObject obj =new JSONObject(a);
+				Map list   = new HashMap<>();
+				list.put("s1",obj.get("s1"));
+				list.put("s2",obj.get("s2"));
+				list.put("w",obj.get("w"));
+				calibrationData.add(list);
+
+			}
+			deviceData.put("Calibration Data", calibrationData);
+
+		}
+		Map lineData   = new HashMap<>();
+		deviceData.put("Line Data", lineData);
+
+		if(device.getLineData() != null && !device.getLineData().equals("")) {
+			JSONObject obj= new JSONObject(device.getLineData());
+			lineData.put("slope",obj.get("slope"));
+			lineData.put("factor",obj.get("factor"));
+
+			deviceData.put("Line Data", lineData);
+
+		}
+
+		dataFinal.put("deviceData", deviceData);
+
+		result.add(dataFinal);
+
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",result);
+		logger.info("************************ findDeviceData Started ***************************");
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
+
+	@Override
+	public ResponseEntity<?> findDeviceLastPosition(String sequenceNumber) {
+		// TODO Auto-generated method stub
+		logger.info("************************ findDeviceLastPosition STARTED ***************************");
+
+
+		if(sequenceNumber.equals("")) {
+
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "No Sequence Number Selected",null);
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+		Device device = deviceRepository.getDeviceBySequenceNumber(sequenceNumber);
+
+		if(device == null) {
+			getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "No Data For This Sequence Number In DB",null);
+			return  ResponseEntity.ok().body(getObjectResponse);
+		}
+
+		List<Map<Object,Object>> result = new ArrayList<>();
+
+		Map dataFinal= new HashMap();
+
+		LastPositionData position = new LastPositionData();
+
+		position = mongoPositionRepo.getLastPosition(device.getId());
+
+		dataFinal.put("positionData", position);
+
+		result.add(dataFinal);
+
+		getObjectResponse= new GetObjectResponse(HttpStatus.OK.value(), "success",result);
+		logger.info("************************ findDeviceLastPosition STARTED ***************************");
+
+		return  ResponseEntity.ok().body(getObjectResponse);
+
+	}
 }

@@ -19,7 +19,6 @@ public class Utilities {
     }
 
     public String monitoringTimeZoneConverter(Date date, String timeOffset){
-        SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
         if(timeOffset.contains("%2B")){
             timeOffset = "+" + timeOffset.substring(3);
         }
@@ -48,10 +47,10 @@ public class Utilities {
         if(date != null){
             ZoneOffset zo = ZoneOffset.of(timeOffset);
             OffsetDateTime odt = OffsetDateTime.ofInstant(date.toInstant(), zo);
-//          return String.valueOf(odt).substring(0,19).replace("T", " ");
-            long epochMilli = odt.toInstant().toEpochMilli();
-            Date dateObject = new Date(epochMilli);
-            return outputFormat.format(dateObject);
+            return String.valueOf(odt).substring(0,19).replace("T", " ");
+//            long epochMilli = odt.toInstant().toEpochMilli();
+//            Date dateObject = new Date(epochMilli);
+//            return outputFormat.format(dateObject);
         }
         return null;
     }

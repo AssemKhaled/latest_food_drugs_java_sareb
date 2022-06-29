@@ -13,6 +13,10 @@ import org.springframework.stereotype.Repository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Repository
@@ -96,32 +100,72 @@ public class ReportsHelper {
 
             if(tripReport.getStartTime() != null && tripReport.getStartTime() != "") {
 
-                Date dateTime = null;
-                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
-                SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+//                if(timeOffset.equals("%2B0200")){
+                    Date dateTime = new Date();
 
-                try {
-                    dateTime = inputFormat.parse(tripReport.getStartTime());
+//                    TimeZone zt2 = TimeZone.getTimeZone(ZoneId.of("Africa/Cairo"));
+                    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//                    SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                    inputFormat.setTimeZone(TimeZone.getTimeZone("Africa/Cairo"));
+                    SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 
-                } catch (ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                    try {
+                        TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+                        inputFormat.setTimeZone(etTimeZone);
+//                        if(dateTime != null){
+////                            tripReport.setStartTime(utilities.timeZoneConverter(dateTime, timeOffset));
+//                            tripReport.setStartTime(String.valueOf(asiaZonedDateTime));
+//                        }
+//                        else {
+//                            tripReport.setStartTime(outputFormat.format(dateTime));
+//                        }
+//                    } catch (ParseException e) {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//
+//                }else if (timeOffset.equals("%2B0300")){
+//                    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//                    inputFormat.setTimeZone(TimeZone.getTimeZone("Asia/Riyadh"));
+////                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+//                    SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
+//
+//                    try {
+//                        Date  dateTime = inputFormat.parse(tripReport.getStartTime());
+//                        if(dateTime != null){
+//                            tripReport.setStartTime(utilities.timeZoneConverter(dateTime, timeOffset));
+//                        }
+//                        else {
+//                            tripReport.setStartTime(outputFormat.format(dateTime));
+//                        }
+//                    } catch (ParseException e) {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//                }
+                        dateTime = inputFormat.parse(tripReport.getStartTime());
 
-                if(dateTime != null){
-                    tripReport.setStartTime(utilities.timeZoneConverter(dateTime, timeOffset));
-                }
-                else {
-                    tripReport.setStartTime(outputFormat.format(dateTime));
-                }
-
+                    }catch (ParseException e){
+                        e.printStackTrace();
+                    }
+                    if (dateTime !=null){
+                        SimpleDateFormat inputFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        tripReport.setStartTime(utilities.timeZoneConverter(dateTime,timeOffset));
+                    }
+                    else {
+                        tripReport.setStartTime(outputFormat.format(dateTime));
+                    }
             }
             if(tripReport.getEndTime() != null && tripReport.getEndTime() != "") {
                 Date dateTime = null;
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+SSSS");
+//                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                 SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 
                 try {
+                    TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+                    inputFormat.setTimeZone(etTimeZone);
                     dateTime = inputFormat.parse(tripReport.getEndTime());
 
                 } catch (ParseException e) {
@@ -133,7 +177,7 @@ public class ReportsHelper {
                     tripReport.setEndTime(utilities.timeZoneConverter(dateTime, timeOffset));
                 }
                 else {
-                    tripReport.setEndTime(outputFormat.format(dateTime));
+                    tripReport.setEndTime(outputFormat.format(null));
                 }
             }
         }
@@ -168,6 +212,8 @@ public class ReportsHelper {
                 SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 
                 try {
+                    TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+                    inputFormat.setTimeZone(etTimeZone);
                     dateTime = inputFormat.parse(stopReportOne.getStartTime());
 
                 } catch (ParseException e) {
@@ -179,7 +225,7 @@ public class ReportsHelper {
                     stopReportOne.setStartTime(utilities.timeZoneConverter(dateTime, timeOffset));
                 }
                 else {
-                    stopReportOne.setStartTime(outputFormat.format(dateTime));
+                    stopReportOne.setStartTime(outputFormat.format(null));
                 }
             }
             if(stopReportOne.getEndTime() != null && stopReportOne.getEndTime() != "") {
@@ -188,6 +234,8 @@ public class ReportsHelper {
                 SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd, yyyy, HH:mm:ss aa");
 
                 try {
+                    TimeZone etTimeZone = TimeZone.getTimeZone("UTC");
+                    inputFormat.setTimeZone(etTimeZone);
                     dateTime = inputFormat.parse(stopReportOne.getEndTime());
 
                 } catch (ParseException e) {
@@ -199,7 +247,7 @@ public class ReportsHelper {
                     stopReportOne.setEndTime(utilities.timeZoneConverter(dateTime, timeOffset));
                 }
                 else {
-                    stopReportOne.setEndTime(outputFormat.format(dateTime));
+                    stopReportOne.setEndTime(outputFormat.format(null));
                 }
             }
         }

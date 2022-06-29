@@ -1,6 +1,7 @@
 package com.example.examplequerydslspringdatajpamaven.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -149,5 +150,8 @@ public interface UserRepository extends JpaRepository<User, Long>, QueryDslPredi
 	
 	@Query(value = "SELECT * FROM tc_users where roleId=:roleId and delete_date is null", nativeQuery = true)
 	public List<User> getUsersAssignedByRoleId(@Param("roleId") Long roleId);
+
+	Optional<List<User>> findAllByIdIn(List<Long> userIds);
+
 	
 }

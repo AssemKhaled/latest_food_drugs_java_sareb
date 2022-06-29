@@ -4,15 +4,27 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.ApiResponseBuilder;
 import com.example.food_drugs.dto.AttributesWrapper;
 import com.example.food_drugs.dto.responses.DeviceResponseDataWrapper;
 import com.example.food_drugs.dto.responses.GraphDataWrapper;
 import com.example.food_drugs.dto.responses.GraphObject;
+import com.example.food_drugs.dto.responses.VehicleListDashBoardResponse;
+import com.example.food_drugs.exception.ApiGetException;
+import com.example.food_drugs.helpers.Impl.AssistantServiceImpl;
+import com.example.food_drugs.helpers.Impl.Dictionary;
 import com.example.food_drugs.service.DeviceServiceSFDA;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -43,6 +55,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DeviceServiceImplSFDA extends RestServiceController implements DeviceServiceSFDA {
 
 	private static final Log logger = LogFactory.getLog(DeviceServiceImplSFDA.class);
+
+	private final AssistantServiceImpl assistantServiceImpl;
+	private final Dictionary dictionary ;
 	
 	private GetObjectResponse getObjectResponse;
 	
@@ -66,7 +81,12 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 	
 	@Autowired
 	private UserClientDeviceRepository userClientDeviceRepository;
-	
+
+	public DeviceServiceImplSFDA(AssistantServiceImpl assistantServiceImpl, Dictionary dictionary) {
+		this.assistantServiceImpl = assistantServiceImpl;
+		this.dictionary = dictionary;
+	}
+
 	@Override
 	public ResponseEntity<?> activeDeviceSFDA(String TOKEN, Long userId, Long deviceId) {
 	    logger.info("************************ activeDevice ENDED ***************************");
@@ -501,7 +521,7 @@ public class DeviceServiceImplSFDA extends RestServiceController implements Devi
 
 	@Override
 	public ResponseEntity<GetObjectResponse<GraphDataWrapper>> getDataForGraphByDeviceID(int deviceID){
-
+		//*************  DEPRECATED ****************
 		List<MongoPositions> lastDataList = mongoPositionsRepository
 				.findFirst15ByDeviceidOrderByServertimeDesc(deviceID);
 		List<GraphObject> series = new ArrayList<>();
@@ -570,6 +590,101 @@ public void startAndEndDate() throws ParseException {
 		}
 	}
 }
+
+	@Override
+	public ApiResponse<List<VehicleListDashBoardResponse>> vehicleListDashBoard(String TOKEN, Long userId) {
+
+		ApiResponseBuilder<List<VehicleListDashBoardResponse>> builder = new ApiResponseBuilder<>();
+		List<VehicleListDashBoardResponse> result = new ArrayList<>();
+		List<Long> userIds;
+		List<String> lastDataIds;
+		userIds = assistantServiceImpl.getChildrenOfUser(userId);
+
+		if (TOKEN.equals("")) {
+			builder.setMessage("TOKEN id is required");
+			builder.setStatusCode(HttpStatus.BAD_REQUEST.value());
+			builder.setEntity(null);
+			builder.setSize(0);
+			builder.setSuccess(false);
+			return builder.build();
+		}
+
+		if (super.checkActiveByApi(TOKEN) != null) {
+			return super.checkActiveByApi(TOKEN);
+		}
+
+		Optional<List<Device>> optionalDeviceList = deviceRepository.findAllByUserIdInAndDeleteDate(userIds,null);
+		if (optionalDeviceList.isPresent()) {
+			List<Device> deviceList = optionalDeviceList.get();
+			lastDataIds = deviceList.stream()
+					.map(Device::getPositionid).filter(Objects::nonNull).collect(Collectors.toList());
+			Optional<List<MongoPositions>> mongoPositions = mongoPositionsRepository.findAllBy_idIn(lastDataIds);
+			List<MongoPositions> mongoPositionsList = mongoPositions.get();
+
+			Integer cooler;
+			Boolean valid;
+			Boolean ignition;
+			for (Device device:deviceList) {
+				try {
+					List<MongoPositions> mongoPositionsList1 = mongoPositionsList.stream()
+							.filter(mongoPositions1 -> mongoPositions1.getDeviceid().equals(device.getId()))
+							.collect(Collectors.toList());
+					AttributesWrapper attributes = new ObjectMapper().readValue(device.getAttributes(),AttributesWrapper.class);
+					if (!mongoPositionsList1.isEmpty()) {
+						valid = mongoPositionsList1.get(0).getValid();
+						ObjectMapper mapper = new ObjectMapper();
+						String json = null;
+						try {
+							json = mapper.writeValueAsString(mongoPositionsList1.get(0).getAttributes());
+						} catch (JsonProcessingException e) {
+							e.printStackTrace();
+						}
+						JSONObject obj = new JSONObject(json);
+						if (obj.has("AC")){
+							cooler = obj.getInt("AC");
+						}else {
+							cooler= null;
+						}
+						if (obj.has("ignition")){
+						ignition = obj.getBoolean("ignition");
+						}else {
+							ignition = null;
+						}
+					}else {
+						valid = null;
+						cooler= null;
+						ignition = null;
+					}
+					result.add(
+							VehicleListDashBoardResponse
+									.builder()
+									.vehicleName(device.getName())
+									.lastUpdate(device.getLastupdate())
+									.temp(device.getLastTemp())
+									.humidity(device.getLastHum())
+									.storingCategory(dictionary.RangeInTempAndHumValid(attributes.getStoringCategory(),device.getLastTemp(),device.getLastHum()))
+									.cooler(cooler)
+									.ignition(ignition)
+									.valid(valid)
+									.build()
+					);
+				}
+				catch (Exception e){
+					throw new ApiGetException(e.getLocalizedMessage());
+				}
+			}
+			builder.setEntity(result);
+			builder.setStatusCode(200);
+			builder.setMessage("Data Found");
+			builder.setSize(result.size());
+			builder.setSuccess(true);
+			return builder.build();
+
+		}else {
+			throw new ApiGetException("No Vehicles Found");
+		}
+
+	}
 
 
 }

@@ -2,8 +2,11 @@ package com.example.food_drugs.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import com.example.food_drugs.dto.ApiResponse;
+import com.example.food_drugs.dto.responses.InventoryListDashBoardResponse;
 import org.bson.types.ObjectId;
 import org.springframework.http.ResponseEntity;
 import com.example.food_drugs.entity.Inventory;
@@ -54,7 +57,7 @@ public interface InventoryService {
 
 	ResponseEntity<?> inventoryMonthelyView(String endDate);
 
-
+	ApiResponse<List<InventoryListDashBoardResponse>> inventoryListDashBoard(String TOKEN,Long userId);
 
 	
 }

@@ -25,5 +25,17 @@ public interface ElmServiceSFDA {
 	public ResponseEntity<?> deviceUpdateStoring(String TOKEN,Map<String, String> data,Long deviceId,Long userId);
 
 	ResponseEntity<?> warehouseInquiry(String TOKEN , Long loggedUserId , Long userId);
+
+	ResponseEntity<?> findLastPositionsSequenceNumberSpeedZero(String sequenceNumber);
+
+	ResponseEntity<?> findLastPositionsSequenceNumberNoneSpeedZero(String sequenceNumber);
+
+	ResponseEntity<?> findLastZeroVelocityPositionsBySequenceNumber(String sequenceNumber) ;
+
+	ResponseEntity<?> findLastNoneZeroVelocityPositionsBySequenceNumber(String sequenceNumber) ;
+
+	ResponseEntity<?> findDeviceData(String sequenceNumber);
+
+	ResponseEntity<?> findDeviceLastPosition(String sequenceNumber);
 	
 }
